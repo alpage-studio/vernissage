@@ -9,6 +9,8 @@ An art director for photo series. Vernissage turns 1–10 photos into a coherent
 3. **Finish**: try another variation, choose a treatment, text on/off, format, paper and location data. Every change can be undone.
 4. **Export**: the series in publishing order, then the share sheet (Save images, or straight to Instagram).
 
+Each photo can carry a place and a short note, and a Small print field replaces the fixed labels some layouts print (Field notes, All photographs...).
+
 The project, photos included, is kept in this browser and comes back after a reload. Reset starts a new series.
 
 ## The signature range
@@ -25,13 +27,13 @@ The project, photos included, is kept in this browser and comes back after a rel
 | Material | Contact sheet | Strips of frames, the best ones circled. |
 | | Print | Each photo printed on paper, with wide margins. |
 | Signal | Poster | Half as shot, half halftone, cut through the subject. |
-| | Diptych | Two photos trading squares across the seam. |
-| | Detail | A framed close-up of the subject, a red line across. |
+| | Diptych | Two photos trading squares across the seam; the lower half in colour or one of eight duotones (ochre by default). |
+| | Detail | A framed close-up of the subject (or the next photo), a red line across. |
 | | Window | The first photo becomes the wall, the others open in it. |
 
 Treatments apply to every photo and are independent of the layout: none, soft grain, pigment, chromogenic, silver B&W, cyanotype, halftone, 1-bit.
 
-The **Lab** keeps the experiments (glitch, HUD, holo glass, neon, stamps, newspaper, engraving and more). Fun to try, but there the photo is no longer the star.
+The **Lab** keeps the experiments (glitch, HUD, holo glass, neon, stamps, newspaper, engraving, polaroid, mirror, tiles, orbit and more). Fun to try, but there the photo is no longer the star.
 
 ## Run locally
 
