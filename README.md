@@ -15,7 +15,6 @@ Other layouts:
 - **Letters**: the title in giant letters, each cut out of your photos.
 - **Route**: prints joined by a dotted trail, with time and (optionally) GPS from the photo metadata.
 - **Fragments**: the first photo scattered in strips, whole again on the last slide.
-- **Film strip**: a 35 mm strip winding through the slides, with perforations and light leaks.
 - **Windows**: the first photo is the wall; the others appear as arched, round or square openings.
 - **Scrapbook**: torn prints, masking tape and pencil notes.
 
