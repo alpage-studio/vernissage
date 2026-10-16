@@ -22,6 +22,18 @@ Six "future" layouts that bring their own background:
 - **Float**: isometric prints hovering over their shadows.
 - **Kaleidoscope**: each photo mirrored into a mandala, with the original at its centre.
 
+Seven editorial and collage layouts, drawn from a Pinterest moodboard:
+
+- **Swap**: two photos trading squares across the middle seam.
+- **Journal**: marker handwriting, arrows, loops and crosses around the photos.
+- **Halftone**: CMYK dots on a colour block, with a line sketch on a B&W photo.
+- **Skyline**: the caption set in vertical bars that cut into the top of each photo.
+- **Map print**: B&W photo with contour lines, a stripe triangle, coordinates, scale and north arrow.
+- **Index**: numbered thumbnails on a staircase, with a big title running across slides.
+- **Photo book**: two slides form one paper spread, with the book gutter on the seam.
+
+The Caption field holds free text for Journal, Skyline, Map print and Photo book.
+
 Tap a photo to give it a place name; it shows up in the captions of Route, Scrapbook, HUD and the future layouts.
 - **Backgrounds**: topographic lines, grain aura, blurred photo, crumpled or marbled paper, risograph, gingham, graph paper, linen, or plain tones.
 - **Print** (optional): original, pigment, silver B&W, chromogenic, cyanotype, applied to the whole series.
