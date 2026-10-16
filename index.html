@@ -15,7 +15,7 @@
 <meta name="theme-color" content="#151517">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=DM+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=DM+Mono:wght@400&family=Reenie+Beanie&display=swap">
 <style>
 /* Layout: a light table — the carousel as it will look on Instagram, the full strip below, settings after (phone) or to the right (desktop). One dark theme, so only the photos carry colour. */
 :root{
@@ -125,7 +125,8 @@ body{font-family:var(--ui);font-size:15px;line-height:1.45;padding-left:max(16px
       <p class="sub">Plain</p><div class="fonds" id="fondsUnis"></div>
     </div>
     <div class="group"><div class="label">Print <span>Original = photos untouched</span></div><div class="chips" id="tirage"></div></div>
-    <div class="group"><div class="label">Text and size</div><div class="chips" id="texte"></div><div class="chips" id="format"></div></div>
+    <div class="group"><div class="label">Text and size</div><div class="chips" id="texte"></div><div class="chips" id="gps"></div><div class="chips" id="format"></div>
+      <p class="sub">GPS prints the coordinates stored in your photos on the Route and Scrapbook layouts. Keep it off for places you'd rather not share.</p></div>
     <div class="fields">
       <div class="field f-title"><label for="title">Series title</label><input id="title" maxlength="50"></div>
       <div class="field"><label for="artist">Signature</label><input id="artist" maxlength="40"></div>
@@ -145,8 +146,15 @@ const MAX=10;
 const ACCENTS=new RegExp('['+String.fromCharCode(768)+'-'+String.fromCharCode(879)+']','g');
 const MODES=[
   {id:'pano',name:'Panorama',sub:'one composition that flows across the slides'},
-  {id:'serie',name:'Series',sub:'one photo per slide, wide margins'}
+  {id:'serie',name:'Series',sub:'one photo per slide, wide margins'},
+  {id:'letters',name:'Letters',sub:'the title in giant letters cut from your photos'},
+  {id:'route',name:'Route',sub:'a dotted trail across the slides, with time and place'},
+  {id:'fragments',name:'Fragments',sub:'one photo in strips, whole again on the last slide'},
+  {id:'film',name:'Film strip',sub:'a 35 mm strip winding through the slides'},
+  {id:'windows',name:'Windows',sub:'one photo as the wall, the others as openings'},
+  {id:'scrap',name:'Scrapbook',sub:'torn prints, masking tape, pencil notes'}
 ];
+const GPSS=[{id:'non',name:'GPS hidden'},{id:'oui',name:'GPS shown'}];
 const TIRAGES=[
   {id:'original',name:'Original',medium:'photographs'},
   {id:'naturel',name:'Pigment',medium:'pigment print'},
@@ -176,8 +184,8 @@ const TEXTES=[{id:'oui',name:'Title and signature'},{id:'non',name:'No text'}];
 const FORMATS=[{id:'34',name:'3:4 · 1080 × 1440',W:1080,H:1440},{id:'45',name:'4:5 · 1080 × 1350',W:1080,H:1350}];
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
-const state={photos:[],mode:'pano',tirage:'original',fond:'topo',texte:'oui',format:'34',seed:11,title:'October Light',artist:'Olivier Zingg',year:'2026'};
-const KEYS=['title','artist','year','mode','tirage','fond','texte','format'];
+const state={photos:[],mode:'pano',tirage:'original',fond:'topo',texte:'oui',gps:'non',format:'34',seed:11,title:'October Light',artist:'Olivier Zingg',year:'2026'};
+const KEYS=['title','artist','year','mode','tirage','fond','texte','gps','format'];
 try{const s=JSON.parse(localStorage.getItem('vernissage-en')||'{}');KEYS.forEach(k=>{if(typeof s[k]==='string')state[k]=s[k]})}catch(e){}
 const persist=()=>{try{const o={};KEYS.forEach(k=>o[k]=state[k]);localStorage.setItem('vernissage-en',JSON.stringify(o))}catch(e){}};
 
@@ -425,10 +433,11 @@ function renderSerie(W,H){
 }
 
 /* ---------- Panorama ---------- */
-function panoLayout(W,H,S,txt){
-  const ps=state.photos,n=ps.length,rnd=rngOf(state.seed*977+n*13+S),T=S*W,yTop=H*.07,yMax=H*(txt?.8:.9);let best=null;
+function panoLayout(W,H,S,txt,o={}){
+  const ps=o.photos||state.photos,n=ps.length,rnd=rngOf(state.seed*977+n*13+S+(o.salt||0)),T=S*W,yTop=o.yTop??H*.07,yMax=o.yMax??H*(txt?.8:.9),hMin=o.hMin??.46,hR=o.hR??.3,maxW=o.maxW??1.4;let best=null;
+  if(!n)return [];
   for(let t=0;t<70;t++){
-    let hs=ps.map(()=>H*(.46+rnd()*.3)),ws=ps.map((p,i)=>Math.min(hs[i]*p.w/p.h,W*1.4));hs=ws.map((w,i)=>w*ps[i].h/ps[i].w);
+    let hs=ps.map(()=>H*(hMin+rnd()*hR)),ws=ps.map((p,i)=>Math.min(hs[i]*p.w/p.h,W*maxW));hs=ws.map((w,i)=>w*ps[i].h/ps[i].w);
     const margin=W*(.06+rnd()*.07);let gap=W*(.045+rnd()*.07);
     const total=ws.reduce((a,b)=>a+b,0)+gap*(n-1);let k=(T-2*margin)/total;
     k=Math.min(k,...hs.map(h=>(yMax-yTop)/h));ws=ws.map(w=>w*k);hs=hs.map(h=>h*k);
@@ -448,17 +457,197 @@ function renderPano(W,H){
   const n=state.photos.length,S=Math.max(2,n),txt=state.texte==='oui',F=FONDS.find(f=>f.id===state.fond),{ink,mute}=inkFor(F),T=S*W;
   const big=canvas(T,H),ctx=big.getContext('2d');drawBackground(ctx,T,H,W,S,F.id,state.seed);
   panoLayout(W,H,S,txt).forEach(r=>placePhoto(ctx,r.p,r.x,r.y,r.w,r.h,W,F));
+  if(txt)captions(ctx,W,H,T,F,ink,mute,n);
+  return slice(big,W,H,S);
+}
+
+/* ---------- Shared pieces for the creative layouts ---------- */
+function captions(ctx,W,H,T,F,ink,mute,n,{title:showTitle=true,light=false}={}){
+  const inkC=light?'#f4f1ea':ink,muteC=light?'rgba(244,241,234,.82)':mute,busy=F.busy&&!light,ty=H*.905;
+  const title=state.title||'Untitled',fs=fitFont(ctx,title,W*.8,Math.round(W*.066),s=>`italic 400 ${s}px "Bodoni Moda"`);
+  const t=TIRAGES.find(t=>t.id===state.tirage),info=`${n} ${n>1?'photographs':'photograph'}${t.id==='original'?'':', '+t.medium}`;
+  if(busy){if(showTitle){const tw=ctx.measureText(title).width;plate(ctx,W*.05,ty-fs*1.02,tw+W*.06,fs*1.02+W*.07,W)}
+    ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;const sw=Math.max(ctx.measureText(signature()).width*1.15,W*.3);plate(ctx,T-W*.11-sw,ty-W*.04,sw+W*.06,W*.1,W)}
+  if(showTitle){ctx.fillStyle=inkC;ctx.font=`italic 400 ${fs}px "Bodoni Moda"`;ctx.textAlign='left';ctx.fillText(title,W*.08,ty)}
+  ctx.fillStyle=muteC;ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),T-W*.08,ty,W*.005,'right');
+  ctx.font=`400 ${Math.round(W*.016)}px "DM Mono"`;ctx.textAlign='right';ctx.fillText(info,T-W*.08,ty+W*.042);
+  if(showTitle){ctx.textAlign='left';ctx.fillText('→',W*.08,ty+W*.042)}
+}
+function rotated(ctx,cx,cy,a,fn){ctx.save();ctx.translate(cx,cy);ctx.rotate(a);fn();ctx.restore()}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function tornPath(ctx,w,h,rnd,W,sides){
+  const j=W*.006,st=W*.011;ctx.beginPath();ctx.moveTo(-w/2,-h/2);
+  const edge=(x0,y0,x1,y1,torn)=>{const len=Math.hypot(x1-x0,y1-y0),k=torn?Math.max(1,Math.round(len/st)):1;
+    for(let i=1;i<=k;i++){const t=i/k;let x=x0+(x1-x0)*t,y=y0+(y1-y0)*t;if(torn&&i<k){const d=(rnd()-.5)*2*j;x+=-(y1-y0)/len*d;y+=(x1-x0)/len*d}ctx.lineTo(x,y)}};
+  edge(-w/2,-h/2,w/2,-h/2,sides.includes('t'));edge(w/2,-h/2,w/2,h/2,sides.includes('r'));edge(w/2,h/2,-w/2,h/2,sides.includes('b'));edge(-w/2,h/2,-w/2,-h/2,sides.includes('l'));ctx.closePath();
+}
+function tape(ctx,cx,cy,len,wid,a){rotated(ctx,cx,cy,a,()=>{const z=wid/6;ctx.beginPath();ctx.moveTo(-len/2,-wid/2);ctx.lineTo(len/2,-wid/2);
+  for(let i=0;i<=6;i++)ctx.lineTo(len/2+(i%2?z*.7:0),-wid/2+i*z);ctx.lineTo(-len/2,wid/2);for(let i=6;i>=0;i--)ctx.lineTo(-len/2-(i%2?z*.7:0),-wid/2+i*z);ctx.closePath();
+  ctx.save();ctx.shadowColor='rgba(40,30,15,.25)';ctx.shadowBlur=wid*.15;ctx.shadowOffsetY=wid*.05;ctx.fillStyle='rgba(214,196,150,.88)';ctx.fill();ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(-len/2,-wid/2,len,wid*.3)})}
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function metaDate(p){const d=p.meta&&p.meta.date;if(!d)return '';const m=d.match(/^(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d)/);return m?`${MON[+m[2]-1]} ${+m[3]}, ${m[1]} · ${m[4]}:${m[5]}`:''}
+function metaGeo(p){if(state.gps!=='oui'||!p.meta||p.meta.lat==null)return '';const la=p.meta.lat,lo=p.meta.lon;return `${Math.abs(la).toFixed(4)}° ${la<0?'S':'N'}  ${Math.abs(lo).toFixed(4)}° ${lo<0?'W':'E'}`}
+function setup(W,H,S){const T=S*W,F=FONDS.find(f=>f.id===state.fond),big=canvas(T,H),ctx=big.getContext('2d');drawBackground(ctx,T,H,W,S,F.id,state.seed);return {T,F,big,ctx,...inkFor(F),txt:state.texte==='oui',n:state.photos.length}}
+
+/* ---------- Letters: the title, cut out of the photos ---------- */
+function renderLetters(W,H){
+  const S=Math.max(2,state.photos.length),{T,F,big,ctx,ink,mute,txt,n}=setup(W,H,S);
+  const text=(state.title||'Untitled').toUpperCase().replace(/\s+/g,' ').trim(),words=text.split(' ');
+  ctx.font='900 100px Archivo';const sp=.015;
+  const lineW=s=>{const c=[...s];return c.reduce((a,ch)=>a+(ch===' '?ctx.measureText(' ').width*.7:ctx.measureText(ch).width),0)+sp*100*(c.length-1)};
+  let lines=[text];
+  if(words.length>1){let best=null;for(let k=1;k<words.length;k++){const a=words.slice(0,k).join(' '),b=words.slice(k).join(' '),m=Math.max(lineW(a),lineW(b));if(!best||m<best.m)best={m,l:[a,b]}}
+    const fs1=Math.min((T-W*.12)/lineW(text)*100,H*.62/.74),fs2=Math.min((T-W*.12)/best.m*100,H*.66/(2*.74+.1));if(fs2>fs1*1.25)lines=best.l}
+  const L=lines.length,fs=Math.min(...lines.map(l=>(T-W*.12)/lineW(l)*100),L===1?H*.62/.74:H*.66/(2*.74+.1)),capH=fs*.74,gap=fs*.1;
+  const top=(H-(L*capH+(L-1)*gap))/2-H*.02,items=[];
+  lines.forEach((l,li)=>{const base=top+capH*(li+1)+gap*li;let x=(T-lineW(l)*fs/100)/2;
+    [...l].forEach(ch=>{const w=(ch===' '?ctx.measureText(' ').width*.7:ctx.measureText(ch).width)*fs/100;if(ch!==' ')items.push({ch,x,w,base,li});x+=w+sp*fs})});
+  const g=Math.min(n,items.length);
+  for(let k=0;k<g;k++){
+    const grp=items.slice(Math.floor(k*items.length/g),Math.floor((k+1)*items.length/g));
+    [...new Set(grp.map(i=>i.li))].forEach(li=>{const seg=grp.filter(i=>i.li===li),bx=seg[0].x-fs*.03,ex=seg[seg.length-1].x+seg[seg.length-1].w+fs*.03,by=seg[0].base-capH-fs*.05,bh=capH+fs*.1;
+      const m=canvas(ex-bx,bh),mx=m.getContext('2d');mx.font=`900 ${fs}px Archivo`;mx.fillStyle='#fff';seg.forEach(i=>mx.fillText(i.ch,i.x-bx,i.base-by));
+      mx.globalCompositeOperation='source-in';mx.drawImage(graded(state.photos[k],m.width,m.height),0,0);
+      ctx.save();ctx.shadowColor=F.dark?'rgba(0,0,0,.55)':'rgba(30,24,18,.3)';ctx.shadowBlur=W*.02;ctx.shadowOffsetY=W*.009;ctx.drawImage(m,bx,by);ctx.restore()});
+  }
+  if(txt){ctx.fillStyle=mute;ctx.font=`400 ${Math.round(W*.017)}px "DM Mono"`;ctx.textAlign='left';ctx.fillText(`A SERIES IN ${n} PHOTOGRAPH${n>1?'S':''}`,W*.08,Math.max(H*.08,top-W*.05));
+    captions(ctx,W,H,T,F,ink,mute,n,{title:false})}
+  return slice(big,W,H,S);
+}
+
+/* ---------- Route: a dotted trail joining the prints ---------- */
+function renderRoute(W,H){
+  const S=Math.max(2,state.photos.length),{T,F,big,ctx,ink,mute,txt}=setup(W,H,S),rnd=rngOf(state.seed+77);
+  const rects=panoLayout(W,H,S,txt,{hMin:.3,hR:.15,yTop:H*.22,yMax:H*.78,maxW:.9,salt:3});
+  const pts=[[W*.05,H*.6],...rects.map(r=>[r.x+r.w/2,r.y+r.h/2]),[T-W*.06,H*.55]];
+  ctx.save();ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);
+  for(let i=0;i<pts.length-1;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)];
+    ctx.bezierCurveTo(p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6,p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6,p2[0],p2[1])}
+  ctx.setLineDash([W*.016,W*.012]);ctx.lineWidth=W*.0065;ctx.lineCap='round';ctx.globalAlpha=.9;ctx.strokeStyle=ink;ctx.stroke();ctx.restore();
+  const mark=(p,fill,label)=>{ctx.save();ctx.lineWidth=W*.004;ctx.strokeStyle=ink;ctx.fillStyle=fill?ink:'rgba(0,0,0,0)';ctx.beginPath();ctx.arc(p[0],p[1],W*.012,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.fillStyle=mute;ctx.font=`400 ${Math.round(W*.016)}px "DM Mono"`;ctx.textAlign='center';ctx.fillText(label,p[0],p[1]+W*.045);ctx.restore()};
+  mark(pts[0],false,'START');mark(pts[pts.length-1],true,'END');
+  rects.forEach((r,i)=>{
+    rotated(ctx,r.x+r.w/2,r.y+r.h/2,(rnd()-.5)*.07,()=>placePhoto(ctx,r.p,-r.w/2,-r.h/2,r.w,r.h,W,{...F,border:true}));
+    ctx.fillStyle='#c8423b';ctx.beginPath();ctx.arc(r.x+r.w/2,r.y-W*.004,W*.011,0,Math.PI*2);ctx.fill();
+    const lines=[`${ROMAN[i]}${metaDate(r.p)?'  ·  '+metaDate(r.p):''}`,metaGeo(r.p)].filter(Boolean),lh=W*.028;
+    let ly=r.y+r.h+W*.05;if(ly+(lines.length-1)*lh>H-W*.05)ly=r.y-W*.05-(lines.length-1)*lh;
+    ctx.font=`400 ${Math.round(W*.017)}px "DM Mono"`;ctx.textAlign='left';
+    if(F.busy){const w=Math.max(...lines.map(l=>ctx.measureText(l).width));plate(ctx,r.x-W*.015,ly-W*.03,w+W*.03,lines.length*lh+W*.012,W)}
+    lines.forEach((l,k)=>{ctx.fillStyle=k?mute:ink;ctx.fillText(l,r.x,ly+k*lh)});
+  });
   if(txt){
-    const title=state.title||'Untitled',fs=fitFont(ctx,title,W*.8,Math.round(W*.066),s=>`italic 400 ${s}px "Bodoni Moda"`),ty=H*.905;
-    const t=TIRAGES.find(t=>t.id===state.tirage),info=`${n} ${n>1?'photographs':'photograph'}${t.id==='original'?'':', '+t.medium}`;
-    if(F.busy){const tw=ctx.measureText(title).width;plate(ctx,W*.08-W*.03,ty-fs*1.02,tw+W*.06,fs*1.02+W*.07,W);
-      ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;const sw=Math.max(ctx.measureText(signature()).width*1.15,W*.3);plate(ctx,T-W*.08-sw-W*.03,ty-W*.04,sw+W*.06,W*.1,W)}
-    ctx.fillStyle=ink;ctx.font=`italic 400 ${fs}px "Bodoni Moda"`;ctx.textAlign='left';ctx.fillText(title,W*.08,ty);
-    ctx.fillStyle=mute;ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),T-W*.08,ty,W*.005,'right');
-    ctx.font=`400 ${Math.round(W*.016)}px "DM Mono"`;ctx.textAlign='right';ctx.fillText(info,T-W*.08,ty+W*.042);
-    ctx.textAlign='left';ctx.fillText('→',W*.08,ty+W*.042);
+    if(F.busy)plate(ctx,W*.05,H*.035,W*.8,W*.12,W);
+    ctx.fillStyle=mute;ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,'FIELD NOTES',W*.08,H*.06,W*.006,'left');
+    ctx.fillStyle=ink;fitFont(ctx,state.title||'Untitled',W*.74,Math.round(W*.062),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='left';ctx.fillText(state.title||'Untitled',W*.08,H*.06+W*.075);
+    ctx.fillStyle=mute;ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),T-W*.08,H*.06,W*.005,'right');
+    const cx=T-W*.1,cy=H*.06+W*.075;ctx.strokeStyle=ink;ctx.lineWidth=W*.003;ctx.beginPath();ctx.moveTo(cx,cy+W*.01);ctx.lineTo(cx,cy-W*.05);ctx.moveTo(cx-W*.012,cy-W*.035);ctx.lineTo(cx,cy-W*.05);ctx.lineTo(cx+W*.012,cy-W*.035);ctx.stroke();
+    ctx.fillStyle=ink;ctx.font=`400 ${Math.round(W*.018)}px "DM Mono"`;ctx.textAlign='center';ctx.fillText('N',cx,cy+W*.04);
   }
   return slice(big,W,H,S);
+}
+
+/* ---------- Fragments: the first photo in strips, whole at the end ---------- */
+function renderFragments(W,H){
+  const S=Math.max(2,state.photos.length),{T,F,big,ctx,ink,mute,txt}=setup(W,H,S),rnd=rngOf(state.seed+31);
+  const main=state.photos[0],others=state.photos.slice(1),A=(S-1)*W,a=main.w/main.h;
+  const mw=Math.min(W*.8,H*.6*a),mh=mw/a,m=clamp(Math.round(2*(S-1)),4,8),sw=mw/m,src=graded(main,mw,mh);
+  panoLayout(W,H,S-1,txt,{photos:others,hMin:.3,hR:.12,yTop:H*.07,yMax:H*.62,maxW:.75,salt:5}).forEach(r=>placePhoto(ctx,r.p,r.x,r.y,r.w,r.h,W,F));
+  const k8=.8,dw=sw*k8,dh=mh*k8;
+  for(let k=0;k<m;k++){const x=W*.08+(k+.5)*(A-W*.16)/m-dw/2+(rnd()-.5)*W*.03,y=H*.3+rnd()*Math.max(0,H*.64-dh);
+    rotated(ctx,x+dw/2,y+dh/2,(rnd()-.5)*.08,()=>{ctx.save();ctx.shadowColor=F.dark?'rgba(0,0,0,.55)':'rgba(30,24,18,.3)';ctx.shadowBlur=W*.018;ctx.shadowOffsetY=W*.008;
+      ctx.fillStyle='#fbfaf6';ctx.fillRect(-dw/2-W*.004,-dh/2-W*.004,dw+W*.008,dh+W*.008);ctx.restore();ctx.drawImage(src,k*sw,0,sw,mh,-dw/2,-dh/2,dw,dh)})}
+  const fx=A+(W-mw)/2,fy=H*.1;placePhoto(ctx,main,fx,fy,mw,mh,W,F);
+  if(txt){const tx=Math.min(fx-A,W*.1),ty=fy+mh+W*.12,title=state.title||'Untitled',fs=fitFont(ctx,title,W-2*tx,Math.round(W*.066),s=>`italic 400 ${s}px "Bodoni Moda"`);
+    if(F.busy)plate(ctx,A+tx-W*.03,ty-fs*1.05,W-2*tx+W*.06,fs*1.05+W*.1,W);
+    ctx.fillStyle=ink;ctx.textAlign='left';ctx.font=`italic 400 ${fs}px "Bodoni Moda"`;ctx.fillText(title,A+tx,ty);
+    ctx.fillStyle=mute;ctx.font=`400 ${Math.round(W*.017)}px "DM Mono"`;ctx.fillText(`Reassembled from ${m} fragments`,A+tx,ty+W*.05);
+    ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),A+W-tx,ty+W*.05,W*.005,'right')}
+  return slice(big,W,H,S);
+}
+
+/* ---------- Film strip: a 35 mm strip winding through the slides ---------- */
+function renderFilm(W,H){
+  const S=Math.max(2,state.photos.length),{T,F,big,ctx,ink,mute,txt,n}=setup(W,H,S),r0=rngOf(state.seed+41);
+  const land=state.photos.filter(p=>p.w>p.h).length>n/2,asp=land?1.5:.75,lead=W*.16,pitch=(T-2*lead)/n;
+  let fw=pitch*.93,fh=fw/asp;if(fh>H*.42){fh=H*.42;fw=fh*asp}
+  const bandH=fh*1.5,A=H*.05,phi=r0()*6.28,yc=H*.45,per=W*1.7;
+  const Y=x=>yc+A*Math.sin(x/per*Math.PI*2+phi),ang=x=>Math.atan(A*Math.PI*2/per*Math.cos(x/per*Math.PI*2+phi));
+  const sc=canvas(T,H),sx=sc.getContext('2d'),x0=lead*.3,x1=T-lead*.3;
+  sx.fillStyle='#17130f';for(let x=x0;x<x1;x+=3)rotated(sx,x,Y(x),ang(x),()=>sx.fillRect(-2.5,-bandH/2,5,bandH));
+  const hp=bandH*.1,hw=bandH*.05,hh=bandH*.07,off=bandH/2-bandH*.12;
+  sx.save();sx.globalCompositeOperation='destination-out';sx.fillStyle='#000';
+  for(let x=x0+hp/2;x<x1-hp/2;x+=hp){const a=ang(x),y=Y(x);[-off,off].forEach(o=>rotated(sx,x-Math.sin(a)*o,y+Math.cos(a)*o,a,()=>{rr(sx,-hw/2,-hh/2,hw,hh,hw*.25);sx.fill()}))}
+  sx.restore();
+  const start=8+Math.floor(r0()*20),fsz=Math.round(bandH*.042);
+  state.photos.forEach((p,i)=>{const xc=lead+pitch*(i+.5);rotated(sx,xc,Y(xc),ang(xc),()=>{
+    sx.fillStyle='#0b0907';sx.fillRect(-fw/2-2,-fh/2-2,fw+4,fh+4);sx.drawImage(graded(p,fw,fh),-fw/2,-fh/2,fw,fh);
+    sx.fillStyle='rgba(226,140,52,.9)';sx.font=`400 ${fsz}px "DM Mono"`;sx.textAlign='center';
+    sx.fillText(`${start+i}`,-fw*.3,bandH/2-bandH*.03);sx.fillText(`▸ ${start+i}A`,fw*.2,bandH/2-bandH*.03);
+    sx.fillText(i%2?'VERNISSAGE 400':'SAFETY FILM',0,-bandH/2+bandH*.065)})});
+  sx.save();sx.globalCompositeOperation='source-atop';
+  [[lead,'rgba(255,120,40,.55)'],[T-lead,'rgba(255,70,40,.45)']].forEach(([x,c])=>{const g=sx.createRadialGradient(x,Y(x),0,x,Y(x),fh*1.1);g.addColorStop(0,c);g.addColorStop(1,'rgba(255,120,40,0)');sx.fillStyle=g;sx.fillRect(0,0,T,H)});
+  sx.restore();
+  ctx.save();ctx.shadowColor=F.dark?'rgba(0,0,0,.6)':'rgba(30,24,18,.32)';ctx.shadowBlur=W*.03;ctx.shadowOffsetY=W*.014;ctx.drawImage(sc,0,0);ctx.restore();
+  if(txt)captions(ctx,W,H,T,F,ink,mute,n);
+  return slice(big,W,H,S);
+}
+
+/* ---------- Windows: the first photo is the wall, the others are openings ---------- */
+function renderWindows(W,H){
+  const n=state.photos.length,S=Math.max(2,n),T=S*W,F=FONDS.find(f=>f.id===state.fond),txt=state.texte==='oui',big=canvas(T,H),ctx=big.getContext('2d'),rnd=rngOf(state.seed+51);
+  ctx.drawImage(graded(state.photos[0],T,H),0,0);
+  const g=ctx.createLinearGradient(0,H*.55,0,H);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.5)');ctx.fillStyle=g;ctx.fillRect(0,0,T,H);grain(ctx,T,H,.06);
+  panoLayout(W,H,S,txt,{photos:state.photos.slice(1),hMin:.42,hR:.2,yTop:H*.08,yMax:H*(txt?.8:.9),maxW:.85,salt:7}).forEach(r=>{
+    const shape=['rect','arch','arch','circle'][Math.floor(rnd()*4)];let {x,y,w,h}=r;if(shape==='circle'){const d=Math.min(w,h);x+=(w-d)/2;y+=(h-d)/2;w=h=d}
+    const path=()=>{ctx.beginPath();if(shape==='rect')ctx.rect(x,y,w,h);else if(shape==='circle')ctx.arc(x+w/2,y+h/2,w/2,0,Math.PI*2);else{const rad=w/2;ctx.moveTo(x,y+h);ctx.lineTo(x,y+rad);ctx.arc(x+rad,y+rad,rad,Math.PI,0);ctx.lineTo(x+w,y+h);ctx.closePath()}};
+    ctx.save();path();ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=W*.03;ctx.fillStyle='#000';ctx.fill();ctx.restore();
+    ctx.save();path();ctx.clip();ctx.drawImage(graded(r.p,w,h),x,y,w,h);ctx.shadowColor='rgba(0,0,0,.7)';ctx.shadowBlur=W*.035;ctx.shadowOffsetY=W*.014;ctx.lineWidth=W*.022;ctx.strokeStyle='rgba(0,0,0,.55)';path();ctx.stroke();ctx.restore();
+    ctx.save();path();ctx.lineWidth=Math.max(1.5,W*.003);ctx.strokeStyle='rgba(255,255,255,.85)';ctx.stroke();ctx.restore();
+  });
+  if(txt)captions(ctx,W,H,T,F,'#f4f1ea','rgba(244,241,234,.82)',n,{light:true});
+  return slice(big,W,H,S);
+}
+
+/* ---------- Scrapbook: torn prints, tape, pencil ---------- */
+function renderScrap(W,H){
+  const S=Math.max(2,state.photos.length),{T,F,big,ctx,txt}=setup(W,H,S),rnd=rngOf(state.seed+61),pencil=F.dark&&!F.busy?'#d9d4c9':'#45433f';
+  const rects=panoLayout(W,H,S,txt,{hMin:.38,hR:.2,yTop:H*.17,yMax:H*.8,maxW:1,salt:9});
+  const hand=s=>`400 ${Math.round(s)}px "Reenie Beanie"`;
+  if(txt){const title=state.title||'Untitled';ctx.fillStyle=pencil;fitFont(ctx,title,W*.86,W*.14,hand);ctx.textAlign='left';ctx.fillText(title,W*.07,H*.1);
+    const tw=ctx.measureText(title).width;ctx.save();ctx.strokeStyle=pencil;ctx.globalAlpha=.7;ctx.lineWidth=W*.004;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(W*.07,H*.1+W*.025);ctx.quadraticCurveTo(W*.07+tw*.5,H*.1+W*.04,W*.07+tw,H*.1+W*.018);ctx.stroke();ctx.restore()}
+  rects.forEach((r,i)=>{const a=(rnd()-.5)*.14,bw=W*.022,sides=['b','t','r','tb','l'][Math.floor(rnd()*5)];
+    rotated(ctx,r.x+r.w/2,r.y+r.h/2,a,()=>{
+      ctx.save();tornPath(ctx,r.w+2*bw,r.h+2*bw,rnd,W,sides);ctx.shadowColor='rgba(30,24,18,.3)';ctx.shadowBlur=W*.02;ctx.shadowOffsetY=W*.009;ctx.fillStyle='#fbfaf6';ctx.fill();ctx.restore();
+      ctx.drawImage(graded(r.p,r.w,r.h),-r.w/2,-r.h/2,r.w,r.h);
+      tape(ctx,(rnd()-.5)*r.w*.4,-r.h/2-bw*.3,W*.17,W*.05,(rnd()-.5)*.5);
+      if(rnd()<.55)tape(ctx,r.w/2-W*.02,r.h/2-W*.01,W*.13,W*.045,.75+(rnd()-.5)*.3);
+    });
+    const notes=[`no. ${ROMAN[i]}`,metaDate(r.p),metaGeo(r.p)].filter(Boolean),lh=W*.055;
+    let ny=r.y+r.h+W*.1;if(ny+(notes.length-1)*lh>H-W*.03)ny=r.y-W*.06-(notes.length-1)*lh;
+    rotated(ctx,r.x+W*.02,ny,(rnd()-.5)*.06,()=>{ctx.fillStyle=pencil;ctx.textAlign='left';notes.forEach((t,k)=>{ctx.font=hand(k?W*.052:W*.075);ctx.fillText(t,0,k*lh)})});
+  });
+  if(txt){ctx.fillStyle=pencil;ctx.font=hand(W*.08);ctx.textAlign='right';ctx.fillText(`— ${state.artist||''}${state.year?', '+state.year:''}`,T-W*.07,H*.95)}
+  return slice(big,W,H,S);
+}
+
+/* ---------- Photo metadata (EXIF date and GPS) ---------- */
+function readExif(buf){
+  const v=new DataView(buf);if(v.byteLength<4||v.getUint16(0)!==0xFFD8)return null;let o=2;
+  while(o<v.byteLength-10){const mk=v.getUint16(o);if((mk&0xFF00)!==0xFF00)break;const len=v.getUint16(o+2);
+    if(mk===0xFFE1&&v.getUint32(o+4)===0x45786966)return tiff(v,o+10);o+=2+len}
+  return null;
+}
+function tiff(v,t){
+  const le=v.getUint16(t)===0x4949,u16=p=>v.getUint16(p,le),u32=p=>v.getUint32(p,le);
+  const ifd=off=>{const n=u16(off),tags={};for(let i=0;i<n;i++){const e=off+2+i*12;tags[u16(e)]={c:u32(e+4),p:e+8}}return tags};
+  const out={},t0=ifd(t+u32(t+4));
+  if(t0[0x8769]){const ex=ifd(t+u32(t0[0x8769].p)),d=ex[0x9003];if(d){const off=t+u32(d.p);let s='';for(let i=0;i<19;i++)s+=String.fromCharCode(v.getUint8(off+i));out.date=s}}
+  if(t0[0x8825]){const g=ifd(t+u32(t0[0x8825].p));
+    const dms=tag=>{const off=t+u32(tag.p),r=k=>u32(off+k*8)/(u32(off+k*8+4)||1);return r(0)+r(1)/60+r(2)/3600};
+    if(g[2]&&g[4]){let la=dms(g[2]),lo=dms(g[4]);if(g[1]&&String.fromCharCode(v.getUint8(g[1].p))==='S')la=-la;if(g[3]&&String.fromCharCode(v.getUint8(g[3].p))==='W')lo=-lo;if(isFinite(la)&&isFinite(lo)&&(la||lo)){out.lat=la;out.lon=lo}}}
+  return out;
 }
 function slice(big,W,H,S){return Array.from({length:S},(_,j)=>{const c=canvas(W,H);c.getContext('2d').drawImage(big,j*W,0,W,H,0,0,W,H);return c})}
 
@@ -467,12 +656,13 @@ let blobs=[],urls=[],pending=0,fontsReady=null;
 const car=$('carousel');
 async function render(){
   const my=++pending;await fontsReady;if(my!==pending)return;
-  const F=FORMATS.find(f=>f.id===state.format),mode=state.photos.length<2?'serie':state.mode;
-  let cs;try{cs=mode==='pano'?renderPano(F.W,F.H):renderSerie(F.W,F.H)}catch(e){status('Rendering failed on this device. Try fewer photos or another background.');console.error(e);return}
+  const F=FORMATS.find(f=>f.id===state.format),mode=state.photos.length<2&&!['letters','film','scrap','route'].includes(state.mode)?'serie':state.mode;
+  const R={pano:renderPano,serie:renderSerie,letters:renderLetters,route:renderRoute,fragments:renderFragments,film:renderFilm,windows:renderWindows,scrap:renderScrap};
+  let cs;try{cs=(R[mode]||renderPano)(F.W,F.H)}catch(e){status('Rendering failed on this device. Try fewer photos or another background.');console.error(e);return}
   const bs=await Promise.all(cs.map(c=>new Promise(r=>c.toBlob(r,'image/jpeg',.94))));if(my!==pending)return;
   urls.forEach(u=>URL.revokeObjectURL(u));blobs=bs;urls=bs.map(b=>URL.createObjectURL(b));
   const keep=car.scrollLeft/Math.max(1,car.clientWidth);
-  car.className='carousel'+(state.format==='45'?' r45':'');car.innerHTML='';const strip=$('strip');strip.innerHTML='';strip.className='strip'+(mode==='pano'?'':' sep');
+  car.className='carousel'+(state.format==='45'?' r45':'');car.innerHTML='';const strip=$('strip');strip.innerHTML='';strip.className='strip'+(mode==='serie'?' sep':'');
   urls.forEach((u,i)=>{const im=new Image();im.src=u;im.alt=`Image ${i+1} of ${urls.length}`;car.append(im);const s=new Image();s.src=u;s.alt='';strip.append(s)});
   car.scrollLeft=Math.min(Math.round(keep),urls.length-1)*car.clientWidth;dots();
   $('saveAll').textContent=`Save ${urls.length} images`;
@@ -504,7 +694,8 @@ function chips(el,list,key,sub=x=>x.sub){
 }
 if(!FONDS.some(f=>f.id===state.fond))state.fond='topo';
 if(!TIRAGES.some(t=>t.id===state.tirage))state.tirage='original';
-chips($('mode'),MODES,'mode');chips($('tirage'),TIRAGES,'tirage',()=>null);chips($('texte'),TEXTES,'texte',()=>null);chips($('format'),FORMATS,'format',()=>null);fondButtons();
+if(!MODES.some(m=>m.id===state.mode))state.mode='pano';
+chips($('mode'),MODES,'mode');chips($('tirage'),TIRAGES,'tirage',()=>null);chips($('texte'),TEXTES,'texte',()=>null);chips($('gps'),GPSS,'gps',()=>null);chips($('format'),FORMATS,'format',()=>null);fondButtons();
 
 let replaceAt=-1;
 function renderSlots(){
@@ -521,7 +712,9 @@ function renderSlots(){
     d.append(tools);el.append(d)});
   if(state.photos.length<MAX){const d=document.createElement('div');d.className='slot add';const b=document.createElement('button');b.type='button';b.className='pick';b.id='slot-add';b.textContent='+ Add';b.onclick=()=>$('fileMany').click();d.append(b);el.append(d)}
 }
-function loadFile(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>{
+async function loadFile(file){let meta=null;try{meta=readExif(await file.slice(0,524288).arrayBuffer())}catch(e){}
+  const p=await decodeFile(file);p.meta=meta;return p}
+function decodeFile(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>{
   const max=2600,s=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)),c=canvas(im.naturalWidth*s,im.naturalHeight*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);
   res(finishPhoto({el:c,w:c.width,h:c.height,sample:false,name:file.name||'Photo'}))};
   im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error(file.name||'file'))};im.src=url})}
@@ -573,7 +766,7 @@ $('saveAll').onclick=async()=>{
 };
 (async()=>{try{downloads=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){downloads=null}})();
 
-fontsReady=Promise.race([Promise.all(['500 20px Archivo','italic 400 20px "Bodoni Moda"','400 20px "DM Mono"'].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
+fontsReady=Promise.race([Promise.all(['500 20px Archivo','900 20px Archivo','italic 400 20px "Bodoni Moda"','400 20px "DM Mono"','400 20px "Reenie Beanie"'].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
 state.photos=makeSamples();renderSlots();render();swatches();
 })();
 </script>

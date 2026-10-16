@@ -1,5 +1,5 @@
 // Offline cache: the app shell up front, fonts and anything else on first use.
-const CACHE = 'vernissage-v1';
+const CACHE = 'vernissage-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
