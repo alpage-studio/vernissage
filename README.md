@@ -32,6 +32,17 @@ Seven editorial and collage layouts, drawn from a Pinterest moodboard:
 - **Index**: numbered thumbnails on a staircase, with a big title running across slides.
 - **Photo book**: two slides form one paper spread, with the book gutter on the seam.
 
+Eight print and object layouts:
+
+- **Bento**: rounded cards mixing photos with the series' real colour palette, count, date and place.
+- **Ticket**: each photo on a boarding-pass style ticket with perforation, from/to, date, time and barcode.
+- **Stamps**: perforated postage stamps with postmarks and an airmail border.
+- **Neon**: glowing tube frames on a brick wall.
+- **Contact sheet**: film strips on paper, marked up in red grease pencil.
+- **Blueprint**: white line drawings with dimension lines and a title block on blue.
+- **Newspaper**: blackletter masthead, halftone photo and columns.
+- **Engraved**: banknote-style line engraving with a guilloche rosette.
+
 The Caption field holds free text for Journal, Skyline, Map print and Photo book.
 
 Tap a photo to give it a place name; it shows up in the captions of Route, Scrapbook, HUD and the future layouts.
