@@ -2,7 +2,11 @@
 
 A small installable web app (PWA) that turns 2–10 photos into a gallery-style Instagram carousel.
 
-Eight layouts:
+**Smart** (default) reads each photo before composing its slide: the five dominant colours (k-means), brightness, where the detail sits, the calmest band and a straight horizon if there is one. The background takes the photo's own hue, the title goes into the calm part of the first photo away from the subject, the horizon continues as a thin rule into the margins, wide photos span two slides, and each slide carries its palette swatches. "New arrangement" cycles three looks: tonal with an offset colour block, dark gallery, and bold colour field.
+
+The preview has previous/next buttons, clickable dots and strip thumbnails, and arrow keys.
+
+Other layouts:
 
 - **Panorama**: one composition that flows across the slides, so each swipe reveals the next part.
 - **Series**: one photo per slide with wide, mat-like margins.
