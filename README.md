@@ -1,65 +1,37 @@
 # Vernissage
 
-A small installable web app (PWA) that turns 2–10 photos into a gallery-style Instagram carousel.
+An art director for photo series. Vernissage turns 1–10 photos into a coherent Instagram carousel (3:4 or 4:5), entirely in the browser: photos never leave the device.
 
-**Smart** (default) reads each photo before composing its slide: the five dominant colours (k-means), brightness, where the detail sits, the calmest band and a straight horizon if there is one. The background takes the photo's own hue, the title goes into the calm part of the first photo away from the subject, the horizon continues as a thin rule into the margins, wide photos span two slides, and each slide carries its palette swatches. "New arrangement" cycles three looks: tonal with an offset colour block, dark gallery, and bold colour field.
+## Four steps
 
-From the second moodboard pass: **Split** (half as shot, half halftone, cut through the subject), **Zoom** (framed close-up of the subject with a red contour line across slides), **Moodboard** (handwritten note, overlapping prints, annotated card), **Cascade** (prints in a wave), **Bauhaus** (B&W bands and geometric colour shapes), **Letter** (handwritten page with the photo on top) and **Echo** (one photo repeated, zooming out).
+1. **Photos**: import, then drag to set the order. The first photo is the cover, the last one closes the series. Give each photo a place, and the series a title, signature, year and an optional sentence.
+2. **Story**: pick an intention (an editorial series, a living memory, a graphic statement). Vernissage reads your photos (count, orientation, palette, calm areas, horizon, places and dates) and recommends three layouts, each with the reason.
+3. **Finish**: try another variation, choose a treatment, text on/off, format, paper and location data. Every change can be undone.
+4. **Export**: the series in publishing order, then the share sheet (Save images, or straight to Instagram).
 
-The preview has previous/next buttons, clickable dots and strip thumbnails, and arrow keys.
+The project, photos included, is kept in this browser and comes back after a reload. Reset starts a new series.
 
-Other layouts:
+## The signature range
 
-- **Panorama**: one composition that flows across the slides, so each swipe reveals the next part.
-- **Series**: one photo per slide with wide, mat-like margins.
-- **Letters**: the title in giant letters, each cut out of your photos.
-- **Route**: prints joined by a dotted trail, with time and (optionally) GPS from the photo metadata.
-- **Fragments**: the first photo scattered in strips, whole again on the last slide.
-- **Windows**: the first photo is the wall; the others appear as arched, round or square openings.
-- **Scrapbook**: torn prints, masking tape and pencil notes.
+| Family | Layout | Promise |
+|---|---|---|
+| Editorial | Gallery | A calm series that lets each image speak; the background comes from each photo's own edges. |
+| | Suite | One continuous composition across the slides. |
+| | Book | Double pages, the gutter on every other seam. |
+| | Index | A numbered archive, the title running across. |
+| Story | Route | Places and moments joined by a trail. |
+| | Journal | Handwritten notes around your prints. |
+| | Correspondence | A short note, two prints, an annotated card. |
+| Material | Contact sheet | Strips of frames, the best ones circled. |
+| | Print | Each photo printed on paper, with wide margins. |
+| Signal | Poster | Half as shot, half halftone, cut through the subject. |
+| | Diptych | Two photos trading squares across the seam. |
+| | Detail | A framed close-up of the subject, a red line across. |
+| | Window | The first photo becomes the wall, the others open in it. |
 
-Six "future" layouts that bring their own background:
+Treatments apply to every photo and are independent of the layout: none, soft grain, pigment, chromogenic, silver B&W, cyanotype, halftone, 1-bit.
 
-- **Glitch**: RGB split, displaced slices, pixel streaks and scanlines.
-- **Holo glass**: frosted glass cards on iridescent foil, chrome title.
-- **HUD**: viewfinder brackets, grid and ruler, with real camera data (aperture, shutter, ISO, focal length) read from the photos.
-- **Dither**: 1-bit ordered dithering in two inks.
-- **Float**: isometric prints hovering over their shadows.
-- **Kaleidoscope**: each photo mirrored into a mandala, with the original at its centre.
-
-Seven editorial and collage layouts, drawn from a Pinterest moodboard:
-
-- **Swap**: two photos trading squares across the middle seam.
-- **Journal**: marker handwriting, arrows, loops and crosses around the photos.
-- **Halftone**: CMYK dots on a colour block, with a line sketch on a B&W photo.
-- **Skyline**: the caption set in vertical bars that cut into the top of each photo.
-- **Map print**: B&W photo with contour lines, a stripe triangle, coordinates, scale and north arrow.
-- **Index**: numbered thumbnails on a staircase, with a big title running across slides.
-- **Photo book**: two slides form one paper spread, with the book gutter on the seam.
-
-Eight print and object layouts:
-
-- **Bento**: rounded cards mixing photos with the series' real colour palette, count, date and place.
-- **Ticket**: each photo on a boarding-pass style ticket with perforation, from/to, date, time and barcode.
-- **Stamps**: perforated postage stamps with postmarks and an airmail border.
-- **Neon**: glowing tube frames on a brick wall.
-- **Contact sheet**: film strips on paper, marked up in red grease pencil.
-- **Blueprint**: white line drawings with dimension lines and a title block on blue.
-- **Newspaper**: blackletter masthead, halftone photo and columns.
-- **Engraved**: banknote-style line engraving with a guilloche rosette.
-
-The Caption field holds free text for Journal, Skyline, Map print and Photo book.
-
-Tap a photo to give it a place name; it shows up in the captions of Route, Scrapbook, HUD and the future layouts.
-- **Backgrounds**: topographic lines, grain aura, blurred photo, crumpled or marbled paper, risograph, gingham, graph paper, linen, or plain tones.
-- **Print** (optional): original, pigment, silver B&W, chromogenic, cyanotype, applied to the whole series.
-- Exports 1080 × 1440 (3:4) or 1080 × 1350 (4:5) JPEGs, numbered in carousel order.
-
-Everything runs in the browser. Photos never leave the device.
-
-## Use it
-
-Open the GitHub Pages URL on your phone, then *Share → Add to Home Screen*. "Save images" opens the share sheet, where you can save to Photos or send straight to Instagram.
+The **Lab** keeps the experiments (glitch, HUD, holo glass, neon, stamps, newspaper, engraving and more). Fun to try, but there the photo is no longer the star.
 
 ## Run locally
 
