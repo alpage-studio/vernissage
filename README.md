@@ -4,6 +4,8 @@ A small installable web app (PWA) that turns 2–10 photos into a gallery-style 
 
 **Smart** (default) reads each photo before composing its slide: the five dominant colours (k-means), brightness, where the detail sits, the calmest band and a straight horizon if there is one. The background takes the photo's own hue, the title goes into the calm part of the first photo away from the subject, the horizon continues as a thin rule into the margins, wide photos span two slides, and each slide carries its palette swatches. "New arrangement" cycles three looks: tonal with an offset colour block, dark gallery, and bold colour field.
 
+From the second moodboard pass: **Split** (half as shot, half halftone, cut through the subject), **Zoom** (framed close-up of the subject with a red contour line across slides), **Moodboard** (handwritten note, overlapping prints, annotated card), **Cascade** (prints in a wave), **Bauhaus** (B&W bands and geometric colour shapes), **Letter** (handwritten page with the photo on top) and **Echo** (one photo repeated, zooming out).
+
 The preview has previous/next buttons, clickable dots and strip thumbnails, and arrow keys.
 
 Other layouts:

@@ -15,7 +15,7 @@
 <meta name="theme-color" content="#151517">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=DM+Mono:wght@400&family=Reenie+Beanie&family=Permanent+Marker&family=UnifrakturMaguntia&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=DM+Mono:wght@400&family=Reenie+Beanie&family=Permanent+Marker&family=UnifrakturMaguntia&family=Homemade+Apple&display=swap">
 <style>
 /* Layout: a light table — the carousel as it will look on Instagram, the full strip below, settings after (phone) or to the right (desktop). One dark theme, so only the photos carry colour. */
 :root{
@@ -182,6 +182,13 @@ const MAX=10;
 const ACCENTS=new RegExp('['+String.fromCharCode(768)+'-'+String.fromCharCode(879)+']','g');
 const MODES=[
   {id:'smart',name:'Smart',sub:'reads each photo: palette background, calm space for the title, horizon line'},
+  {id:'split',name:'Split',sub:'cut through the subject: half as shot, half halftone'},
+  {id:'zoom',name:'Zoom',sub:'framed close-up of the subject, red line across slides'},
+  {id:'mood',name:'Moodboard',sub:'handwritten note, overlapping prints, annotated card'},
+  {id:'cascade',name:'Cascade',sub:'prints of mixed sizes flowing in a wave'},
+  {id:'bauhaus',name:'Bauhaus',sub:'B&W photo bands with red, pink and blue shapes'},
+  {id:'letter',name:'Letter',sub:'a handwritten page with the photo laid on top'},
+  {id:'echo',name:'Echo',sub:'the same photo repeated, zooming out step by step'},
   {id:'pano',name:'Panorama',sub:'one composition that flows across the slides'},
   {id:'serie',name:'Series',sub:'one photo per slide, wide margins'},
   {id:'letters',name:'Letters',sub:'the title in giant letters cut from your photos'},
@@ -1268,6 +1275,126 @@ function renderSmart(W,H){
   return slice(big,W,H,S);
 }
 
+/* ---------- Second moodboard pass ---------- */
+const cursive=s=>`400 ${Math.round(s)}px "Homemade Apple"`;
+const fitBox=(p,w,h)=>{const a=p.w/p.h,ww=Math.min(w,h*a);return {w:ww,h:ww/a}};
+function drawCrop(ctx,p,sx,sy,sw,sh,x,y,w,h){let src=p.el,k=1;const s=w/sw;if(p.mips)for(const m of p.mips){if(m.width>=p.w*s*1.05){src=m;k=m.width/p.w}else break}
+  ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(src,sx*k,sy*k,sw*k,sh*k,x,y,w,h);ctx.restore()}
+
+// Split: cut through the subject, one side as shot, the other in coarse halftone
+function renderSplit(W,H){
+  const n=state.photos.length,S=Math.max(1,n),{T,big,ctx,txt}=base(W,H,S,'#d4d4d1');
+  state.photos.forEach((p,j)=>{const ox=j*W,ai=analyze(p),img=graded(p,W,H),sx=Math.round(W*clamp(ai.sub.x,.38,.62));
+    ctx.drawImage(img,0,0,sx,H,ox,0,sx,H);
+    const right=canvas(W-sx,H);right.getContext('2d').drawImage(img,sx,0,W-sx,H,0,0,W-sx,H);
+    ctx.drawImage(monoHalftone(right,W-sx,H,Math.max(5,Math.round(W/110)),'#d4d4d1','#121212'),ox+sx,0);
+    if(txt){const ty=ai.calm.band==='top'?H*.17:H*.88,t=(((j===0?state.title:(p.place||state.title))||'Untitled').toUpperCase())+'.';
+      ctx.fillStyle=ai.calm.l>.5?'#111':'#f4f4f4';const fs=fitFont(ctx,t,sx-W*.08,Math.round(W*.075),s=>`900 ${s}px Archivo`);ctx.font=`900 ${fs}px Archivo`;ctx.textAlign='right';ctx.fillText(t,ox+sx-W*.012,ty);
+      ctx.fillStyle='#111';ctx.font=`600 ${Math.round(W*.017)}px Archivo`;ctx.textAlign='left';
+      [`© ${state.year||''} ${(state.artist||'').toUpperCase()}`.trim(),'ALL PHOTOGRAPHS',`${pad2(j+1)} / ${pad2(n)}`].forEach((l,k)=>ctx.fillText(l,ox+sx+W*.012,ty-fs*.62+k*W*.022))}
+  });
+  return slice(big,W,H,S);
+}
+
+// Zoom: grainy B&W photo, a framed close-up of the subject, a red line that follows the contours across all slides
+function renderZoom(W,H){
+  const n=state.photos.length,S=Math.max(1,n),{T,big,ctx,txt}=base(W,H,S,'#f7f7f5'),pts=[];
+  state.photos.forEach((p,j)=>{const ox=j*W,ai=analyze(p),bw=Math.round(W*.62),bh=Math.round(H*.82),by=H*.06,baseImg=tone(graded(p,bw,bh),'bw');ctx.drawImage(baseImg,ox,by);
+    const g=64,gh=Math.round(g*bh/bw),sm=canvas(g,gh),sx=sm.getContext('2d');sx.drawImage(baseImg,0,0,g,gh);const d=sx.getImageData(0,0,g,gh).data,L=(x,y)=>d[(y*g+x)*4];
+    let prev=Math.round(clamp(ai.sub.y,.3,.7)*gh);
+    for(let x=0;x<g;x++){let best=prev,bv=-1;for(let y=Math.max(2,prev-4);y<=Math.min(gh-3,prev+4);y++){const v=Math.abs(L(x,y+1)-L(x,y-1));if(v>bv){bv=v;best=y}}prev=Math.round(prev*.6+best*.4);pts.push([ox+x/(g-1)*bw,by+prev/gh*bh])}
+    const iw=Math.round(W*.52),ih=Math.round(H*.54),ix=ox+W*.42,iy=H*.16+(j%2)*H*.1,zs=2.2,cw=Math.min(p.w,p.h*iw/ih)/zs,ch=cw*ih/iw,cx=clamp(ai.sub.x*p.w-cw/2,0,p.w-cw),cy=clamp(ai.sub.y*p.h-ch/2,0,p.h-ch);
+    const z=canvas(iw,ih);drawCrop(z.getContext('2d'),p,cx,cy,cw,ch,0,0,iw,ih);
+    ctx.fillStyle='#111';ctx.fillRect(ix-W*.012,iy-W*.012,iw+W*.024,ih+W*.024);ctx.drawImage(tone(z,'bw'),ix,iy);
+    if(txt){ctx.fillStyle='#111';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(`${pad2(j+1)}  ×${zs}${p.place?'  ·  '+p.place.toUpperCase():''}`,ix,iy+ih+W*.05)}
+  });
+  ctx.save();ctx.strokeStyle='#d0202a';ctx.lineWidth=W*.005;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();ctx.restore();
+  if(txt){ctx.fillStyle='#111';ctx.font=`600 ${Math.round(W*.026)}px Archivo`;spaced(ctx,(state.title||'Untitled').toUpperCase(),W*.94,H*.955,W*.008,'right');
+    ctx.font=mono(W,.016);ctx.textAlign='right';ctx.fillText(signature(),T-W*.06,H*.955)}
+  return slice(big,W,H,S);
+}
+
+// Moodboard: handwritten note, two overlapping prints, an annotated card
+function renderMood(W,H){
+  const n=state.photos.length,S=Math.max(1,Math.ceil(n/2)),{T,big,ctx,txt}=base(W,H,S,'#f3f3f2'),rnd=rngOf(state.seed+1801),cap=chunks(S);
+  for(let j=0;j<S;j++){const ox=j*W,A=state.photos[2*j],B=state.photos[2*j+1];
+    if(txt){ctx.fillStyle='#222';ctx.font=`500 ${Math.round(W*.018)}px Archivo`;spaced(ctx,(state.artist||'').toUpperCase(),ox+W/2,H*.045,W*.012,'center');
+      ctx.fillStyle='#1d1d1d';ctx.font=cursive(W*.026);wrap(ctx,cap[j],W*.56).slice(0,5).forEach((l,k)=>rotated(ctx,ox+W*.25,H*.1+k*W*.045,(rnd()-.5)*.02,()=>{ctx.textAlign='left';ctx.fillText(l,0,0)}))}
+    const fa=fitBox(A,W*.46,H*.38),ax=ox+W*.09,ay=H*.26;
+    ctx.fillStyle='#e6e9e6';ctx.fillRect(ax-W*.018,ay-W*.018,fa.w+W*.036,fa.h+W*.036);ctx.drawImage(graded(A,fa.w,fa.h),ax,ay,fa.w,fa.h);
+    const cxc=ox+W*.24,cyc=H*.72,cw=W*.56,chh=H*.22;ctx.save();ctx.shadowColor='rgba(0,0,0,.12)';ctx.shadowBlur=W*.01;ctx.fillStyle='#e6d9bb';ctx.fillRect(cxc,cyc,cw,chh);ctx.restore();
+    ctx.fillStyle='#e0662f';handText(ctx,`no.${j+1}`,cxc+W*.025,cyc+W*.07,W*.045,-.08,'left',W*.12);xMark(ctx,cxc+W*.06,cyc+W*.14,W*.018,W*.004,'#e8b21f',rnd);
+    if(B){const fb=fitBox(B,W*.54,H*.32),bx=ox+W*.38,by=Math.min(ay+fa.h*.75,H*.85-fb.h);ctx.save();ctx.shadowColor='rgba(0,0,0,.14)';ctx.shadowBlur=W*.012;ctx.drawImage(graded(B,fb.w,fb.h),bx,by,fb.w,fb.h);ctx.restore();
+      ctx.fillStyle='#555';ctx.font=`400 ${Math.round(W*.014)}px Archivo`;ctx.textAlign='right';ctx.fillText(`© ${state.artist||''}`,bx+fb.w,by+fb.h+W*.022)}
+    if(txt){ctx.fillStyle='#3a3a3a';ctx.font=cursive(W*.024);ctx.textAlign='left';[state.title,[A.place,B&&B.place].filter(Boolean).join(' · '),state.year].filter(Boolean).forEach((l,k)=>ctx.fillText(l,cxc+W*.03,H*.885+k*W*.04))}
+  }
+  return slice(big,W,H,S);
+}
+
+// Cascade: prints of mixed sizes flowing in a wave across the slides
+function renderCascade(W,H){
+  const n=state.photos.length,S=Math.max(2,Math.ceil(n*.75)),{T,big,ctx,txt}=base(W,H,S,'#fbfbfa'),rnd=rngOf(state.seed+1901);
+  ctx.fillStyle='#e8dfcf';ctx.fillRect(0,0,T,H*.012);
+  state.photos.forEach((p,i)=>{const t=(i+.5)/n,hh=H*(i%3===0?.56:.42)*(.9+rnd()*.15),f=fitBox(p,Math.min(hh*1.45,W*.95),hh),cx=W*.12+t*(T-W*.24),cy=H*(.52+.22*Math.sin(t*Math.PI*2*(S/3)+.6)),x=cx-f.w/2,y=clamp(cy-f.h/2,H*.07,H*.93-f.h),b=W*.012;
+    ctx.save();ctx.shadowColor='rgba(0,0,0,.18)';ctx.shadowBlur=W*.022;ctx.shadowOffsetY=W*.009;ctx.fillStyle='#fff';ctx.fillRect(x-b,y-b,f.w+2*b,f.h+2*b);ctx.restore();ctx.drawImage(graded(p,f.w,f.h),x,y,f.w,f.h)});
+  if(txt){const list=[state.title,...state.photos.map(p=>p.place).filter(Boolean),state.year].filter(Boolean).slice(0,6);ctx.fillStyle='#2b2b2b';
+    list.forEach((l,k)=>{ctx.font=`${k?'400':'italic 400'} ${Math.round(W*(k?.024:.034))}px "Bodoni Moda"`;ctx.textAlign='left';ctx.fillText(l,W*.07+k*W*.045,H*.07+k*W*.045)});
+    ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),T-W*.07,H*.965,W*.005,'right')}
+  return slice(big,W,H,S);
+}
+
+// Bauhaus: B&W photo bands with geometric colour shapes, or a grid of colour blocks
+const BH=['#e23b2a','#ec6f95','#2d3a8c','#9cc9c0','#e1b07e','#141414'];
+function burnt(ctx,cx,cy,r,rnd){ctx.save();ctx.beginPath();for(let k=0;k<=24;k++){const a=k/24*Math.PI*2,q=r*(.8+rnd()*.35);k?ctx.lineTo(cx+Math.cos(a)*q,cy+Math.sin(a)*q):ctx.moveTo(cx+Math.cos(a)*q,cy+Math.sin(a)*q)}ctx.closePath();
+  ctx.shadowColor='rgba(200,110,30,.9)';ctx.shadowBlur=r*.35;ctx.fillStyle='#141210';ctx.fill();ctx.restore()}
+function renderBauhaus(W,H){
+  const n=state.photos.length,S=Math.max(1,n),paper='#efe9de',{T,big,ctx,txt}=base(W,H,S,paper),rnd=rngOf(state.seed+2001),cap=chunks(S*2).map(s=>s.toUpperCase());
+  grain(ctx,T,H,.08);
+  state.photos.forEach((p,j)=>{const ox=j*W,q=state.photos[(j+1)%n];
+    if((j+state.seed)%2===0){const cx=ox+W*.5;
+      ctx.fillStyle=BH[1];ctx.fillRect(cx-W*.14,H*.27,W*.28,H*.22);
+      ctx.fillStyle=BH[2];ctx.beginPath();ctx.moveTo(cx-W*.3,H*.42);ctx.lineTo(cx+W*.3,H*.38);ctx.lineTo(cx+W*.27,H*.53);ctx.lineTo(cx-W*.24,H*.55);ctx.closePath();ctx.fill();
+      ctx.fillStyle=paper;ctx.beginPath();ctx.moveTo(cx-W*.2,H*.445);ctx.lineTo(cx+W*.17,H*.43);ctx.lineTo(cx-W*.12,H*.515);ctx.closePath();ctx.fill();
+      ctx.fillStyle=BH[0];ctx.fillRect(cx-W*.16,H*.47,W*.17,H*.09);ctx.fillRect(cx-W*.16,H*.7,W*.17,H*.11);
+      const bw=Math.round(W*.7),bh=Math.round(H*.16);ctx.drawImage(tone(graded(p,bw,bh),'bw'),cx-bw/2,H*.555);
+      if(q!==p){const fw=Math.round(W*.24),fh=Math.round(H*.07);ctx.drawImage(tone(graded(q,fw,fh),'bw'),cx+W*.1,H*.555-fh)}
+      burnt(ctx,cx+W*.25,H*.33,W*.04,rnd);
+      const sp=[];for(let k=0;k<44;k++){const a=k*.9;sp.push([cx-W*.17+Math.cos(a)*W*.05*(1+k/70),H*.8+Math.sin(a)*W*.07+k*1.1])}marker(ctx,sp,W*.003,'#222',rnd);marker(ctx,[[cx-W*.18,H*.43],[cx-W*.17,H*.76]],W*.0022,'#222',rnd);
+      ctx.fillStyle='#1c1c1c';handText(ctx,cap[2*j],cx-W*.36,H*.3,W*.038,0,'left',W*.44);handText(ctx,cap[2*j+1]||'',cx-W*.12,H*.76,W*.038,0,'left',W*.55);
+    }else{const x0=ox+W*.07,mid=ox+W*.36,x1=ox+W*.93,Y=k=>H*k;
+      ctx.fillStyle=BH[3];ctx.beginPath();ctx.moveTo(x0,Y(.05));ctx.lineTo(x0+W*.1,Y(.05));ctx.lineTo(x0+W*.12,Y(.42));ctx.lineTo(x0,Y(.42));ctx.fill();
+      if(q!==p){const fw=Math.round(mid-x0-W*.1),fh=Math.round(Y(.37));ctx.drawImage(tone(graded(q,fw,fh),'bw'),x0+W*.1,Y(.05))}
+      ctx.fillStyle=BH[0];ctx.fillRect(x0,Y(.42),mid-x0,Y(.17));ctx.fillStyle=BH[4];ctx.beginPath();ctx.moveTo(x0,Y(.59));ctx.lineTo(mid,Y(.62));ctx.lineTo(mid,Y(.73));ctx.lineTo(x0,Y(.73));ctx.fill();
+      ctx.fillStyle='#f6f1e6';ctx.fillRect(x0,Y(.73),mid-x0,Y(.23));ctx.fillStyle='#f4ede0';ctx.fillRect(mid,Y(.05),x1-mid,Y(.37));
+      const pw=Math.round(x1-mid),ph=Math.round(Y(.32));ctx.drawImage(tone(graded(p,pw,ph),'bw'),mid,Y(.42));ctx.fillStyle=BH[5];ctx.fillRect(mid,Y(.74),x1-mid,Y(.22));
+      ctx.fillStyle='#2a2622';ctx.font=`400 ${Math.round(W*.022)}px "Bodoni Moda"`;rotated(ctx,x1-W*.04,Y(.38),Math.PI,()=>{ctx.textAlign='left';wrap(ctx,cap[2*j]+' '+(cap[2*j+1]||''),W*.36).slice(0,7).forEach((l,k)=>ctx.fillText(l.toLowerCase(),0,k*W*.034))})}
+  });
+  if(txt){ctx.fillStyle='#1c1c1c';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(`${(state.title||'').toUpperCase()}  ·  ${state.year||''}`,W*.07,H*.975)}
+  return slice(big,W,H,S);
+}
+
+// Letter: a handwritten page with the photo laid on top
+function renderLetter(W,H){
+  const n=state.photos.length,S=Math.max(1,n),{T,big,ctx}=base(W,H,S,'#f7f7f5'),rnd=rngOf(state.seed+2101),ww=words();let wi=0;
+  state.photos.forEach((p,j)=>{const ox=j*W;ctx.fillStyle='#161616';ctx.font=cursive(W*.05);
+    for(let k=0;k<9;k++){let line='';while(true){const nx=(line?line+' ':'')+ww[wi%ww.length];if(ctx.measureText(nx).width>W*.74&&line)break;line=nx;wi++;if(ctx.measureText(line).width>W*.74)break}
+      rotated(ctx,ox+W*.13+(rnd()-.5)*W*.03,H*.16+k*H*.085,(rnd()-.5)*.03,()=>{ctx.textAlign='left';ctx.fillText(line,0,0);
+        if(rnd()<.2){const w=ctx.measureText(line).width,s0=w*(.4+rnd()*.3);ctx.strokeStyle='#161616';ctx.lineWidth=W*.003;ctx.beginPath();ctx.moveTo(s0,-W*.012);ctx.lineTo(w*.98,-W*.018);ctx.stroke()}})}
+    const f=fitBox(p,W*.58,H*.32);ctx.drawImage(tone(graded(p,f.w,f.h),'bw'),ox+(W-f.w)/2,H*.31,f.w,f.h)});
+  return slice(big,W,H,S);
+}
+
+// Echo: the same photo repeated, zooming out step by step towards a big final print
+function renderEcho(W,H){
+  const n=state.photos.length,S=Math.max(1,n),{T,big,ctx,txt}=base(W,H,S,'#111');
+  state.photos.forEach((p,j)=>{const ox=j*W,ai=analyze(p),dom=ai.pal[0],N=7;ctx.fillStyle=hsl(dom.h,Math.min(dom.s,.3),.13);ctx.fillRect(ox,0,W,H);
+    for(let k=0;k<N;k++){const t=k/(N-1),w=W*(.14+t*.5),h=w*1.25,x=ox+W*.06+t*(W*.88-w),y=H*.04+t*(H*.92-h),z=1+(1-t)*1.6,cw=Math.min(p.w,p.h*w/h)/z,ch=cw*h/w,cx=clamp(ai.sub.x*p.w-cw/2,0,p.w-cw),cy=clamp(ai.sub.y*p.h-ch/2,0,p.h-ch);
+      ctx.save();ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=W*.02;ctx.shadowOffsetY=W*.008;ctx.fillStyle='#f4f2ee';const b=W*.006;ctx.fillRect(x-b,y-b,w+2*b,h+2*b);ctx.restore();drawCrop(ctx,p,cx,cy,cw,ch,x,y,w,h)}
+    if(txt){ctx.fillStyle='rgba(244,242,238,.85)';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(`${pad2(j+1)}${p.place?'  ·  '+p.place.toUpperCase():''}`,ox+W*.06,H*.975)}});
+  if(txt){ctx.fillStyle='#f4f2ee';ctx.font=`italic 400 ${Math.round(W*.05)}px "Bodoni Moda"`;ctx.textAlign='right';ctx.fillText(state.title||'',W*.94,H*.09)}
+  return slice(big,W,H,S);
+}
+
 /* ---------- Photo metadata (EXIF date and GPS) ---------- */
 function readExif(buf){
   const v=new DataView(buf);if(v.byteLength<4||v.getUint16(0)!==0xFFD8)return null;let o=2;
@@ -1294,7 +1421,7 @@ function slice(big,W,H,S){return Array.from({length:S},(_,j)=>{const c=canvas(W,
 let blobs=[],urls=[],pending=0,fontsReady=null;
 const car=$('carousel');
 let thumbKey='';
-function RENDERERS(){return {smart:renderSmart,pano:renderPano,serie:renderSerie,letters:renderLetters,route:renderRoute,fragments:renderFragments,film:renderFilm,windows:renderWindows,scrap:renderScrap,
+function RENDERERS(){return {smart:renderSmart,split:renderSplit,zoom:renderZoom,mood:renderMood,cascade:renderCascade,bauhaus:renderBauhaus,letter:renderLetter,echo:renderEcho,pano:renderPano,serie:renderSerie,letters:renderLetters,route:renderRoute,fragments:renderFragments,film:renderFilm,windows:renderWindows,scrap:renderScrap,
   glitch:renderGlitch,holo:renderHolo,hud:renderHud,dither:renderDither,float:renderFloat,kaleido:renderKaleido,
   swap:renderSwap,journal:renderJournal,halftone:renderHalftone,skyline:renderSkyline,carto:renderCarto,index:renderIndex,book:renderBook,
   bento:renderBento,ticket:renderTicket,stamps:renderStamps,neon:renderNeon,contact:renderContact,blueprint:renderBlueprint,news:renderNews,engraved:renderEngraved}}
@@ -1341,7 +1468,7 @@ function fondButtons(){
 
 /* ---------- Layout gallery: every layout previewed with your own photos ---------- */
 // Photo first: the photo fills most of the slide and is shown as it is. Everything else is Experimental.
-const HERO=['smart','serie','pano','swap','windows','bento','journal','book','film','ticket','scrap','neon','holo','hud'];
+const HERO=['smart','split','zoom','mood','cascade','serie','pano','swap','windows','bento','journal','book','film','ticket','scrap','neon','holo','hud'];
 function buildGallery(){
   const mk=(m,box)=>{const b=document.createElement('button');b.type='button';b.className='tpl'+(state.format==='45'?' r45':'');b.id=`mode-${m.id}`;b.dataset.id=m.id;b.setAttribute('aria-pressed',state.mode===m.id);
     const c=canvas(150,state.format==='45'?188:200),s=document.createElement('span'),sm=document.createElement('small');s.textContent=m.name;sm.textContent=m.sub;b.append(c,s,sm);
@@ -1447,7 +1574,7 @@ $('saveAll').onclick=async()=>{
 };
 (async()=>{try{downloads=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){downloads=null}})();
 
-fontsReady=Promise.race([Promise.all(['500 20px Archivo','900 20px Archivo','italic 400 20px "Bodoni Moda"','400 20px "DM Mono"','400 20px "Reenie Beanie"','400 20px "Permanent Marker"','400 20px "UnifrakturMaguntia"','400 20px "Bodoni Moda"'].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
+fontsReady=Promise.race([Promise.all(['500 20px Archivo','900 20px Archivo','italic 400 20px "Bodoni Moda"','400 20px "DM Mono"','400 20px "Reenie Beanie"','400 20px "Permanent Marker"','400 20px "UnifrakturMaguntia"','400 20px "Homemade Apple"','400 20px "Bodoni Moda"'].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
 state.photos=makeSamples();renderSlots();render();swatches();
 })();
 </script>
