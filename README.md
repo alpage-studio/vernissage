@@ -11,6 +11,8 @@ An art director for photo series. Vernissage turns 1–10 photos into a coherent
 
 Each photo can carry a place and a short note, and a Small print field replaces the fixed labels some layouts print (Field notes, All photographs...).
 
+**Studio kit** (header button): import a sheet of your hand-drawn marks (each drawing is cut out automatically), your papers, a stamp or monogram, and textures such as tape or torn paper. Black ink on white paper needs no cut-out: the white disappears. Your marks replace the generated ones, your paper becomes the background, and your stamp signs the cover and the last slide. The kit stays on the device.
+
 The project, photos included, is kept in this browser and comes back after a reload. Reset starts a new series.
 
 ## The signature range

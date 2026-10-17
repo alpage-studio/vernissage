@@ -177,6 +177,12 @@ body{padding-block:14px 96px}
 .order figcaption{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .dots{gap:8px}.dots button{width:10px;height:10px}
 .status{font-size:13.5px}
+.kit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.kit-item{position:relative;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column}
+.kit-item canvas{width:100%;height:auto;display:block}
+.kit-item span{font-size:12px;color:var(--muted);padding:5px 7px}
+.kit-item button{all:unset;cursor:pointer;position:absolute;right:4px;top:4px;width:28px;height:28px;border-radius:50%;background:rgba(10,10,12,.75);color:#fff;display:grid;place-items:center}
+.kit-item button:focus-visible{outline:2px solid var(--accent)}
 .seq .slot.add{all:unset;cursor:pointer;aspect-ratio:3/4;border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:13px}
 .seq .slot.add:focus-visible{outline:2px solid var(--accent)}
 </style>
@@ -186,7 +192,7 @@ body{padding-block:14px 96px}
 
 <header class="top">
   <div class="brand"><div class="mark">Vernissage</div><p>Turn a set of photos into a signed visual story.</p></div>
-  <div class="top-actions"><button class="ghost" id="undoBtn" type="button" disabled>Undo</button><button class="ghost" id="resetBtn" type="button">Reset</button></div>
+  <div class="top-actions"><button class="ghost" id="studioBtn" type="button">Studio kit</button><button class="ghost" id="undoBtn" type="button" disabled>Undo</button><button class="ghost" id="resetBtn" type="button">Reset</button></div>
 </header>
 
 <nav class="steps" id="steps" aria-label="Steps">
@@ -271,6 +277,26 @@ body{padding-block:14px 96px}
       <div class="group"><div class="label">Location data</div><div class="chips" id="gps"></div>
         <p class="sub">GPS prints the coordinates stored in your photos on Route and some Lab layouts. Keep it off for private places and type a place under each photo instead.</p></div>
       <button class="btn primary next" data-goto="export" type="button">Next: export</button>
+    </div>
+
+    <div class="panel" id="panel-studio" hidden>
+      <div class="group"><div class="label">Your studio kit <span id="kitCount"></span></div>
+        <p class="sub">Hand-made elements that make every series yours: they replace the marks, papers and stamps the app would draw. Photograph them flat in daylight, black ink on white paper; the white disappears by itself. Everything stays on this device.</p>
+        <div class="mini-actions">
+          <button class="btn small" type="button" data-kit="mark">+ A sheet of marks</button>
+          <button class="btn small" type="button" data-kit="paper">+ Paper</button>
+          <button class="btn small" type="button" data-kit="stamp">+ Stamp or monogram</button>
+          <button class="btn small" type="button" data-kit="texture">+ Tape, torn paper, wash</button>
+        </div>
+        <p class="status" id="kitMsg" role="status"></p>
+        <input type="file" id="kitFile" accept="image/*" multiple hidden>
+        <div class="kit-grid" id="kitGrid"></div>
+      </div>
+      <div class="group" id="kitUse" hidden><div class="label">Use in the series</div>
+        <div class="chips" id="kitMarksChips"></div><div class="chips" id="kitStampChips"></div>
+        <p class="sub">Paper for the backgrounds</p><div class="fonds" id="kitPapers"></div>
+      </div>
+      <button class="btn primary next" data-goto="finish" type="button">Back to finish</button>
     </div>
 
     <div class="panel" id="panel-export" hidden>
@@ -405,8 +431,8 @@ const FORMATS=[{id:'34',name:'3:4 · 1080 × 1440',W:1080,H:1440},{id:'45',name:
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
 // A new series starts empty: no title, no name, no year. The example photos are only an inspiration until the first import.
-const state={photos:[],mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom'};
-const KEYS=['title','artist','year','caption','kicker','duo','inset','mode','intent','tirage','fond','texte','gps','format','seed'];
+const state={photos:[],mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',kitMarks:'on',kitStamp:'on',kitPaper:''};
+const KEYS=['title','artist','year','caption','kicker','duo','inset','kitMarks','kitStamp','kitPaper','mode','intent','tirage','fond','texte','gps','format','seed'];
 try{const s=JSON.parse(localStorage.getItem('vernissage-v2')||'null');
   if(s)KEYS.forEach(k=>{if(k==='seed'){if(typeof s.seed==='number')state.seed=s.seed}else if(typeof s[k]==='string')state[k]=s[k]});
   else{const o=JSON.parse(localStorage.getItem('vernissage-en')||'{}');['title','artist','year','caption','tirage','fond','texte','gps','format'].forEach(k=>{if(typeof o[k]==='string')state[k]=o[k]});if(o.mode)state.mode=LEGACY[o.mode]||o.mode}}catch(e){}
@@ -713,7 +739,7 @@ function tornPath(ctx,w,h,rnd,W,sides){
     for(let i=1;i<=k;i++){const t=i/k;let x=x0+(x1-x0)*t,y=y0+(y1-y0)*t;if(torn&&i<k){const d=(rnd()-.5)*2*j;x+=-(y1-y0)/len*d;y+=(x1-x0)/len*d}ctx.lineTo(x,y)}};
   edge(-w/2,-h/2,w/2,-h/2,sides.includes('t'));edge(w/2,-h/2,w/2,h/2,sides.includes('r'));edge(w/2,h/2,-w/2,h/2,sides.includes('b'));edge(-w/2,h/2,-w/2,-h/2,sides.includes('l'));ctx.closePath();
 }
-function tape(ctx,cx,cy,len,wid,a){rotated(ctx,cx,cy,a,()=>{const z=wid/6;ctx.beginPath();ctx.moveTo(-len/2,-wid/2);ctx.lineTo(len/2,-wid/2);
+function tape(ctx,cx,cy,len,wid,a){const tx=kitOf('texture');if(tx.length){const t=tx[Math.floor(Math.abs(Math.sin(cx*12.9898+cy*78.233))*1e4)%tx.length].canvas,s=len/t.width;rotated(ctx,cx,cy,a,()=>{ctx.save();ctx.globalCompositeOperation='multiply';ctx.drawImage(t,-len/2,-t.height*s/2,len,t.height*s);ctx.restore()});return}rotated(ctx,cx,cy,a,()=>{const z=wid/6;ctx.beginPath();ctx.moveTo(-len/2,-wid/2);ctx.lineTo(len/2,-wid/2);
   for(let i=0;i<=6;i++)ctx.lineTo(len/2+(i%2?z*.7:0),-wid/2+i*z);ctx.lineTo(-len/2,wid/2);for(let i=6;i>=0;i--)ctx.lineTo(-len/2-(i%2?z*.7:0),-wid/2+i*z);ctx.closePath();
   ctx.save();ctx.shadowColor='rgba(40,30,15,.25)';ctx.shadowBlur=wid*.15;ctx.shadowOffsetY=wid*.05;ctx.fillStyle='rgba(214,196,150,.88)';ctx.fill();ctx.restore();
   ctx.fillStyle='rgba(255,255,255,.18)';ctx.fillRect(-len/2,-wid/2,len,wid*.3)})}
@@ -868,7 +894,7 @@ function renderScrap(W,H){
 
 /* ---------- Future layouts ---------- */
 const mono=(W,s)=>`400 ${Math.round(W*s)}px "DM Mono"`;
-function base(W,H,S,col){const T=S*W,big=canvas(T,H),ctx=big.getContext('2d');ctx.fillStyle=col;ctx.fillRect(0,0,T,H);return {T,big,ctx,n:state.photos.length,txt:state.texte==='oui'}}
+function base(W,H,S,col){const T=S*W,big=canvas(T,H),ctx=big.getContext('2d');ctx.fillStyle=col;ctx.fillRect(0,0,T,H);kitPaperOver(ctx,0,0,T,H,W);return {T,big,ctx,n:state.photos.length,txt:state.texte==='oui'}}
 
 // Glitch: RGB split, displaced slices, pixel streaks, scanlines
 function chan(src,col){const c=canvas(src.width,src.height),x=c.getContext('2d');x.drawImage(src,0,0);x.globalCompositeOperation='multiply';x.fillStyle=col;x.fillRect(0,0,c.width,c.height);return c}
@@ -1042,12 +1068,12 @@ function marker(ctx,pts,w,col,rnd){ctx.save();ctx.strokeStyle=col;ctx.lineCap='r
   for(let pass=0;pass<2;pass++){ctx.lineWidth=w*(pass?.55:1);ctx.globalAlpha=pass?.45:.95;ctx.beginPath();
     pts.forEach((p,i)=>{const x=p[0]+(pass?w*.3:0)+(rnd()-.5)*w*.3,y=p[1]+(pass?w*.2:0)+(rnd()-.5)*w*.3;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()}ctx.restore()}
 function curvePts(x1,y1,x2,y2,bend,N=24){const mx=(x1+x2)/2-(y2-y1)*bend,my=(y1+y2)/2+(x2-x1)*bend,pts=[];for(let i=0;i<=N;i++){const t=i/N,u=1-t;pts.push([u*u*x1+2*u*t*mx+t*t*x2,u*u*y1+2*u*t*my+t*t*y2])}return pts}
-function arrowMark(ctx,x1,y1,x2,y2,w,col,rnd){const p=curvePts(x1,y1,x2,y2,(rnd()-.5)*.3);marker(ctx,p,w,col,rnd);const q=p[p.length-4],a=Math.atan2(y2-q[1],x2-q[0]),L=w*7;
+function arrowMark(ctx,x1,y1,x2,y2,w,col,rnd){if(kitMark(ctx,(x1+x2)/2,(y1+y2)/2,Math.min(Math.hypot(x2-x1,y2-y1)*.75,W0()*.14),col,rnd))return;const p=curvePts(x1,y1,x2,y2,(rnd()-.5)*.3);marker(ctx,p,w,col,rnd);const q=p[p.length-4],a=Math.atan2(y2-q[1],x2-q[0]),L=w*7;
   marker(ctx,[[x2-Math.cos(a-.5)*L,y2-Math.sin(a-.5)*L],[x2,y2],[x2-Math.cos(a+.5)*L,y2-Math.sin(a+.5)*L]],w,col,rnd)}
-function loopMark(ctx,cx,cy,rx,ry,w,col,rnd){const pts=[];for(let i=0;i<=56;i++){const a=i/48*Math.PI*2-.7,k=1+i/56*.1+(rnd()-.5)*.03;pts.push([cx+Math.cos(a)*rx*k,cy+Math.sin(a)*ry*k])}marker(ctx,pts,w,col,rnd)}
-function xMark(ctx,cx,cy,s,w,col,rnd){for(let k=0;k<3;k++){marker(ctx,curvePts(cx-s,cy-s+(rnd()-.5)*s*.3,cx+s,cy+s,(rnd()-.5)*.15,10),w,col,rnd);marker(ctx,curvePts(cx+s,cy-s,cx-s+(rnd()-.5)*s*.3,cy+s,(rnd()-.5)*.15,10),w,col,rnd)}}
-function heartMark(ctx,cx,cy,s,w,col,rnd){const pts=[];for(let i=0;i<=40;i++){const t=i/40*Math.PI*2;pts.push([cx+s*Math.pow(Math.sin(t),3),cy-s*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/16])}marker(ctx,pts,w,col,rnd)}
-function scribbleLine(ctx,x1,x2,y,w,col,rnd){const pts=[];for(let k=0;k<3;k++){pts.push([k%2?x2:x1,y+k*w*.8+(rnd()-.5)*w],[k%2?x1:x2,y+k*w*.8+w*.4+(rnd()-.5)*w])}marker(ctx,pts,w,col,rnd)}
+function loopMark(ctx,cx,cy,rx,ry,w,col,rnd){if(kitMark(ctx,cx,cy,Math.max(rx,ry)*2.3,col,rnd))return;const pts=[];for(let i=0;i<=56;i++){const a=i/48*Math.PI*2-.7,k=1+i/56*.1+(rnd()-.5)*.03;pts.push([cx+Math.cos(a)*rx*k,cy+Math.sin(a)*ry*k])}marker(ctx,pts,w,col,rnd)}
+function xMark(ctx,cx,cy,s,w,col,rnd){if(kitMark(ctx,cx,cy,s*2.4,col,rnd))return;for(let k=0;k<3;k++){marker(ctx,curvePts(cx-s,cy-s+(rnd()-.5)*s*.3,cx+s,cy+s,(rnd()-.5)*.15,10),w,col,rnd);marker(ctx,curvePts(cx+s,cy-s,cx-s+(rnd()-.5)*s*.3,cy+s,(rnd()-.5)*.15,10),w,col,rnd)}}
+function heartMark(ctx,cx,cy,s,w,col,rnd){if(kitMark(ctx,cx,cy,s*2.4,col,rnd))return;const pts=[];for(let i=0;i<=40;i++){const t=i/40*Math.PI*2;pts.push([cx+s*Math.pow(Math.sin(t),3),cy-s*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))/16])}marker(ctx,pts,w,col,rnd)}
+function scribbleLine(ctx,x1,x2,y,w,col,rnd){if(kitMark(ctx,(x1+x2)/2,y,(x2-x1)*1.05,col,rnd))return;const pts=[];for(let k=0;k<3;k++){pts.push([k%2?x2:x1,y+k*w*.8+(rnd()-.5)*w],[k%2?x1:x2,y+k*w*.8+w*.4+(rnd()-.5)*w])}marker(ctx,pts,w,col,rnd)}
 function handText(ctx,t,x,y,size,rot,align,maxW){if(!t)return;rotated(ctx,x,y,rot,()=>{ctx.textAlign=align||'left';let s=Math.round(size);ctx.font=`400 ${s}px "Permanent Marker"`;
   if(maxW)while(ctx.measureText(t).width>maxW&&s>10){s--;ctx.font=`400 ${s}px "Permanent Marker"`}ctx.fillText(t,0,0)})}
 function renderJournal(W,H){
@@ -1436,7 +1462,7 @@ function renderSmart(W,H){
     else if(style===1){bgL=clamp(bd.l+(bd.l>.5?-.1:.1),.08,.92);bgS=grey?0:Math.min(bd.s*1.1,.4)} // tonal: continues the edges
     else{bgH=vivid.h;bgS=grey?0:clamp(vivid.s*.75,.25,.55);bgL=clamp(vivid.l,.35,.6)}         // the photo's strongest colour
     const dark=bgL<.5,ink=dark?'#f3f1ec':'#1b1a18',mute=dark?'rgba(243,241,236,.72)':'rgba(27,26,24,.6)';
-    ctx.fillStyle=hsl(bgH,bgS,bgL);ctx.fillRect(ox,0,sw,H);
+    ctx.fillStyle=hsl(bgH,bgS,bgL);ctx.fillRect(ox,0,sw,H);kitPaperOver(ctx,ox,0,sw,H,W);
     const lg=ctx.createRadialGradient(ox+sw/2,H*.45,0,ox+sw/2,H*.45,H*.8);lg.addColorStop(0,dark?'rgba(255,255,255,.05)':'rgba(255,255,255,.28)');lg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=lg;ctx.fillRect(ox,0,sw,H);
     // the photo gets almost the whole slide
     const a=p.w/p.h,mx=W*.06,top=H*.05,bot=txt?H*.11:H*.05,availH=H-top-bot,w=Math.min(sw-2*mx,availH*a),h=w/a,x=ox+(sw-w)/2,y=top+(availH-h)/2;
@@ -1506,7 +1532,7 @@ function renderMood(W,H){
     if(txt){ctx.fillStyle='#222';ctx.font=`500 ${Math.round(W*.018)}px Archivo`;spaced(ctx,(state.artist||'').toUpperCase(),ox+W/2,H*.045,W*.012,'center');
       ctx.fillStyle='#1d1d1d';ctx.font=`italic 400 ${Math.round(W*.03)}px "Bodoni Moda"`;wrap(ctx,cap[j],W*.56).slice(0,5).forEach((l,k)=>rotated(ctx,ox+W*.25,H*.1+k*W*.045,(rnd()-.5)*.02,()=>{ctx.textAlign='left';ctx.fillText(l,0,0)}))}
     const fa=fitBox(A,W*.54,H*.4),ax=ox+W*.07,ay=H*.25;
-    ctx.fillStyle='#e6e9e6';ctx.fillRect(ax-W*.018,ay-W*.018,fa.w+W*.036,fa.h+W*.036);ctx.drawImage(graded(A,fa.w,fa.h),ax,ay,fa.w,fa.h);
+    ctx.fillStyle='#e6e9e6';ctx.fillRect(ax-W*.018,ay-W*.018,fa.w+W*.036,fa.h+W*.036);ctx.drawImage(graded(A,fa.w,fa.h),ax,ay,fa.w,fa.h);if(kitOf('texture').length)tape(ctx,ax+fa.w*.15,ay-W*.01,W*.16,W*.04,-.25);
     const cxc=ox+W*.24,cyc=H*.72,cw=W*.56,chh=H*.22;ctx.save();ctx.shadowColor='rgba(0,0,0,.12)';ctx.shadowBlur=W*.01;ctx.fillStyle='#e6d9bb';ctx.fillRect(cxc,cyc,cw,chh);ctx.restore();
     ctx.fillStyle='#8a7a5a';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(`No. ${pad2(j+1)}`,cxc+W*.03,cyc+W*.06);
     if(B){const fb=fitBox(B,W*.6,H*.36),bx=ox+W*.34,by=Math.min(ay+fa.h*.75,H*.85-fb.h);ctx.save();ctx.shadowColor='rgba(0,0,0,.14)';ctx.shadowBlur=W*.012;ctx.drawImage(graded(B,fb.w,fb.h),bx,by,fb.w,fb.h);ctx.restore();
@@ -1585,7 +1611,7 @@ function renderPolaroid(W,H){const S=Math.max(1,Math.ceil(state.photos.length/2)
   for(let j=0;j<S;j++){const ox=j*W,ps=state.photos.slice(2*j,2*j+2);
     ps.forEach((p,k)=>{const one=ps.length===1,pw=W*(one?.7:.56),ph=pw,b=pw*.06,bb=pw*.24,cw=pw+2*b,ch=ph+b+bb,cx=ox+(one?W/2:(k?W*.6:W*.4)),cy=one?H*.48:(k?H*.67:H*.31),a=(rnd()-.5)*.16;
       rotated(ctx,cx,cy,a,()=>{ctx.save();ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=W*.03;ctx.shadowOffsetY=W*.012;ctx.fillStyle='#fbfaf6';ctx.fillRect(-cw/2,-ch/2,cw,ch);ctx.restore();
-        ctx.drawImage(graded(p,pw,ph),-pw/2,-ch/2+b,pw,ph);
+        ctx.drawImage(graded(p,pw,ph),-pw/2,-ch/2+b,pw,ph);if(kitOf('texture').length)tape(ctx,0,-ch/2,pw*.45,pw*.1,(k?.08:-.06));
         const t=p.note||p.place||(j===0&&k===0?state.title:'');if(txt&&t){ctx.fillStyle='#2b2925';fitFont(ctx,t,pw*.9,Math.round(W*.032),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='center';ctx.fillText(t,0,ch/2-bb*.42)}})})}
   return slice(big,W,H,S)}
 function renderMirror(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#111');
@@ -1836,9 +1862,9 @@ const isSample=()=>state.photos.some(p=>p.sample);
 async function render(){
   const my=++pending;setBusy(true);await fontsReady;await ensureFonts(rendererOf(state.mode));if(my!==pending)return;
   const F=FORMATS.find(f=>f.id===state.format);
-  const key=JSON.stringify([state.photos.map(p=>p.id+'|'+(p.place||'')+'|'+(p.note||'')),state.kicker,state.duo,state.inset,state.tirage,state.fond,state.texte,state.gps,state.format,state.seed,state.title,state.artist,state.year,state.caption]);
+  const key=JSON.stringify([state.photos.map(p=>p.id+'|'+(p.place||'')+'|'+(p.note||'')),state.kicker,state.duo,state.inset,state.kitMarks,state.kitStamp,state.kitPaper,kit.ver,state.tirage,state.fond,state.texte,state.gps,state.format,state.seed,state.title,state.artist,state.year,state.caption]);
   if(key!==thumbKey){thumbKey=key;thumbs()}
-  let cs;try{cs=renderWith(state.mode,F.W,F.H)}catch(e){console.error(e);setBusy(false,'Rendering failed on this device. Try fewer photos or another layout.');return}
+  let cs;try{cs=renderWith(state.mode,F.W,F.H);applyStamp(cs,F.W,F.H)}catch(e){console.error(e);setBusy(false,'Rendering failed on this device. Try fewer photos or another layout.');return}
   const bs=await Promise.all(cs.map(c=>new Promise(r=>c.toBlob(r,'image/jpeg',.96))));if(my!==pending)return;
   urls.forEach(u=>URL.revokeObjectURL(u));blobs=bs;urls=bs.map(b=>URL.createObjectURL(b));
   const keep=car.scrollLeft/Math.max(1,car.clientWidth);
@@ -1883,7 +1909,7 @@ function undo(){const s=hist.pop();$('undoBtn').disabled=!hist.length;if(!s)retu
 $('undoBtn').onclick=undo;
 
 /* ---------- Steps ---------- */
-function showStep(s){['photos','story','finish','export'].forEach(n=>$('panel-'+n).hidden=n!==s);
+function showStep(s){['photos','story','finish','export','studio'].forEach(n=>$('panel-'+n).hidden=n!==s);
   document.querySelectorAll('#steps button').forEach(b=>{if(b.dataset.step===s)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
   if(s==='story')buildStory();if(s==='export')buildOrder();
   if(window.innerWidth<900)document.querySelector('.controls').scrollIntoView({block:'start',behavior:'smooth'})}
@@ -2047,6 +2073,70 @@ function blobToPhoto(blob,name){return new Promise((res,rej)=>{const url=URL.cre
 async function loadProject(){try{const list=await DB.get('photos');if(!list||!list.length)return false;const out=[];
   for(const it of list){try{const p=await blobToPhoto(it.blob,it.name);p.place=it.place;p.note=it.note||'';p.meta=it.meta;p.blob=it.blob;out.push(p)}catch(e){}}
   if(out.length){state.photos=out;return true}}catch(e){}return false}
+/* ---------- Studio kit: hand-made marks, papers, a stamp and textures, kept on this device ---------- */
+const kit={items:[],ver:0};let kitSeq=1;
+// black ink on white paper becomes ink on transparency: no cut-out needed
+function inkMask(img,maxSide){const s=Math.min(1,maxSide/Math.max(img.width,img.height)),c=canvas(img.width*s,img.height*s),x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);
+  const id=x.getImageData(0,0,c.width,c.height),d=id.data,L=[];for(let i=0;i<d.length;i+=16)L.push(.299*d[i]+.587*d[i+1]+.114*d[i+2]);L.sort((a,b)=>a-b);
+  const paper=L[Math.floor(L.length*.9)]||255,ink=L[Math.floor(L.length*.02)]||0,span=Math.max(30,paper*.9-ink);
+  for(let i=0;i<d.length;i+=4){const l=.299*d[i]+.587*d[i+1]+.114*d[i+2],a=clamp((paper*.9-l)/span,0,1);d[i]=d[i+1]=d[i+2]=20;d[i+3]=Math.round(Math.pow(a,.8)*255)}
+  x.putImageData(id,0,0);return c}
+// one sheet of marks becomes separate marks: strokes that touch (after a small dilation) stay together
+function sliceMarks(mask){const sc=4,w=Math.ceil(mask.width/sc),h=Math.ceil(mask.height/sc),sm=canvas(w,h),sx=sm.getContext('2d');sx.drawImage(mask,0,0,w,h);
+  const d=sx.getImageData(0,0,w,h).data;let D=new Uint8Array(w*h);for(let i=0;i<w*h;i++)D[i]=d[i*4+3]>40?1:0;
+  for(let it=0;it<3;it++){const N=new Uint8Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const k=y*w+x;N[k]=D[k]||(x>0&&D[k-1])||(x<w-1&&D[k+1])||(y>0&&D[k-w])||(y<h-1&&D[k+w])?1:0}D=N}
+  const lab=new Int32Array(w*h),boxes=[];let L=0;
+  for(let i=0;i<w*h;i++){if(!D[i]||lab[i])continue;L++;let x0=w,y0=h,x1=0,y1=0,cnt=0;const st=[i];lab[i]=L;
+    while(st.length){const k=st.pop(),x=k%w,y=(k/w)|0;cnt++;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;
+      if(x>0&&D[k-1]&&!lab[k-1]){lab[k-1]=L;st.push(k-1)}if(x<w-1&&D[k+1]&&!lab[k+1]){lab[k+1]=L;st.push(k+1)}
+      if(y>0&&D[k-w]&&!lab[k-w]){lab[k-w]=L;st.push(k-w)}if(y<h-1&&D[k+w]&&!lab[k+w]){lab[k+w]=L;st.push(k+w)}}
+    boxes.push({x0,y0,x1,y1,cnt})}
+  const area=w*h;return boxes.filter(b=>b.cnt>area*.0015&&(b.x1-b.x0+1)*(b.y1-b.y0+1)<area*.6).sort((a,b)=>a.y0-b.y0||a.x0-b.x0).slice(0,40).map(b=>{const x=Math.max(0,(b.x0-1)*sc),y=Math.max(0,(b.y0-1)*sc),
+    ww=Math.min(mask.width-x,(b.x1-b.x0+3)*sc),hh=Math.min(mask.height-y,(b.y1-b.y0+3)*sc),c=canvas(ww,hh);c.getContext('2d').drawImage(mask,x,y,ww,hh,0,0,ww,hh);return c})}
+const tintCache=new Map();
+function tinted(c,col){if(!c.__id)c.__id='k'+(kitSeq++);const k=c.__id+'|'+col;if(tintCache.has(k))return tintCache.get(k);const t=canvas(c.width,c.height),x=t.getContext('2d');x.drawImage(c,0,0);
+  x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,t.width,t.height);if(tintCache.size>200)tintCache.clear();tintCache.set(k,t);return t}
+const kitOf=type=>kit.items.filter(i=>i.type===type);
+const W0=()=>FORMATS.find(f=>f.id===state.format).W;
+function kitMark(ctx,cx,cy,size,col,rnd){const ms=state.kitMarks==='off'?[]:kitOf('mark');if(!ms.length||!rnd)return false;const m=ms[Math.floor(rnd()*ms.length)].canvas,s=size/Math.max(m.width,m.height);
+  rotated(ctx,cx,cy,(rnd()-.5)*.5,()=>ctx.drawImage(tinted(m,col||'#111'),-m.width*s/2,-m.height*s/2,m.width*s,m.height*s));return true}
+function kitPaperOver(ctx,x,y,w,h,W){const p=kit.items.find(i=>i.type==='paper'&&i.id===state.kitPaper);if(!p)return;const c=p.canvas;
+  ctx.save();ctx.globalCompositeOperation='multiply';for(let ox=x,k=0;ox<x+w-1;ox+=W,k++){const cw=Math.min(W,x+w-ox),s=Math.max(cw/c.width,h/c.height),sw=cw/s,sh=h/s;
+    ctx.save();if(k%2){ctx.translate(ox+cw,0);ctx.scale(-1,1);ctx.drawImage(c,(c.width-sw)/2,(c.height-sh)/2,sw,sh,0,y,cw,h)}else ctx.drawImage(c,(c.width-sw)/2,(c.height-sh)/2,sw,sh,ox,y,cw,h);ctx.restore()}
+  ctx.restore()}
+function applyStamp(cs,W,H){const st=state.kitStamp==='off'?null:kitOf('stamp')[0];if(!st||!cs.length)return;const col=seriesAccent(),m=st.canvas,s=W*.13/Math.max(m.width,m.height);
+  [...new Set([0,cs.length-1])].forEach((k,i)=>{const x=cs[k].getContext('2d');x.save();x.globalAlpha=.88;rotated(x,W*.86,H*.9,i?.06:-.1,()=>x.drawImage(tinted(m,col),-m.width*s/2,-m.height*s/2,m.width*s,m.height*s));x.restore()})}
+// every background gets the chosen paper, multiplied, so the colours stay and the fibres show
+const __drawBackground=drawBackground;drawBackground=function(ctx,T,H,W,S,id,seed){__drawBackground(ctx,T,H,W,S,id,seed);kitPaperOver(ctx,0,0,T,H,W)};
+
+// storage and UI
+async function saveKit(){try{const list=[];for(const it of kit.items){if(!it.blob)it.blob=await new Promise(r=>it.canvas.toBlob(r,it.type==='paper'?'image/jpeg':'image/png',.9));list.push({id:it.id,type:it.type,blob:it.blob})}await DB.set('kit',list)}catch(e){}}
+async function loadKit(){try{const list=await DB.get('kit');if(!list)return;for(const it of list){try{const im=await blobImage(it.blob);const c=canvas(im.naturalWidth,im.naturalHeight);c.getContext('2d').drawImage(im,0,0);kit.items.push({id:it.id,type:it.type,canvas:c,blob:it.blob})}catch(e){}}}catch(e){}}
+function blobImage(blob){return new Promise((res,rej)=>{const u=URL.createObjectURL(blob),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('image'))};im.src=u})}
+const kid=()=>'kit'+Date.now().toString(36)+Math.floor(Math.random()*1e4);
+let kitType='mark';
+document.querySelectorAll('[data-kit]').forEach(b=>b.onclick=()=>{kitType=b.dataset.kit;$('kitFile').multiple=kitType!=='stamp';$('kitFile').click()});
+$('kitFile').onchange=async e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;let added=0;$('kitMsg').textContent='Reading…';
+  for(const f of files){try{const im=await blobImage(f);
+    if(kitType==='mark'){const marks=sliceMarks(inkMask(im,2400));marks.forEach(c=>kit.items.push({id:kid(),type:'mark',canvas:c}));added+=marks.length}
+    else if(kitType==='stamp'){const parts=sliceMarks(inkMask(im,1600)).sort((a,b)=>b.width*b.height-a.width*a.height);const c=parts[0]||inkMask(im,1600);kit.items=kit.items.filter(i=>i.type!=='stamp');kit.items.push({id:kid(),type:'stamp',canvas:c});added++}
+    else{const s=Math.min(1,(kitType==='paper'?2000:1400)/Math.max(im.naturalWidth,im.naturalHeight)),c=canvas(im.naturalWidth*s,im.naturalHeight*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      const it={id:kid(),type:kitType,canvas:c};kit.items.push(it);added++;if(kitType==='paper'&&!state.kitPaper){state.kitPaper=it.id;persist()}}}catch(err){}}
+  $('kitMsg').textContent=added?`${added} element${added>1?'s':''} added.${kitType==='mark'?' Each drawing on the sheet became its own mark.':''}`:'Nothing found. Use black ink on white paper, in daylight.';
+  kit.ver++;saveKit();renderKit();schedule()};
+function renderKit(){const g=$('kitGrid');g.innerHTML='';const names={mark:'Mark',paper:'Paper',stamp:'Stamp',texture:'Texture'};
+  kit.items.forEach(it=>{const d=document.createElement('div');d.className='kit-item';const c=canvas(120,120),x=c.getContext('2d');x.fillStyle='#f2f0ea';x.fillRect(0,0,120,120);
+    const m=it.canvas,s=Math.min(104/m.width,104/m.height);x.drawImage(m,60-m.width*s/2,60-m.height*s/2,m.width*s,m.height*s);
+    const t=document.createElement('span');t.textContent=names[it.type];const rm=document.createElement('button');rm.type='button';rm.textContent='×';rm.setAttribute('aria-label',`Remove this ${names[it.type].toLowerCase()}`);
+    rm.onclick=()=>{kit.items=kit.items.filter(i=>i!==it);if(state.kitPaper===it.id){state.kitPaper='';persist()}kit.ver++;saveKit();renderKit();schedule()};d.append(c,t,rm);g.append(d)});
+  const n=t=>kitOf(t).length;$('kitCount').textContent=`${n('mark')} marks · ${n('paper')} papers · ${n('stamp')} stamp · ${n('texture')} textures`;
+  const pb=$('kitPapers');pb.innerHTML='';[{id:'',name:'No paper'},...kitOf('paper').map((p,i)=>({id:p.id,name:`Paper ${i+1}`,c:p.canvas}))].forEach(o=>{const b=document.createElement('button');b.type='button';b.className='fond';b.setAttribute('aria-pressed',state.kitPaper===o.id);
+    const c=canvas(180,120);if(o.c)c.getContext('2d').drawImage(o.c,0,0,180,120);const s=document.createElement('span');s.textContent=o.name;b.append(c,s);
+    b.onclick=()=>{remember();state.kitPaper=o.id;persist();renderKit();schedule()};pb.append(b)});
+  $('kitUse').hidden=!kit.items.length;refreshControls()}
+$('studioBtn').onclick=()=>showStep('studio');
+
+chips($('kitMarksChips'),[{id:'on',name:'My marks'},{id:'off',name:'Generated marks'}],'kitMarks',()=>null);chips($('kitStampChips'),[{id:'on',name:'Stamp on cover and end'},{id:'off',name:'No stamp'}],'kitStamp',()=>null);
 let resetArmed=0;
 $('resetBtn').onclick=async()=>{if(Date.now()-resetArmed>3000){resetArmed=Date.now();$('resetBtn').textContent='Tap again to reset';setTimeout(()=>{$('resetBtn').textContent='Reset'},3000);return}
   resetArmed=0;$('resetBtn').textContent='Reset';hist.length=0;$('undoBtn').disabled=true;
@@ -2088,7 +2178,7 @@ $('saveAll').onclick=async()=>{
 (async()=>{try{downloads=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){downloads=null}})();
 
 fontsReady=Promise.race([Promise.all(['500 20px Archivo','600 20px Archivo','900 20px Archivo','italic 400 20px "Bodoni Moda"','400 20px "Bodoni Moda"','400 20px "DM Mono"'].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,2500))]).catch(()=>{});
-(async()=>{const had=await loadProject();if(!had)state.photos=makeSamples();state.photos.forEach(p=>allPhotos.set(p.id,p));
+(async()=>{await loadKit();renderKit();const had=await loadProject();if(!had)state.photos=makeSamples();state.photos.forEach(p=>allPhotos.set(p.id,p));
   renderSlots();render();swatches();if(had)status(`Your series is back: ${state.photos.length} photos.`)})();
 })();
 </script>
