@@ -300,6 +300,12 @@ const MODES=[
   {id:'mirror',name:'Mirror',sub:'each photo folded into its own reflection'},
   {id:'tiles',name:'Tiles',sub:'the photo cut into a grid with colour tiles and letters'},
   {id:'orbit',name:'Orbit',sub:'one photo in a circle, the others orbiting around it'},
+  {id:'strata',name:'Strata',sub:'horizon bands with an inset plate and a material swatch'},
+  {id:'vellum',name:'Vellum',sub:'a frosted tracing sheet slides off the photo'},
+  {id:'salon',name:'Salon',sub:'big prints, then the whole series hung as one cluster'},
+  {id:'ripple',name:'Ripple',sub:'photos as islands ringed by contour echoes'},
+  {id:'measure',name:'Measure',sub:'heavy bars sweep across the photo like a score'},
+  {id:'burst',name:'Burst',sub:'a narrow column holds the scene, the subject breaks out'},
   {id:'pano',name:'Panorama',sub:'one composition that flows across the slides'},
   {id:'serie',name:'Series',sub:'one photo per slide, wide margins'},
   {id:'letters',name:'Letters',sub:'the title in giant letters cut from your photos'},
@@ -363,7 +369,11 @@ const SIG=[
   {id:'poster',fam:'Signal',name:'Poster',r:'split',promise:'Half as shot, half halftone, cut through the subject.',best:'Portraits, strong subjects',count:[1,6],text:'A bold title'},
   {id:'diptych',fam:'Signal',name:'Diptych',r:'swap',promise:'Two photos trading squares across the seam.',best:'Pairs that answer each other',count:[2,10],text:'Minimal'},
   {id:'detail',fam:'Signal',name:'Detail',r:'zoom',promise:'A framed close-up of the subject, a red line across.',best:'Portraits, textures, details',count:[1,8],text:'Frame numbers'},
-  {id:'window',fam:'Signal',name:'Window',r:'windows',promise:'The first photo becomes the wall, the others open in it.',best:'A wide first photo, then others',count:[3,10],text:'Title and signature'}
+  {id:'window',fam:'Signal',name:'Window',r:'windows',promise:'The first photo becomes the wall, the others open in it.',best:'A wide first photo, then others',count:[3,10],text:'Title and signature'},
+  {id:'twin',fam:'Editorial',name:'Twin',r:'twin',promise:'Each photo beside a drawing computed from itself.',best:'Landscapes, skylines, night skies',count:[1,10],text:'Figure numbers'},
+  {id:'sketch',fam:'Material',name:'Sketch',r:'sketch',promise:'The photo turns into a pencil drawing of itself at the edges.',best:'Landscapes, mountains, architecture',count:[1,10],text:'Place and date'},
+  {id:'fault',fam:'Signal',name:'Fault',r:'fault',promise:'One colour plane, and the image slips along it.',best:'Mountains, cities, strong lines',count:[1,10],text:'One vertical word'},
+  {id:'slats',fam:'Signal',name:'Slats',r:'slats',promise:'Vertical slats show the scene a moment later, a little closer.',best:'Landscapes, weather, light',count:[1,10],text:'Title on the cover'}
 ];
 const FAMS=[{id:'Editorial',sub:'Quiet editions: gallery, sequence, book, archive.'},{id:'Story',sub:'Field notes: places, dates, a few words.'},{id:'Material',sub:'Printed matter: paper, frames, contact sheets.'},{id:'Signal',sub:'Strong images: poster, pairs, close-ups.'}];
 const INTENTS=[{id:'editorial',name:'An editorial series',sub:'Calm and precise, like an exhibition.',fams:['Editorial','Material']},
@@ -1610,6 +1620,182 @@ function renderOrbit(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,t
   if(txt&&state.title){ctx.fillStyle='#fff';ctx.font=`italic 400 ${Math.round(W*.055)}px "Bodoni Moda"`;ctx.textAlign='center';ctx.fillText(state.title,W/2,H*.085)}
   return slice(big,W,H,S)}
 
+/* ---------- Third moodboard: one accent, the photo cut not framed, its own graphic twin ---------- */
+// one accent for the whole series: the most saturated colour that really exists in the photos, pushed to a printable strength
+function seriesAccent(){let best=null;state.photos.forEach(p=>analyze(p).pal.forEach(c=>{if(c.share>.05&&(!best||c.s>best.s))best=c}));
+  if(!best||best.s<.18)return '#f2c230';return hsl(best.h,clamp(best.s,.7,.85),clamp(best.l,.5,.58))}
+function lumGrid(p,gw,gh){const c=graded(p,gw,gh),d=c.getContext('2d').getImageData(0,0,c.width,c.height).data,f=new Float32Array(gw*gh);for(let i=0;i<gw*gh;i++)f[i]=(.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2])/255;return f}
+const lerp=(a,b,t)=>a+(b-a)*t;
+const tOf=(j,n)=>n>1?j/(n-1):0;
+
+// Fault: a coloured plane crosses the photo and part of the image slips, like a geological fault; the fault closes on the last slide
+function renderFault(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#f4efe4'),acc=seriesAccent(),rnd=rngOf(state.seed+2401);
+  state.photos.forEach((p,j)=>{const ox=j*W,last=n>1&&j===n-1,img=graded(p,W,H);ctx.drawImage(img,ox,0);
+    const top=ctx.createLinearGradient(0,0,0,H*.14);top.addColorStop(0,'rgba(244,239,228,.55)');top.addColorStop(1,'rgba(244,239,228,0)');ctx.fillStyle=top;ctx.fillRect(ox,0,W,H*.14);
+    if(last){ctx.fillStyle=acc;ctx.fillRect(ox,0,W*.022,H);if(txt&&state.title){ctx.fillStyle='#fff';ctx.save();ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=W*.02;fitFont(ctx,state.title,W*.8,Math.round(W*.06),s=>`400 ${s}px "Bodoni Moda"`);ctx.textAlign='left';ctx.fillText(state.title,W*.08+ox,H*.93);ctx.restore()}return}
+    const left=j%2===0,bw=W*.3,bx=ox+(left?W*.12:W*.58),tp=H*.08,knee=H*.6,dx=left?W*.42:-W*.42;
+    const poly=[[bx,tp],[bx+bw,tp],[bx+bw,knee],[bx+bw+dx,H],[bx+dx,H],[bx,knee]];
+    // the slipped block beside the plane: same photo, a little bigger, shifted up and sideways
+    const sx=left?bx+bw:bx-W*.36,sy=H*.18,sw=W*.36,sh=H*.42,ch=W*.06;
+    ctx.save();ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx+sw-ch,sy);ctx.lineTo(sx+sw,sy+ch);ctx.lineTo(sx+sw,sy+sh);ctx.lineTo(sx,sy+sh);ctx.closePath();ctx.clip();
+    const big2=graded(p,W*1.12,H*1.12);ctx.drawImage(big2,ox-W*.06-W*.04*(left?1:-1),-H*.06-H*.05);ctx.fillStyle='rgba(0,0,0,.12)';ctx.fillRect(sx,sy,sw,sh);ctx.restore();
+    ctx.save();ctx.beginPath();poly.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.closePath();ctx.fillStyle=acc;ctx.fill();ctx.clip();
+    ctx.strokeStyle='rgba(0,0,0,.12)';ctx.lineWidth=1;for(let k=0;k<70;k++){const x=bx+rnd()*bw*1.6,y=tp+rnd()*(H-tp);ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+W*.02,y+W*.01,x+W*(.04+rnd()*.08),y+(rnd()-.5)*W*.03);ctx.stroke()}ctx.restore();
+    if(txt){const word=(j===0?state.title:(p.note||p.place))||'';if(word){ctx.fillStyle='#141414';rotated(ctx,bx+bw*.66,knee-W*.02,-Math.PI/2,()=>{fitFont(ctx,word,knee-tp-W*.06,Math.round(W*.1),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='left';ctx.fillText(word,0,0)})}
+      ctx.fillStyle='#141414';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText([pad2(j+1),metaDate(p).split(',')[0]].filter(Boolean).join('  ·  '),bx+W*.02,knee-W*.012+W*.04)}
+  });
+  return slice(big,W,H,S)}
+
+// Twin: every photo next to a drawing computed from itself (skyline, bars, stars, contours); the photo gains ground slide after slide
+function contourGrid(ctx,f,gw,gh,x,y,w,h,levels,col,lw){const sx=w/(gw-1),sy=h/(gh-1);ctx.strokeStyle=col;ctx.lineWidth=lw;
+  for(let k=0;k<levels;k++){const th=.15+k*(.7/levels);ctx.beginPath();
+    for(let j=0;j<gh-1;j++)for(let i=0;i<gw-1;i++){const a=f[j*gw+i],b=f[j*gw+i+1],c=f[(j+1)*gw+i+1],d=f[(j+1)*gw+i],idx=(a>th?8:0)|(b>th?4:0)|(c>th?2:0)|(d>th?1:0);if(!idx||idx===15)continue;
+      const px=x+i*sx,py=y+j*sy,P={T:[px+sx*(th-a)/(b-a),py],R:[px+sx,py+sy*(th-b)/(c-b)],B:[px+sx*(th-d)/(c-d),py+sy],L:[px,py+sy*(th-a)/(d-a)]},s=MS[idx];
+      for(let q=0;q<s.length;q+=2){ctx.moveTo(P[s[q]][0],P[s[q]][1]);ctx.lineTo(P[s[q+1]][0],P[s[q+1]][1])}}ctx.stroke()}}
+function renderTwin(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#2b2a28'),acc=seriesAccent(),modes=['skyline','bars','stars','contour'],ink='rgba(244,240,232,.85)';
+  state.photos.forEach((p,j)=>{const ox=j*W,t=tOf(j,n),ph=Math.round(H*(1-lerp(.42,.24,t))),py=H-ph,mode=modes[j%4];
+    ctx.drawImage(graded(p,W,ph),ox,py);
+    const gw=96,gh=Math.max(8,Math.round(gw*ph/W)),f=lumGrid(p,gw,gh),pad=W*.07,X=ox+pad,Y=H*.06,PW=W-2*pad,PH=py-H*.12;
+    ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+    if(mode==='skyline'){const pts=[],pts2=[];for(let i=0;i<gw;i++){let best=1,bv=-1,second=1,sv=-1;for(let k=1;k<gh-1;k++){const v=Math.abs(f[(k+1)*gw+i]-f[(k-1)*gw+i]);if(v>bv){sv=bv;second=best;bv=v;best=k}else if(v>sv&&Math.abs(k-best)>3){sv=v;second=k}}pts.push([X+i/(gw-1)*PW,Y+best/gh*PH]);pts2.push([X+i/(gw-1)*PW,Y+second/gh*PH])}
+      const sm=a=>a.map((q,i)=>[q[0],(a[Math.max(0,i-1)][1]+q[1]*2+a[Math.min(a.length-1,i+1)][1])/4]);const A=sm(sm(pts)),B=sm(sm(pts2));
+      ctx.strokeStyle=ink;ctx.lineWidth=Math.max(1.2,W*.0016);ctx.beginPath();A.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();
+      ctx.setLineDash([W*.008,W*.008]);ctx.strokeStyle=acc;ctx.beginPath();B.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=ink;A.forEach((q,i)=>{if(i>2&&i<A.length-3&&q[1]<A[i-3][1]&&q[1]<A[i+3][1]){ctx.beginPath();ctx.arc(q[0],q[1],W*.005,0,Math.PI*2);ctx.fill()}})}
+    if(mode==='bars'){const N=48,bw=PW/N;for(let i=0;i<N;i++){let s=0;const c0=Math.floor(i/N*gw),c1=Math.max(c0+1,Math.floor((i+1)/N*gw));for(let c=c0;c<c1;c++)for(let k=0;k<gh;k++)s+=1-f[k*gw+c];const v=s/((c1-c0)*gh);
+      ctx.fillStyle=i===Math.floor(N*.62)?acc:ink;ctx.fillRect(X+i*bw+bw*.3,Y+PH-v*PH,Math.max(1,bw*.4),v*PH)}}
+    if(mode==='stars'){const cand=[];for(let k=1;k<gh-1;k++)for(let i=1;i<gw-1;i++){const v=f[k*gw+i];if(v>f[k*gw+i-1]&&v>=f[k*gw+i+1]&&v>f[(k-1)*gw+i]&&v>=f[(k+1)*gw+i])cand.push([v,i,k])}
+      cand.sort((a,b)=>b[0]-a[0]);const st=cand.slice(0,12).sort((a,b)=>a[1]-b[1]);ctx.strokeStyle='rgba(244,240,232,.35)';ctx.lineWidth=1;ctx.beginPath();st.forEach((s,i)=>{const x=X+s[1]/gw*PW,y=Y+s[2]/gh*PH;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+      st.forEach((s,i)=>{ctx.fillStyle=i===3?acc:ink;ctx.beginPath();ctx.arc(X+s[1]/gw*PW,Y+s[2]/gh*PH,W*(.004+s[0]*.01),0,Math.PI*2);ctx.fill()})}
+    if(mode==='contour'){const bl=new Float32Array(gw*gh);for(let k=0;k<gh;k++)for(let i=0;i<gw;i++){let s=0,c=0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const y=clamp(k+a,0,gh-1),x=clamp(i+b,0,gw-1);s+=f[y*gw+x];c++}bl[k*gw+i]=s/c}
+      contourGrid(ctx,bl,gw,gh,X,Y,PW,PH,9,ink,Math.max(1,W*.0013))}
+    ctx.restore();
+    const L=f[Math.floor(gh*.12)*gw+Math.floor(gw*.8)]||0;ctx.fillStyle=L>.55?'rgba(20,20,20,.88)':'rgba(250,248,244,.9)';ctx.font=`400 ${Math.round(W*.21)}px "Bodoni Moda"`;ctx.textAlign='right';ctx.fillText(pad2(j+1),ox+W*.94,py+W*.22);
+    if(txt){ctx.fillStyle='rgba(244,240,232,.7)';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(`fig. ${pad2(j+1)} — ${mode==='stars'?'constellation':mode}${(p.note||p.place)?'  ·  '+(p.note||p.place):''}`,X,py-H*.025);
+      if(j===0&&state.title){ctx.fillStyle='rgba(244,240,232,.92)';fitFont(ctx,state.title,W*.6,Math.round(W*.045),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='right';ctx.fillText(state.title,ox+W-pad,H*.05+W*.03)}}
+  });
+  return slice(big,W,H,S)}
+
+// Sketch: the photo is real in the middle and turns into a pencil drawing of itself towards the edges
+function renderSketch(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#faf8f4'),acc=seriesAccent(),rnd=rngOf(state.seed+2501);grain(ctx,S*W,H,.05);
+  state.photos.forEach((p,j)=>{const ox=j*W,t=tOf(j,n),a=p.w/p.h,cy=H*.45,fw0=W*lerp(.52,.82,t),fh0=H*lerp(.5,.7,t),fw=Math.min(fw0,fh0*a),fh=fw/a,fx=ox+(W-fw)/2,fy=cy-fh/2;
+    // the drawing: the same photo scaled to 1.9x the slide width, its edges redrawn as short pencil strokes
+    const SW=W*1.9,SH=SW/a,sx0=ox+W/2-SW/2,sy0=cy-SH/2,gw=270,gh=Math.max(8,Math.round(gw/a)),f=lumGrid(p,gw,gh),cell=SW/gw;
+    ctx.save();ctx.beginPath();ctx.rect(ox,0,W,H);ctx.clip();ctx.lineCap='round';
+    let top=null;
+    for(let k=1;k<gh-1;k++)for(let i=1;i<gw-1;i++){const gx=f[k*gw+i+1]-f[k*gw+i-1],gy=f[(k+1)*gw+i]-f[(k-1)*gw+i],m=Math.hypot(gx,gy);if(m<.045)continue;
+      const x=sx0+i*cell,y=sy0+k*cell;if(x>fx-2&&x<fx+fw+2&&y>fy-2&&y<fy+fh+2)continue;
+      const dx=Math.max(fx-x,0,x-fx-fw),dy=Math.max(fy-y,0,y-fy-fh),dist=Math.hypot(dx,dy);if(rnd()>1.15-dist/(W*.42))continue;
+      if(!top||y<top[1])top=[x,y];
+      const ang=Math.atan2(gy,gx)+Math.PI/2,len=cell*(1.2+rnd()*1.6);ctx.strokeStyle=`rgba(58,54,50,${.3+rnd()*.4})`;ctx.lineWidth=.8+rnd()*.8;
+      for(let s=0;s<2;s++){const jx=(rnd()-.5)*cell*.6,jy=(rnd()-.5)*cell*.6;ctx.beginPath();ctx.moveTo(x+jx-Math.cos(ang)*len,y+jy-Math.sin(ang)*len);ctx.lineTo(x+jx+Math.cos(ang)*len,y+jy+Math.sin(ang)*len);ctx.stroke()}}
+    ctx.restore();
+    ctx.drawImage(graded(p,fw,fh),fx,fy,fw,fh);
+    if(top){ctx.strokeStyle=acc;ctx.lineWidth=W*.003;const s=W*.012;ctx.beginPath();ctx.moveTo(top[0]-s,top[1]-s);ctx.lineTo(top[0]+s,top[1]+s);ctx.moveTo(top[0]+s,top[1]-s);ctx.lineTo(top[0]-s,top[1]+s);ctx.stroke()}
+    if(txt){const t1=(j===0?state.title:(p.note||p.place))||'';ctx.fillStyle='#2b2925';ctx.textAlign='center';if(t1){fitFont(ctx,t1,W*.8,Math.round(W*.037),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.fillText(t1,ox+W/2,fy+fh+W*.085)}
+      ctx.fillStyle='#77726a';ctx.font=mono(W,.015);ctx.fillText([pad2(j+1),j===0?'':p.place&&p.note?p.place:'',metaDate(p).split(',')[0]].filter(Boolean).join('  ·  '),ox+W/2,fy+fh+W*.13)}
+  });
+  if(txt&&state.artist){ctx.fillStyle='#77726a';ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),S*W-W*.07,H*.96,W*.005,'right')}
+  return slice(big,W,H,S)}
+
+// Slats: vertical slats show the same scene a moment later, a little closer; on the last slide they close into one view
+function renderSlats(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#fbfaf7'),acc=seriesAccent();
+  state.photos.forEach((p,j)=>{const ox=j*W,t=tOf(j,n),last=n>1&&j===n-1,b=W*.04,bb=j===0&&txt?H*.13:b,iw=W-2*b,ih=H-b-bb;
+    ctx.drawImage(graded(p,iw,ih),ox+b,b);ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(ox+b,b,iw,ih);
+    const k=last?1:[3,5,7][Math.min(2,Math.floor(t*3))],gap=last?0:W*.03,aw=last?iw:W*.72,sw=(aw-(k-1)*gap)/k,sx0=ox+(W-aw)/2,sy=last?b:H*.14,sh=last?ih:H*.66,z=lerp(1.2,1.6,t);
+    const q=n>1?state.photos[(j+1)%n]:null,zimg=graded(p,iw*z,ih*z),zx=ox+b-(iw*z-iw)/2,zy=b-(ih*z-ih)/2-H*.12;
+    for(let s=0;s<k;s++){const x=sx0+s*(sw+gap);ctx.save();ctx.beginPath();ctx.rect(x,sy,sw,sh);ctx.clip();
+      if(q&&k>1&&s===Math.floor(k/2)&&j%2===1)ctx.drawImage(graded(q,sw,sh),x,sy);else ctx.drawImage(zimg,zx,zy);
+      const mg=ctx.createLinearGradient(0,sy,0,sy+sh*.35);mg.addColorStop(0,'rgba(255,255,255,.5)');mg.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=mg;ctx.fillRect(x,sy,sw,sh*.35);ctx.restore();
+      if(!last&&txt){ctx.fillStyle='#6f6a63';ctx.font=mono(W,.014);ctx.textAlign='center';ctx.fillText(ROMAN[s]||'',x+sw/2,sy+sh+W*.035)}
+      if(!last&&s===j%k){ctx.fillStyle=acc;ctx.fillRect(x,sy-W*.006,sw,W*.006)}}
+    if(txt&&j===0&&state.title){ctx.fillStyle='#1d1b18';fitFont(ctx,state.title,W*.84,Math.round(W*.075),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='left';ctx.fillText(state.title,ox+b,H-bb*.38)}
+    if(txt&&j>0&&(p.note||p.place)){ctx.fillStyle='#fff';ctx.font=mono(W,.015);ctx.textAlign='left';ctx.fillText((p.note||p.place).toUpperCase(),ox+b+W*.02,H-b-W*.025)}
+  });
+  return slice(big,W,H,S)}
+
+// Strata: each photo as a long horizon band with an inset plate and a material swatch; the band climbs the page
+function renderStrata(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#efe9df'),acc=seriesAccent(),rnd=rngOf(state.seed+2601);grain(ctx,S*W,H,.07);
+  state.photos.forEach((p,j)=>{const ox=j*W,t=tOf(j,n),last=n>1&&j===n-1,m=last?0:W*.083,bw=W-2*m,bh=H*.3,by=H*lerp(.6,.22,t),left=j%2===0;
+    ctx.save();ctx.shadowColor='rgba(0,0,0,.12)';ctx.shadowBlur=W*.012;ctx.drawImage(graded(p,bw,bh),ox+m,by);ctx.restore();
+    if(!last){ctx.fillStyle='#bdb6aa';[[by-W*.012],[by-W*.018],[by+bh+W*.012],[by+bh+W*.018]].forEach(([y])=>{ctx.fillRect(ox+m-W*.05,y,W*.05,1);ctx.fillRect(ox+m+bw,y,W*.05,1)})}
+    const swx=ox+(left?W*.46:W*.12),sww=W*.42,swy=by+bh-W*.035;ctx.fillStyle=acc;ctx.fillRect(swx,swy,sww,W*.13);ctx.strokeStyle='rgba(0,0,0,.07)';ctx.lineWidth=1;
+    for(let k=0;k<70;k++){const y=swy+k*(W*.13/70);ctx.beginPath();for(let x=0;x<=sww;x+=8)ctx.lineTo(swx+x,y+Math.sin(x*.03+k)*2);ctx.stroke()}
+    if(!last){const q=n>1?state.photos[(j+1)%n]:p,s=W*.36,ix=ox+(left?m+W*.04:W-m-W*.04-s),iy=by-W*.07;ctx.save();ctx.shadowColor='rgba(0,0,0,.2)';ctx.shadowBlur=W*.018;ctx.shadowOffsetY=W*.006;ctx.drawImage(graded(q,s,s),ix,iy,s,s);ctx.restore();
+      ctx.fillStyle='#d8d4cc';ctx.fillRect(ox+W*.62,by-H*.08,2,H*.08);ctx.fillRect(ox+W*.66,by-H*.11,4,H*.11)}
+    if(txt){ctx.fillStyle='#55524c';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(`${pad2(j+1)}${(p.note||p.place)?' — '+(p.note||p.place).toUpperCase():''}`,ox+Math.max(m,W*.06),by+bh+W*.07);
+      if(j===0&&state.title){ctx.fillStyle='#1d1b18';fitFont(ctx,state.title.toUpperCase(),W*.84,Math.round(W*.045),s=>`800 ${s}px Archivo`);ctx.textAlign='left';ctx.fillText(state.title.toUpperCase(),ox+m,H*.1)}
+      if(last&&state.artist){ctx.fillStyle='#1d1b18';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(signature(),swx+W*.02,swy+W*.08)}}
+  });
+  return slice(big,W,H,S)}
+
+// Vellum: a frosted tracing sheet slides off the photo slide after slide, carrying the words and a route
+function renderVellum(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#111'),acc=seriesAccent(),rnd=rngOf(state.seed+2701);
+  state.photos.forEach((p,j)=>{const ox=j*W,t=tOf(j,n),img=graded(p,W,H);ctx.drawImage(img,ox,0);
+    const cover=lerp(.62,.18,t),vw=W*cover,vh=H*lerp(.78,.3,t),left=j%2===0,vx=left?ox+W*.06:ox+W*.94-vw,vy=H*.1,a=(rnd()-.5)*.08;
+    rotated(ctx,vx+vw/2,vy+vh/2,a,()=>{const sm=canvas(Math.max(4,vw/14),Math.max(4,vh/14));sm.getContext('2d').drawImage(img,vx-ox,vy,vw,vh,0,0,sm.width,sm.height);
+      ctx.save();ctx.shadowColor='rgba(0,0,0,.25)';ctx.shadowBlur=W*.02;ctx.shadowOffsetX=W*.004;ctx.shadowOffsetY=W*.01;ctx.fillStyle='#000';ctx.fillRect(-vw/2,-vh/2,vw,vh);ctx.restore();
+      upscaleTo(ctx,sm,-vw/2,-vh/2,vw,vh);ctx.fillStyle='rgba(244,244,242,.66)';ctx.fillRect(-vw/2,-vh/2,vw,vh);ctx.strokeStyle='rgba(255,255,255,.6)';ctx.strokeRect(-vw/2+.5,-vh/2+.5,vw-1,vh-1);
+      const pts=[];for(let k=0;k<=8;k++)pts.push([-vw*.38+k*vw*.09,vh*.32-k*vh*.06+(rnd()-.5)*vh*.05]);ctx.strokeStyle=acc;ctx.lineWidth=W*.0028;ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();
+      [pts[0],pts[4],pts[8]].forEach(q=>{ctx.fillStyle=acc;ctx.beginPath();ctx.arc(q[0],q[1],W*.011,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(q[0],q[1],W*.004,0,Math.PI*2);ctx.fill()});
+      if(txt){const lx=-vw/2+W*.04;let ly=-vh/2+W*.09;ctx.fillStyle='#1b1b1b';ctx.textAlign='left';
+        const head=(j===0?state.title:(p.note||p.place))||'';if(head&&vh>H*.25){fitFont(ctx,head.toUpperCase(),vw-W*.08,Math.round(W*.05),s=>`800 ${s}px Archivo`);ctx.fillText(head.toUpperCase(),lx,ly);ly+=W*.05;
+          ctx.fillRect(lx,ly-W*.02,vw-W*.08,2);ctx.font=`italic 400 ${Math.round(W*.03)}px "Bodoni Moda"`;ctx.fillText(j===0?(state.caption?'':'a series'):(p.place&&p.note?p.place:''),lx,ly+W*.03);ly+=W*.06}
+        ctx.font=mono(W,.015);ctx.fillText([pad2(j+1),metaDate(p).split(',')[0]].filter(Boolean).join('  ·  '),lx,vh/2-W*.04)}});
+  });
+  return slice(big,W,H,S)}
+function upscaleTo(ctx,small,x,y,w,h){ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(small,x,y,w,h);ctx.restore()}
+
+// Salon: big prints one by one, then a closing wall where the whole series hangs as one cluster
+function renderSalon(W,H){const n=state.photos.length,S=n+(n>1?1:0),{big,ctx,txt}=base(W,H,S,'#f5f3ee');grain(ctx,S*W,H,.05);
+  state.photos.forEach((p,j)=>{const ox=j*W,f=fitBox(p,W*.84,H*.78),x=ox+(W-f.w)/2,y=(H-f.h)/2-H*.02;ctx.save();ctx.shadowColor='rgba(30,24,18,.18)';ctx.shadowBlur=W*.02;ctx.shadowOffsetY=W*.008;ctx.drawImage(graded(p,f.w,f.h),x,y,f.w,f.h);ctx.restore();
+    if(txt){ctx.fillStyle='#6f6a63';ctx.font=mono(W,.015);ctx.textAlign='left';ctx.fillText(`${pad2(j+1)} / ${pad2(n)}${(p.note||p.place)?'  ·  '+(p.note||p.place).toUpperCase():''}`,x,y+f.h+W*.045)}});
+  if(n>1){const ox=n*W,ps=state.photos.slice(0,6),colX=ox+W*.36,colW=W*.58,g=W*.014,rows=[];let i=0;while(i<ps.length){const take=Math.min(i===0?1:2,ps.length-i);rows.push(ps.slice(i,i+take));i+=take}
+    let y=H*.1;const maxH=H*.8,hs=rows.map(r=>{const ar=r.reduce((s,p)=>s+p.w/p.h,0);return (colW-g*(r.length-1))/ar});const tot=hs.reduce((a,b)=>a+b,0)+g*(rows.length-1),k=Math.min(1,maxH/tot);y=(H-tot*k)/2;
+    rows.forEach((r,ri)=>{const h=hs[ri]*k,rw=r.reduce((s,p)=>s+h*p.w/p.h,0)+g*(r.length-1);let x=colX+(colW-rw)/2;r.forEach(p=>{const w=h*p.w/p.h;ctx.drawImage(graded(p,w,h),x,y,w,h);x+=w+g});y+=h+g});
+    if(txt){ctx.fillStyle='#1d1b18';ctx.font=mono(W,.016);ctx.textAlign='left';spaced(ctx,(state.title||'').toUpperCase(),ox+W*.06,H*.48,W*.005,'left');ctx.fillStyle='#6f6a63';ctx.fillText(state.artist?`photographs by ${state.artist}`:'',ox+W*.06,H*.48+W*.04)}}
+  return slice(big,W,H,S)}
+
+// Ripple: photos as organic islands ringed by contour echoes, like terrain on a map
+function renderRipple(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#f2e9e4'),acc=seriesAccent(),N=noise2(state.seed+2801);grain(ctx,S*W,H,.06);
+  const blob=(cx,cy,R,ph)=>{ctx.beginPath();for(let k=0;k<=180;k++){const a=k/180*Math.PI*2,r=R*(1+.12*(N(Math.cos(a)*1.5+ph,Math.sin(a)*1.5+ph,2)-.5)*2+.05*(N(Math.cos(a)*4+ph*2,Math.sin(a)*4,2)-.5)*2),x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;k?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.closePath()};
+  state.photos.forEach((p,j)=>{const ox=j*W,two=n>2&&j>0&&j<n-1,isl=two?[[ox+W*.4,H*.32,W*.3,p],[ox+W*.62,H*.7,W*.25,state.photos[(j+1)%n]]]:[[ox+W/2,H*.47,W*(j===n-1&&n>1?.42:.36),p]];
+    isl.forEach(([cx,cy,R,q],k)=>{for(let r=8;r>=1;r--){blob(cx,cy,R+r*W*.016,j*3+k+r*.08);ctx.strokeStyle=r===3&&k===0?acc:`rgba(30,30,30,${.85-r*.07})`;ctx.lineWidth=r===3&&k===0?W*.003:1;ctx.stroke()}
+      ctx.save();blob(cx,cy,R,j*3+k);ctx.clip();const s=R*2.3;ctx.drawImage(graded(q,s,s),cx-s/2,cy-s/2,s,s);ctx.restore()});
+    if(txt){ctx.fillStyle='#3b3734';ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(`${pad2(j+1)}${(p.note||p.place)?'  ·  '+(p.note||p.place).toUpperCase():''}`,ox+W*.06,H*.955);
+      if(j===0&&state.title){ctx.fillStyle='#1d1b18';fitFont(ctx,state.title.toUpperCase(),W*.86,Math.round(W*.1),s=>`900 ${s}px Archivo`);ctx.textAlign='left';ctx.fillText(state.title.toUpperCase(),ox+W*.06,H*.9)}}});
+  return slice(big,W,H,S)}
+
+// Measure: heavy bars as a score laid over the photo, sweeping across the series; one bar is the accent playhead
+function renderMeasure(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#ececea'),acc=seriesAccent();
+  state.photos.forEach((p,j)=>{const ox=j*W,last=n>1&&j===n-1,px=ox+W*.083,py=H*.22,pw=W*.72,ph=H*.42,img=graded(p,pw,ph);ctx.drawImage(img,px,py);
+    const gw=64,gh=24,f=lumGrid(p,gw,gh),col=[];for(let i=1;i<gw-1;i++){let s=0;for(let k=0;k<gh;k++)s+=Math.abs(f[k*gw+i+1]-f[k*gw+i-1]);col.push([s,i])}
+    const peaks=col.filter((c,i)=>i>0&&i<col.length-1&&c[0]>col[i-1][0]&&c[0]>=col[i+1][0]).sort((a,b)=>b[0]-a[0]);
+    const Nb=last?1:clamp(peaks.length,4,8),bw=last?W*.25:W*.028,gap=W*.022,x0=last?px+(peaks[0]?peaks[0][1]/gw:.5)*pw-bw/2:ox+W*.48-j*W*.083,y0=H*.1,y1=H*.8;
+    const inv=canvas(pw,ph),ix=inv.getContext('2d');ix.drawImage(img,0,0);ix.globalCompositeOperation='difference';ix.fillStyle='#fff';ix.fillRect(0,0,pw,ph);
+    for(let b=0;b<Nb;b++){const x=x0+b*(bw+gap);ctx.fillStyle=b===j%Nb&&!last?acc:'#0b0b0b';ctx.fillRect(x,y0,bw,y1-y0);
+      const l=Math.max(x,px),r=Math.min(x+bw,px+pw);if(r>l&&b!==j%Nb)ctx.drawImage(inv,l-px,0,r-l,ph,l,py,r-l,ph)}
+    if(txt){const word=((j===0?state.title:(p.note||p.place))||'').toUpperCase();if(word){ctx.fillStyle='#0b0b0b';ctx.textAlign='left';
+        if(last){fitFont(ctx,word,W*.8,Math.round(W*.07),s=>`italic 400 ${s}px "Bodoni Moda"`)}else{fitFont(ctx,word+'.',W*.8,Math.round(W*.06),s=>`900 ${s}px Archivo`)}ctx.fillText(last?word:word+'.',px,py+ph+W*.09)}
+      ctx.font=mono(W,.015);ctx.fillStyle='#55524c';ctx.fillText(`${pad2(j+1)} / ${pad2(n)}`,ox+W*.083,H*.07)}});
+  return slice(big,W,H,S)}
+
+// Burst: a narrow column holds the scene and the subject breaks out of it
+function renderBurst(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#f6f5f2'),acc=seriesAccent(),rnd=rngOf(state.seed+2901);
+  state.photos.forEach((p,j)=>{const ox=j*W,t=tOf(j,n),last=n>1&&j===n-1,ai=analyze(p);
+    if(last){ctx.drawImage(graded(p,W,H),ox,0)}
+    else{const cw=W*.2,ch=H*.68,cx=ox+W*lerp(.3,.6,t),cy=H*.14;
+      ctx.fillStyle=acc;ctx.beginPath();ctx.arc(cx+cw*.9,cy+ch*.42,W*.18,0,Math.PI*2);ctx.fill();
+      // the scene, as wide as the slide, but only shown inside the column and around the subject
+      const sw=W*1.1,sh=sw*p.h/p.w,sx=cx+cw/2-sw*ai.sub.x,sy=cy+ch*.5-sh*ai.sub.y,full=graded(p,sw,sh);
+      ctx.save();ctx.beginPath();ctx.rect(cx,cy,cw,ch);ctx.clip();ctx.drawImage(full,sx,sy);ctx.restore();
+      const m=canvas(W,H),mx=m.getContext('2d');mx.drawImage(full,sx-ox,sy);mx.globalCompositeOperation='destination-in';const b=ai.sub.box,ex=sx-ox+sw*(b.x0+b.x1)/2,ey=sy+sh*(b.y0+b.y1)/2,rx=sw*(b.x1-b.x0)*lerp(.32,.55,t),ry=sh*(b.y1-b.y0)*lerp(.32,.55,t);
+      const g=mx.createRadialGradient(ex,ey,0,ex,ey,Math.max(rx,ry));g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.7,'rgba(0,0,0,.9)');g.addColorStop(1,'rgba(0,0,0,0)');mx.fillStyle=g;mx.fillRect(0,0,W,H);ctx.drawImage(m,ox,0);
+      ctx.strokeStyle='#3b2620';ctx.lineWidth=W*.016;ctx.beginPath();ctx.arc(cx-W*.02,cy+ch*.7,W*.16,Math.PI*.6,Math.PI*1.7);ctx.stroke()}
+    if(txt&&state.title){ctx.fillStyle='rgba(30,30,30,.55)';ctx.font=`400 ${Math.round(W*.013)}px "DM Mono"`;ctx.textAlign='right';for(let k=0;k<12;k++)spaced(ctx,state.title.toUpperCase(),ox+W*.94,H*.2+k*W*.03,W*.006,'right')}
+    if(txt&&(p.note||p.place)){ctx.fillStyle=last?'#fff':'#1d1b18';ctx.font=`italic 400 ${Math.round(W*.034)}px "Bodoni Moda"`;ctx.textAlign='left';ctx.fillText(p.note||p.place,ox+W*.07,H*.93)}});
+  return slice(big,W,H,S)}
+
 /* ---------- Photo metadata (EXIF date and GPS) ---------- */
 function readExif(buf){
   const v=new DataView(buf);if(v.byteLength<4||v.getUint16(0)!==0xFFD8)return null;let o=2;
@@ -1636,7 +1822,7 @@ function slice(big,W,H,S){return Array.from({length:S},(_,j)=>{const c=canvas(W,
 let blobs=[],urls=[],pending=0,fontsReady=null;
 const car=$('carousel');
 let thumbKey='';
-function RENDERERS(){return {polaroid:renderPolaroid,mirror:renderMirror,tiles:renderTiles,orbit:renderOrbit,smart:renderSmart,split:renderSplit,zoom:renderZoom,mood:renderMood,cascade:renderCascade,bauhaus:renderBauhaus,letter:renderLetter,echo:renderEcho,pano:renderPano,serie:renderSerie,letters:renderLetters,route:renderRoute,fragments:renderFragments,film:renderFilm,windows:renderWindows,scrap:renderScrap,
+function RENDERERS(){return {twin:renderTwin,sketch:renderSketch,fault:renderFault,slats:renderSlats,strata:renderStrata,vellum:renderVellum,salon:renderSalon,ripple:renderRipple,measure:renderMeasure,burst:renderBurst,polaroid:renderPolaroid,mirror:renderMirror,tiles:renderTiles,orbit:renderOrbit,smart:renderSmart,split:renderSplit,zoom:renderZoom,mood:renderMood,cascade:renderCascade,bauhaus:renderBauhaus,letter:renderLetter,echo:renderEcho,pano:renderPano,serie:renderSerie,letters:renderLetters,route:renderRoute,fragments:renderFragments,film:renderFilm,windows:renderWindows,scrap:renderScrap,
   glitch:renderGlitch,holo:renderHolo,hud:renderHud,dither:renderDither,float:renderFloat,kaleido:renderKaleido,
   swap:renderSwap,journal:renderJournal,halftone:renderHalftone,skyline:renderSkyline,carto:renderCarto,index:renderIndex,book:renderBook,
   bento:renderBento,ticket:renderTicket,stamps:renderStamps,neon:renderNeon,contact:renderContact,blueprint:renderBlueprint,news:renderNews,engraved:renderEngraved}}
@@ -1726,7 +1912,11 @@ function recommend(intent){const f=features(),pct=v=>Math.round(v*100)+' %';
     poster:[f.n>6?.1:.35+f.port*.3+(1-f.quiet)*.1,'Strong subjects: one bold image per slide.'],
     diptych:[f.n<2?0:.3+f.contrast*.4,'Your photos contrast with each other: pairs will answer one another.'],
     detail:[.32+f.port*.2+(1-f.quiet)*.1,'The subjects are clear enough for a framed close-up.'],
-    window:[f.n<3||!f.firstWide?.05:.5,'Your first photo is wide enough to become the wall.']};
+    window:[f.n<3||!f.firstWide?.05:.5,'Your first photo is wide enough to become the wall.'],
+    twin:[.42+f.hor*.25+f.land*.1,'Each photo gets a drawing computed from itself: skyline, bars, stars, contours.'],
+    sketch:[.4+f.land*.2+f.hor*.15,'Your landscapes can dissolve into a pencil drawing at the edges.'],
+    fault:[.38+(1-f.quiet)*.15+f.port*.1,'One colour plane and a slip in the image: depth without effects.'],
+    slats:[.36+f.land*.2,'Vertical slats show each scene a moment later, a little closer.']};
   const fams=intent?INTENTS.find(i=>i.id===intent).fams:null;
   return SIG.filter(s=>!fams||fams.includes(s.fam)).map(s=>({s,score:R[s.id][0],why:R[s.id][1]})).sort((a,b)=>b.score-a.score)}
 function tplCard(m,idPrefix,extra){const b=document.createElement('button');b.type='button';b.className='tpl'+(state.format==='45'?' r45':'');b.id=`${idPrefix}${m.id}`;b.dataset.id=m.id;b.setAttribute('aria-pressed',state.mode===m.id);

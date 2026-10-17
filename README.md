@@ -21,19 +21,23 @@ The project, photos included, is kept in this browser and comes back after a rel
 | | Suite | One continuous composition across the slides. |
 | | Book | Double pages, the gutter on every other seam. |
 | | Index | A numbered archive, the title running across. |
+| | Twin | Each photo beside a drawing computed from itself: skyline, bars, constellation, contours. |
 | Story | Route | Places and moments joined by a trail. |
 | | Journal | Handwritten notes around your prints. |
 | | Correspondence | A short note, two prints, an annotated card. |
 | Material | Contact sheet | Strips of frames, the best ones circled. |
 | | Print | Each photo printed on paper, with wide margins. |
+| | Sketch | The photo is real in the middle and turns into a pencil drawing of itself towards the edges. |
 | Signal | Poster | Half as shot, half halftone, cut through the subject. |
 | | Diptych | Two photos trading squares across the seam; the lower half in colour or one of eight duotones (ochre by default). |
 | | Detail | A framed close-up of the subject (or the next photo), a red line across. |
 | | Window | The first photo becomes the wall, the others open in it. |
+| | Fault | One colour plane crosses the photo and the image slips along it; the fault closes on the last slide. |
+| | Slats | Vertical slats show the scene a moment later, a little closer; they close into one view at the end. |
 
 Treatments apply to every photo and are independent of the layout: none, soft grain, pigment, chromogenic, silver B&W, cyanotype, halftone, 1-bit.
 
-The **Lab** keeps the experiments (glitch, HUD, holo glass, neon, stamps, newspaper, engraving, polaroid, mirror, tiles, orbit and more). Fun to try, but there the photo is no longer the star.
+The **Lab** keeps the experiments (glitch, HUD, holo glass, neon, stamps, newspaper, engraving, polaroid, mirror, tiles, orbit, strata, vellum, salon, ripple, measure, burst and more). Fun to try, but there the photo is no longer the star.
 
 ## Run locally
 
