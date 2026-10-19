@@ -359,7 +359,9 @@ const MODES=[
   {id:'contact',name:'Contact sheet',sub:'film strips marked up in red grease pencil',group:'objects'},
   {id:'blueprint',name:'Blueprint',sub:'white line drawings with dimensions on blue',group:'objects'},
   {id:'news',name:'Newspaper',sub:'blackletter masthead, halftone photo, columns',group:'objects'},
-  {id:'engraved',name:'Engraved',sub:'banknote-style line engraving',group:'objects'}
+  {id:'engraved',name:'Engraved',sub:'banknote-style line engraving',group:'objects'},
+  {id:'gatefold',name:'Gatefold',sub:'a folded wing that opens a little more each slide'},
+  {id:'breath',name:'Breath',sub:'the photo grows to a full-bleed peak, then breathes out'}
 ];
 const CAPTION_DEFAULT='Some places stay with you long after you leave them, and some light only happens once.';
 const pad2=i=>String(i).padStart(2,'0');
@@ -1822,6 +1824,63 @@ function renderBurst(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,t
     if(txt&&(p.note||p.place)){ctx.fillStyle=last?'#fff':'#1d1b18';ctx.font=`italic 400 ${Math.round(W*.034)}px "Bodoni Moda"`;ctx.textAlign='left';ctx.fillText(p.note||p.place,ox+W*.07,H*.93)}});
   return slice(big,W,H,S)}
 
+// Gatefold: each photo is a page with one folded wing; the wing opens a little more on every slide and lies flat on the last one
+function renderGatefold(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#ece7de'),acc=seriesAccent(),rnd=rngOf(state.seed+3001);grain(ctx,S*W,H,.05);
+  state.photos.forEach((p,j)=>{const ox=j*W,t=tOf(j,n),last=n>1&&j===n-1,y0=H*.11,ph=H*.7,right=j%2===0,dir=right?1:-1;
+    // opening angle: half closed on the cover, flat on the last slide; the visible page is scaled and centred so the photo stays large
+    const th=n>1?lerp(.3,1,t)*Math.PI:Math.PI,c=Math.cos(th),lift=Math.sin(th),cw=W*.88/(2+Math.max(0,-c)),A=3*cw,fx=right?0:cw,hl=right?2*cw:cw;
+    const wpx=cw*Math.abs(c),sg=c>0?-dir:dir,L=Math.min(fx,hl+sg*wpx),R=Math.max(fx+2*cw,hl+sg*wpx),x0=ox+(W-(R-L))/2-L,hx=x0+hl,tip=hx+sg*wpx,d=ph*.035*lift,img=graded(p,A,ph);
+    ctx.drawImage(img,fx,0,2*cw,ph,x0+fx,y0,2*cw,ph);
+    if(c>0){// the back of the wing lies over the photo: paper, a shadow beyond its edge
+      const sh=ctx.createLinearGradient(tip,0,tip+sg*cw*.3,0);sh.addColorStop(0,`rgba(0,0,0,${.28*lift})`);sh.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sh;ctx.fillRect(Math.min(tip,tip+sg*cw*.3),y0,cw*.3,ph);
+      ctx.beginPath();ctx.moveTo(hx,y0);ctx.lineTo(tip,y0-d);ctx.lineTo(tip,y0+ph+d);ctx.lineTo(hx,y0+ph);ctx.closePath();ctx.fillStyle='#f8f5ef';ctx.fill();
+      const g=ctx.createLinearGradient(hx,0,tip,0);g.addColorStop(0,`rgba(60,50,40,${.1+.15*(1-c)})`);g.addColorStop(1,'rgba(60,50,40,0)');ctx.fillStyle=g;ctx.fill();
+      if(txt&&wpx>W*.1){const word=(j===0?state.title:(p.place||p.note))||'',cx=(hx+tip)/2;if(word){ctx.fillStyle='#1d1b18';rotated(ctx,cx,y0+ph/2,-Math.PI/2,()=>{ctx.textAlign='center';
+        if(j===0)fitFont(ctx,word,ph*.8,Math.round(Math.min(W*.07,wpx*.42)),s=>`italic 400 ${s}px "Bodoni Moda"`);else ctx.font=mono(W,.016);ctx.textBaseline='middle';ctx.fillText(j===0?word:word.toUpperCase(),0,0);ctx.textBaseline='alphabetic'})}}}
+    else{// the face of the wing: the hidden third of the photo, foreshortened as it comes down
+      const N=28,src=u=>right?2*cw+u*cw:cw-u*cw;
+      if(lift>.02){ctx.fillStyle=`rgba(0,0,0,${.12*lift})`;ctx.fillRect(Math.min(hx,tip+sg*W*.01),y0+ph*.02,wpx+W*.01,ph)}
+      for(let k=0;k<N;k++){const u0=k/N,u1=(k+1)/N,sa=src(u0),sb=src(u1),xa=hx+sg*u0*wpx,xb=hx+sg*u1*wpx,um=(u0+u1)/2,hh=ph+2*d*um;
+        ctx.drawImage(img,Math.min(sa,sb),0,Math.abs(sb-sa),ph,Math.min(xa,xb)-.5,y0+(ph-hh)/2,Math.abs(xb-xa)+1,hh)}
+      if(lift>.01){ctx.beginPath();ctx.moveTo(hx,y0);ctx.lineTo(tip,y0-d);ctx.lineTo(tip,y0+ph+d);ctx.lineTo(hx,y0+ph);ctx.closePath();ctx.fillStyle=`rgba(20,16,12,${.32*(1+c)})`;ctx.fill()}}
+    // printer's fold marks above and below each crease; a hairline crease once the page is flat
+    ctx.strokeStyle=acc;ctx.lineWidth=Math.max(2,W*.0025);[x0+cw,x0+2*cw].forEach(x=>{ctx.beginPath();ctx.moveTo(x,y0-W*.05);ctx.lineTo(x,y0-W*.018);ctx.moveTo(x,y0+ph+W*.018);ctx.lineTo(x,y0+ph+W*.05);ctx.stroke()});
+    if(lift<.05){ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(hx,y0,1,ph);ctx.fillStyle='rgba(0,0,0,.14)';ctx.fillRect(hx+1,y0,1,ph)}
+    // the bottom-right corner of the first and last slides is kept free for the studio stamp
+    if(j===0&&n>1){const y=y0-W*.08;arrowMark(ctx,hx-dir*cw*.5,y+W*.015,hx+dir*cw*.3,y,W*.004,acc,rnd)}
+    if(txt){const ly=y0+ph+W*.1,lt=right||last;ctx.fillStyle='#55524c';ctx.font=mono(W,.016);ctx.textAlign=lt?'left':'right';const lx=lt?x0+L:x0+R;
+      ctx.fillText([`${pad2(j+1)} / ${pad2(n)}`,j>0&&(p.note||p.place)?(p.note||p.place).toUpperCase():''].filter(Boolean).join('  ·  '),lx,ly);
+      if(j===0){ctx.textAlign='left';ctx.fillText(kick('in folds'),x0+L,y0-W*.035)}
+      if(j===0&&n===1&&state.title){ctx.fillStyle='#1d1b18';fitFont(ctx,state.title,A,Math.round(W*.065),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='left';ctx.fillText(state.title,x0,y0+ph+W*.2)}
+      if(last&&state.artist){ctx.fillStyle='#1d1b18';ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),x0+L,y0+ph+W*.15,W*.005,'left')}}
+  });
+  return slice(big,W,H,S)}
+
+// Breath: the series breathes in and out; the photo grows to a full-bleed peak about two thirds in, then the last slide breathes out
+function renderBreath(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,txt}=base(W,H,S,'#f3f0ea'),acc=seriesAccent(),rnd=rngOf(state.seed+3101);grain(ctx,S*W,H,.05);
+  const peak=n>2?Math.round((n-1)*.66):n-1,ten=j=>n===1?.5:j<=peak?lerp(.15,1,peak?j/peak:1):lerp(1,.3,(j-peak)/(n-1-peak));
+  state.photos.forEach((p,j)=>{const ox=j*W,s=ten(j),full=s>=.95,last=n>2&&j===n-1,even=j%2===0,m=W*.07;let x,y,w,h;
+    if(full){x=ox;y=0;w=W;h=H;ctx.drawImage(graded(p,W,H),x,y)}
+    else{const f=fitBox(p,W*lerp(.76,.88,s/.95),H*lerp(.58,.74,s/.95));w=f.w;h=f.h;
+      if(last){x=ox+(W-w)/2;y=H*.44-h/2}else if(even){x=ox+m;y=H*.84-h}else{x=ox+W-m-w;y=H*.1}
+      ctx.drawImage(graded(p,w,h),x,y,w,h)}
+    // the breath gauge: a hairline across the foot of the slide, filled to the tension of this slide
+    const gy=H*.955,gx=ox+m,gw=W-2*m;ctx.fillStyle=full?'rgba(255,255,255,.4)':'rgba(29,27,24,.16)';ctx.fillRect(gx,gy,gw,Math.max(1,W*.0015));ctx.fillStyle=acc;ctx.fillRect(gx,gy-W*.0015,gw*s,Math.max(2,W*.0045));
+    if(!txt)return;
+    const ink=full?'#fff':'#1d1b18',mute=full?'rgba(255,255,255,.85)':'#6f6a63';
+    ctx.fillStyle=mute;ctx.font=mono(W,.015);ctx.textAlign=full||even||last?'left':'right';ctx.fillText(`${pad2(j+1)} / ${pad2(n)}`,full||even||last?gx:gx+gw,gy-W*.025);
+    if(j===0)ctx.fillText(kick('in, out'),gx,H*.06);
+    const word=(j===0?state.title:(p.note||p.place))||'';
+    if(word){ctx.fillStyle=ink;const big0=j===0,fs=Math.round(W*(big0?.07:.042)),tpl=q=>`italic 400 ${q}px "Bodoni Moda"`;
+      if(full){ctx.save();ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=W*.02;fitFont(ctx,word,W*.8,fs,tpl);ctx.textAlign='left';ctx.fillText(word,gx,H*.88);ctx.restore()}
+      else if(last){fitFont(ctx,word,W*.8,fs,tpl);ctx.textAlign='center';ctx.fillText(word,ox+W/2,y+h+W*.1)}
+      else if(even&&y-H*.1>W*.1){fitFont(ctx,word,W*.84,fs,tpl);ctx.textAlign='left';ctx.fillText(word,ox+m,Math.min(y-W*.05,H*.1+fs*1.2))}
+      else if(!even&&H*.9-(y+h)>W*.1){fitFont(ctx,word,W*.84,fs,tpl);ctx.textAlign='right';ctx.fillText(word,ox+W-m,y+h+W*.1)}}
+    if(last||n===1){if(state.artist){ctx.fillStyle=mute;ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),ox+W/2,y+h+W*.17,W*.005,'center')}
+      loopMark(ctx,gx+gw*s,gy,W*.03,W*.02,W*.003,acc,rnd)}
+  });
+  return slice(big,W,H,S)}
+
 /* ---------- Photo metadata (EXIF date and GPS) ---------- */
 function readExif(buf){
   const v=new DataView(buf);if(v.byteLength<4||v.getUint16(0)!==0xFFD8)return null;let o=2;
@@ -1851,7 +1910,7 @@ let thumbKey='';
 function RENDERERS(){return {twin:renderTwin,sketch:renderSketch,fault:renderFault,slats:renderSlats,strata:renderStrata,vellum:renderVellum,salon:renderSalon,ripple:renderRipple,measure:renderMeasure,burst:renderBurst,polaroid:renderPolaroid,mirror:renderMirror,tiles:renderTiles,orbit:renderOrbit,smart:renderSmart,split:renderSplit,zoom:renderZoom,mood:renderMood,cascade:renderCascade,bauhaus:renderBauhaus,letter:renderLetter,echo:renderEcho,pano:renderPano,serie:renderSerie,letters:renderLetters,route:renderRoute,fragments:renderFragments,film:renderFilm,windows:renderWindows,scrap:renderScrap,
   glitch:renderGlitch,holo:renderHolo,hud:renderHud,dither:renderDither,float:renderFloat,kaleido:renderKaleido,
   swap:renderSwap,journal:renderJournal,halftone:renderHalftone,skyline:renderSkyline,carto:renderCarto,index:renderIndex,book:renderBook,
-  bento:renderBento,ticket:renderTicket,stamps:renderStamps,neon:renderNeon,contact:renderContact,blueprint:renderBlueprint,news:renderNews,engraved:renderEngraved}}
+  bento:renderBento,ticket:renderTicket,stamps:renderStamps,neon:renderNeon,contact:renderContact,blueprint:renderBlueprint,news:renderNews,engraved:renderEngraved,gatefold:renderGatefold,breath:renderBreath}}
 const rendererOf=id=>{const s=SIG.find(x=>x.id===id);return s?s.r:id};
 const metaOf=id=>SIG.find(x=>x.id===id)||MODES.find(m=>m.id===id);
 const LAB=()=>MODES.filter(m=>!SIG.some(s=>s.r===m.id));
