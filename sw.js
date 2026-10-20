@@ -1,5 +1,5 @@
 // Offline cache: the app shell up front, fonts and anything else on first use.
-const CACHE = 'vernissage-v15';
+const CACHE = 'vernissage-v16';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
@@ -15,6 +15,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  // Terrain heights from swisstopo: always live, never stored.
+  if (new URL(req.url).hostname === 'api3.geo.admin.ch') return;
   // Pages: network first so updates arrive, cache when offline.
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req)

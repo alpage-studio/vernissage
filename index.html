@@ -15,11 +15,13 @@
 <meta name="theme-color" content="#14140F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=DM+Mono:wght@400&family=Reenie+Beanie&family=Permanent+Marker&family=UnifrakturMaguntia&family=Homemade+Apple&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=DM+Mono:wght@400&family=Reenie+Beanie&family=Permanent+Marker&family=UnifrakturMaguntia&family=Homemade+Apple&display=swap">
 <style>
 /* Layout: a light table — the carousel as it will look on Instagram, the full strip below, settings after (phone) or to the right (desktop). One dark theme, so only the photos carry colour. */
 :root{
-  --bg:#14140F; --panel:#1E1E17; --line:#34332A; --fg:#EDEAE0; --muted:#948F80; --accent:#C99A32; --accent-ink:#17150E; --signal:#3d95f0;
+  --bg:#14140F; --panel:#1E1E17; --raised:#282820; --line:#34332A; --line-2:#474539; --fg:#EDEAE0; --muted:#948F80; --accent:#C99A32; --accent-ink:#17150E;
+  --signal:#3d95f0; --danger:#f0a49a; --danger-bg:#5a2f2b; --dot:#7A7566; --scrim:rgba(20,20,15,.78);
+  --r-btn:10px; --r-card:12px; --r-pill:999px;
   --display:"Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
   --ui:"Archivo", "Helvetica Neue", Arial, sans-serif;
   --mono:"DM Mono", ui-monospace, Menlo, monospace;
@@ -47,15 +49,15 @@ body{font-family:var(--ui);font-size:15px;line-height:1.45;padding-left:max(16px
 .carousel::-webkit-scrollbar{display:none}
 .carousel img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:start;display:block;-webkit-touch-callout:default}
 .dots{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;padding:10px 0 12px}
-.dots button{all:unset;cursor:pointer;width:8px;height:8px;border-radius:50%;background:#4a4a50;display:block}
-.dots button.on{background:#3d95f0}
+.dots button{all:unset;cursor:pointer;width:8px;height:8px;border-radius:50%;background:var(--dot);display:block}
+.dots button.on{background:var(--signal)}
 .dots button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .car-wrap{position:relative}
 .nav{all:unset;cursor:pointer;position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.88);color:#111;display:grid;place-items:center;font-size:24px;line-height:1;box-shadow:0 2px 10px rgba(0,0,0,.35)}
 .nav.prev{left:10px}.nav.next{right:10px}
 .nav:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .strip img{cursor:pointer}
-.strip img.on{outline:2px solid #3d95f0;outline-offset:-2px}
+.strip img.on{outline:2px solid var(--signal);outline-offset:-2px}
 .strip-wrap{width:100%;max-width:440px;overflow-x:auto}
 .strip{display:flex;width:max-content;min-width:100%}
 .strip img{height:96px;width:auto;display:block;border-right:1px dashed rgba(255,255,255,.4)}
@@ -75,11 +77,11 @@ body{font-family:var(--ui);font-size:15px;line-height:1.45;padding-left:max(16px
 .slot img{width:100%;height:100%;object-fit:cover;display:block}
 .slot .tag{position:absolute;left:4px;top:4px;font-family:var(--mono);font-size:10px;background:rgba(0,0,0,.6);color:var(--fg);padding:1px 5px;pointer-events:none}
 .slot .tools{position:absolute;right:3px;bottom:3px;display:flex;gap:3px}
-.slot .tools button{all:unset;cursor:pointer;width:22px;height:22px;display:grid;place-items:center;background:rgba(10,10,12,.75);color:var(--fg);font-size:12px;border-radius:50%}
+.slot .tools button{all:unset;cursor:pointer;width:22px;height:22px;display:grid;place-items:center;background:var(--scrim);color:var(--fg);font-size:12px;border-radius:50%}
 .slot .tools button:focus-visible{outline:2px solid var(--accent)}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
 .tpl{all:unset;cursor:pointer;display:flex;flex-direction:column;border:1px solid var(--line);min-width:0;background:var(--panel)}
-.tpl canvas{display:block;width:100%;aspect-ratio:3/4;max-width:100%;background:#26262b}
+.tpl canvas{display:block;width:100%;aspect-ratio:3/4;max-width:100%;background:var(--raised)}
 .tpl.r45 canvas{aspect-ratio:4/5}
 .tpl span{font-size:12.5px;padding:6px 7px 1px}
 .tpl small{font-size:10.5px;color:var(--muted);padding:0 7px 7px;line-height:1.3}
@@ -131,7 +133,7 @@ body{padding-block:14px 96px}
 .steps{max-width:1180px;margin:0 auto 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .steps button{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 8px;border:1px solid var(--line);font-size:14px;color:var(--muted);background:var(--bg)}
 .steps button b{font-family:var(--mono);font-weight:400;font-size:12px;width:22px;height:22px;border-radius:50%;border:1px solid currentColor;display:grid;place-items:center}
-.steps button[aria-current="step"]{color:var(--fg);border-color:var(--accent);background:rgba(226,214,191,.08)}
+.steps button[aria-current="step"]{color:var(--fg);border-color:var(--accent);background:rgba(201,154,50,.10)}
 @media (max-width:899px){
   .steps{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;gap:0;background:var(--bg);border-top:1px solid var(--line);
     padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
@@ -141,7 +143,7 @@ body{padding-block:14px 96px}
 .stage-bar{width:100%;max-width:440px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .stage-body{width:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
 .stage.collapsed .stage-body{display:none}
-.example-badge{position:absolute;left:10px;right:10px;top:10px;background:rgba(10,10,12,.8);color:#fff;font-size:13px;padding:8px 10px;text-align:center;pointer-events:none}
+.example-badge{position:absolute;left:10px;right:10px;top:10px;background:var(--scrim);color:var(--fg);border-radius:var(--r-btn);font-size:13px;padding:8px 10px;text-align:center;pointer-events:none}
 .render-state{margin:0;font-size:13px;color:var(--muted);min-height:1.3em;text-align:center}
 .render-state.busy::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:8px;animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.25}}
@@ -158,22 +160,22 @@ body{padding-block:14px 96px}
 .photo-panel .field{flex:1 1 100%}
 .mini-actions{display:flex;flex-wrap:wrap;gap:8px;width:100%}
 .btn.small{flex:0 0 auto;padding:10px 12px;font-size:13.5px}
-.btn.danger{color:#f0a49a;border-color:#5a2f2b}
+.btn.danger{color:var(--danger);border-color:var(--danger-bg)}
 .btn.next{flex:none}
 .btn[disabled]{opacity:.45;cursor:default}
 .intents{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
 .intent{all:unset;cursor:pointer;border:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:4px}
-.intent b{font-family:var(--display);font-style:italic;font-weight:400;font-size:20px}
+.intent b{font-family:var(--ui);font-weight:700;letter-spacing:-.02em;font-size:18px;line-height:1.2}
 .intent span{font-size:13px;color:var(--muted)}
-.intent[aria-pressed="true"]{border-color:var(--accent);background:rgba(226,214,191,.08)}
+.intent[aria-pressed="true"]{border-color:var(--accent);background:rgba(201,154,50,.10)}
 .intent:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .gallery{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
 .tpl span{font-size:14px;padding:8px 9px 2px;font-weight:500}
 .tpl small{font-size:12px;padding:0 9px 3px;line-height:1.35}
 .tpl em{font-style:normal;font-size:12px;color:var(--accent);padding:0 9px 9px;line-height:1.35}
 .fam{display:flex;flex-direction:column;gap:9px}
-.fam h3{margin:0;font-family:var(--display);font-style:italic;font-weight:400;font-size:20px}
-.ready h2{margin:0 0 4px;font-family:var(--display);font-style:italic;font-weight:400;font-size:28px}
+.fam h3{margin:0;font-family:var(--ui);font-weight:700;letter-spacing:-.02em;font-size:18px}
+.ready h2{margin:0 0 4px;font-family:var(--ui);font-weight:800;letter-spacing:-.025em;font-size:26px;line-height:1.15}
 .ready p{margin:0;color:var(--muted);font-size:14px}
 .order{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
 .order figure{margin:0;display:flex;flex-direction:column;gap:4px}
@@ -185,10 +187,60 @@ body{padding-block:14px 96px}
 .kit-item{position:relative;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column}
 .kit-item canvas{width:100%;height:auto;display:block}
 .kit-item span{font-size:12px;color:var(--muted);padding:5px 7px}
-.kit-item button{all:unset;cursor:pointer;position:absolute;right:4px;top:4px;width:28px;height:28px;border-radius:50%;background:rgba(10,10,12,.75);color:#fff;display:grid;place-items:center}
+.kit-item button{all:unset;cursor:pointer;position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,var(--scrim) 13px,transparent 14px);color:var(--fg);display:grid;place-items:center}
 .kit-item button:focus-visible{outline:2px solid var(--accent)}
 .seq .slot.add{all:unset;cursor:pointer;aspect-ratio:3/4;border:1px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:13px}
 .seq .slot.add:focus-visible{outline:2px solid var(--accent)}
+/* ---------- alpage family: radius, Archivo headings, mono labels, 44 px targets ---------- */
+.btn,.ghost,.import,.field input,.steps button{border-radius:var(--r-btn)}
+.ghost{border-color:var(--line-2)}
+.btn{border-color:var(--line-2)}
+.btn.primary{font-weight:600}
+.chip{border-radius:var(--r-pill);padding:9px 15px;min-height:44px;justify-content:center;border-color:var(--line-2)}
+.chip small{display:block}
+.chip small.hint{display:none;max-width:30ch;white-space:normal}
+.chip[aria-pressed="true"] small.hint{display:block}
+.tpl,.fond,.intent,.kit-item{border-radius:var(--r-card);overflow:hidden}
+.tpl{padding:6px 6px 0}
+.tpl span,.tpl small,.tpl em{padding-left:3px;padding-right:3px}
+.fond{padding:5px 5px 0}
+.lab,.photo-panel{border-radius:var(--r-card)}
+.label,.field label{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em}
+.label span{font-size:11.5px}
+.slot .role,.slot .tag{border-radius:0}
+.tpl .rec-tag{display:inline-block;align-self:flex-start;margin:0 3px 8px;padding:2px 8px;border-radius:var(--r-pill);background:rgba(201,154,50,.16);color:var(--accent);font-family:var(--mono);font-size:11px;font-style:normal}
+.all-layouts{border:1px solid var(--line);border-radius:var(--r-card);padding:0 12px}
+.all-layouts>summary{cursor:pointer;padding:14px 0;font-weight:700;letter-spacing:-.01em;font-size:15px;min-height:20px}
+.all-layouts>summary span{color:var(--muted);font-family:var(--mono);font-weight:400;font-size:12px}
+.all-layouts[open]{padding-bottom:14px}
+.all-layouts .fam{margin-top:14px}
+.lab summary{min-height:24px;padding:12px 0}
+.lab-group{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.lab-group h4{margin:0;font-family:var(--ui);font-weight:700;letter-spacing:-.015em;font-size:15px}
+.lab-group h4 span{color:var(--muted);font-family:var(--mono);font-weight:400;font-size:11.5px;margin-left:6px}
+.chip-group{display:flex;flex-direction:column;gap:7px}
+.chip-group+.chip-group{margin-top:8px}
+.chip-group h4{margin:0;font-family:var(--mono);font-weight:400;font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+/* dots keep their small look but get a 44 px tall hit area */
+.dots{gap:0;flex-wrap:nowrap;padding:0 8px 2px}
+.dots button{all:unset;cursor:pointer;flex:0 1 32px;height:44px;display:grid;place-items:center;background:none;border-radius:0}
+.dots button::before{content:'';width:10px;height:10px;border-radius:50%;background:var(--dot)}
+.dots button.on::before{background:var(--signal)}
+.dots button.on{background:none}
+.nav{width:44px;height:44px}
+.slot .tools button{width:44px;height:44px;background:radial-gradient(circle,var(--scrim) 11px,transparent 12px)}
+.kit-link{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:3px;border:1px solid var(--line-2);border-radius:var(--r-card);padding:14px 16px;background:var(--panel)}
+.kit-link b{font-weight:700;letter-spacing:-.015em;font-size:16px}
+.kit-link b i{font-style:normal;color:var(--accent)}
+.kit-link span{font-size:13px;color:var(--muted)}
+.kit-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.confirm-row{max-width:1180px;margin:0 auto 12px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;border:1px solid var(--danger-bg);background:var(--panel);border-radius:var(--r-card);padding:12px 14px}
+.confirm-row p{margin:0;flex:1 1 220px;font-size:14px}
+.confirm-row .btn{flex:0 0 auto;padding:11px 16px}
+.notice{margin:0;font-size:13px;color:var(--danger);min-height:0}
+.notice:empty{display:none}
+.quiet-line{margin:0;font-size:12.5px;color:var(--muted);text-align:center}
+.quiet-line:empty{display:none}
 </style>
 </head>
 <body>
@@ -198,6 +250,11 @@ body{padding-block:14px 96px}
   <div class="brand"><div class="mark" aria-label="alpage vernissage"><svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.8 4.6 C7.3 10 9.6 15 12 19.6 C14.2 14.6 16.4 9.6 18.8 4.8 C19.6 3.6 20.8 3.4 21.4 4.4"/><circle cx="12" cy="2.6" r="1.2"/></svg><span><span class="house">alpage</span> vernissage</span></div><p>Turn a set of photos into a signed visual story.</p></div>
   <div class="top-actions"><button class="ghost" id="studioBtn" type="button">Studio kit</button><button class="ghost" id="undoBtn" type="button" disabled>Undo</button><button class="ghost" id="resetBtn" type="button">Reset</button></div>
 </header>
+<div class="confirm-row" id="resetConfirm" role="alertdialog" aria-labelledby="resetQ" hidden>
+  <p id="resetQ"><b>Clear everything?</b> Your photos, text and settings will be removed from this device. The studio kit stays.</p>
+  <button class="btn" id="resetKeep" type="button">Keep my series</button>
+  <button class="btn danger" id="resetGo" type="button">Clear everything</button>
+</div>
 
 <nav class="steps" id="steps" aria-label="Steps">
   <button type="button" data-step="photos" aria-current="step"><b>1</b><span>Photos</span></button>
@@ -222,6 +279,7 @@ body{padding-block:14px 96px}
       </div>
       <div class="strip-wrap"><div class="strip" id="strip" aria-label="Every image in the carousel"></div></div>
       <p class="render-state" id="renderState" role="status"></p>
+      <p class="quiet-line" id="storeMsg" role="status"></p>
     </div>
   </section>
 
@@ -230,6 +288,7 @@ body{padding-block:14px 96px}
       <div class="group">
         <div class="label">Your photos <span id="count"></span></div>
         <button class="import" id="importBtn" type="button">Import photos</button>
+        <p class="notice" id="photoMsg" role="alert"></p>
         <div class="seq" id="slots" aria-label="Photo order"></div>
         <p class="sub">Drag a photo to change the order. The first one is the cover, the last one closes the series.</p>
         <div class="photo-panel" id="photoPanel" hidden>
@@ -262,9 +321,9 @@ body{padding-block:14px 96px}
     <div class="panel" id="panel-story" hidden>
       <div class="group"><div class="label">What do you want to make?</div><div class="intents" id="intents"></div></div>
       <div class="group"><div class="label">Recommended for your photos</div><div class="gallery rec" id="galRec"></div></div>
-      <div id="famBox"></div>
+      <details class="all-layouts" id="allBox"><summary>All layouts <span id="allCount"></span></summary><div id="famBox"></div></details>
       <details class="lab" id="labBox"><summary>Lab · experiments <span id="labCount"></span></summary>
-        <p class="sub">Effects and graphic exercises. Fun to try, but here the photo is no longer the star.</p><div class="gallery" id="galLab"></div></details>
+        <p class="sub">Effects and graphic exercises. Fun to try, but here the photo is no longer the star.</p><div id="galLab"></div></details>
       <button class="btn primary next" data-goto="finish" type="button">Next: finish</button>
     </div>
 
@@ -280,6 +339,9 @@ body{padding-block:14px 96px}
         <details class="lab"><summary>Textured papers</summary><div class="fonds" id="fondsOrig"></div></details></div>
       <div class="group"><div class="label">Location data</div><div class="chips" id="gps"></div>
         <p class="sub">GPS prints the coordinates stored in your photos on Route and some Lab layouts. Keep it off for private places and type a place under each photo instead.</p></div>
+      <div class="group" id="terrainBox" hidden><div class="label">Terrain <span id="terrainName"></span></div><div class="chips" id="terrain"></div>
+        <p class="sub" id="terrainMsg">Contour lines on the Map print layout and the Topo papers. From GPS asks swisstopo for the real relief around your photos (Switzerland only).</p></div>
+      <div class="group"><button class="kit-link" id="kitLink" type="button"><b>Make it yours <i>·</i> Studio kit</b><span>Your own hand-drawn marks, papers and stamp, used in every layout.</span></button></div>
       <button class="btn primary next" data-goto="export" type="button">Next: export</button>
     </div>
 
@@ -318,54 +380,54 @@ body{padding-block:14px 96px}
 const MAX=10;
 const ACCENTS=new RegExp('['+String.fromCharCode(768)+'-'+String.fromCharCode(879)+']','g');
 const MODES=[
-  {id:'smart',name:'Smart',sub:'reads each photo: palette background, calm space for the title, horizon line'},
-  {id:'split',name:'Split',sub:'cut through the subject: half as shot, half halftone'},
-  {id:'zoom',name:'Zoom',sub:'framed close-up of the subject, red line across slides'},
-  {id:'mood',name:'Moodboard',sub:'handwritten note, overlapping prints, annotated card'},
-  {id:'cascade',name:'Cascade',sub:'prints of mixed sizes flowing in a wave'},
-  {id:'bauhaus',name:'Bauhaus',sub:'B&W photo bands with red, pink and blue shapes'},
-  {id:'letter',name:'Letter',sub:'a handwritten page with the photo laid on top'},
-  {id:'echo',name:'Echo',sub:'the same photo repeated, zooming out step by step'},
-  {id:'polaroid',name:'Polaroid',sub:'instant prints with a written note'},
-  {id:'mirror',name:'Mirror',sub:'each photo folded into its own reflection'},
-  {id:'tiles',name:'Tiles',sub:'the photo cut into a grid with colour tiles and letters'},
-  {id:'orbit',name:'Orbit',sub:'one photo in a circle, the others orbiting around it'},
-  {id:'strata',name:'Strata',sub:'horizon bands with an inset plate and a material swatch'},
-  {id:'vellum',name:'Vellum',sub:'a frosted tracing sheet slides off the photo'},
-  {id:'salon',name:'Salon',sub:'big prints, then the whole series hung as one cluster'},
-  {id:'ripple',name:'Ripple',sub:'photos as islands ringed by contour echoes'},
-  {id:'measure',name:'Measure',sub:'heavy bars sweep across the photo like a score'},
-  {id:'burst',name:'Burst',sub:'a narrow column holds the scene, the subject breaks out'},
-  {id:'pano',name:'Panorama',sub:'one composition that flows across the slides'},
-  {id:'serie',name:'Series',sub:'one photo per slide, wide margins'},
-  {id:'letters',name:'Letters',sub:'the title in giant letters cut from your photos'},
-  {id:'route',name:'Route',sub:'a dotted trail across the slides, with time and place'},
-  {id:'fragments',name:'Fragments',sub:'one photo in strips, whole again on the last slide'},
-  {id:'windows',name:'Windows',sub:'one photo as the wall, the others as openings'},
-  {id:'scrap',name:'Scrapbook',sub:'torn prints, masking tape, pencil notes'},
-  {id:'glitch',name:'Glitch',sub:'RGB split, broken scanlines, pixel streaks',group:'future'},
-  {id:'holo',name:'Holo glass',sub:'frosted glass cards on iridescent foil',group:'future'},
-  {id:'hud',name:'HUD',sub:'viewfinder brackets with real camera data',group:'future'},
-  {id:'dither',name:'Dither',sub:'1-bit pixels in two inks',group:'future'},
-  {id:'float',name:'Float',sub:'isometric prints hovering over their shadows',group:'future'},
-  {id:'kaleido',name:'Kaleidoscope',sub:'each photo turned into a mandala',group:'future'},
-  {id:'swap',name:'Swap',sub:'two photos trading squares across the seam',group:'inspired'},
-  {id:'journal',name:'Journal',sub:'marker notes, arrows and circles around the photos',group:'inspired'},
-  {id:'halftone',name:'Halftone',sub:'CMYK dots on a colour block, line sketch on B&W',group:'inspired'},
-  {id:'skyline',name:'Skyline',sub:'your caption in vertical bars cutting into the photo',group:'inspired'},
-  {id:'carto',name:'Map print',sub:'B&W photo with contours, stripes and coordinates',group:'inspired'},
-  {id:'index',name:'Index',sub:'numbered thumbnails, title running across slides',group:'inspired'},
-  {id:'book',name:'Photo book',sub:'paper spreads, with the gutter on every other seam',group:'inspired'},
-  {id:'bento',name:'Bento',sub:'rounded cards with photos, real palette and stats',group:'objects'},
-  {id:'ticket',name:'Ticket',sub:'each photo on a boarding-pass style ticket',group:'objects'},
-  {id:'stamps',name:'Stamps',sub:'perforated postage stamps with postmarks',group:'objects'},
-  {id:'neon',name:'Neon',sub:'glowing tube frames on a brick wall',group:'objects'},
-  {id:'contact',name:'Contact sheet',sub:'film strips marked up in red grease pencil',group:'objects'},
-  {id:'blueprint',name:'Blueprint',sub:'white line drawings with dimensions on blue',group:'objects'},
-  {id:'news',name:'Newspaper',sub:'blackletter masthead, halftone photo, columns',group:'objects'},
-  {id:'engraved',name:'Engraved',sub:'banknote-style line engraving',group:'objects'},
-  {id:'gatefold',name:'Gatefold',sub:'a folded wing that opens a little more each slide'},
-  {id:'breath',name:'Breath',sub:'the photo grows to a full-bleed peak, then breathes out'}
+  {id:'smart',name:'Smart',sub:'Reads each photo: palette background, calm space for the title, horizon line.'},
+  {id:'split',name:'Split',sub:'Cut through the subject: half as shot, half halftone.'},
+  {id:'zoom',name:'Zoom',sub:'Framed close-up of the subject, red line across slides.'},
+  {id:'mood',name:'Moodboard',sub:'Handwritten note, overlapping prints, annotated card.'},
+  {id:'cascade',name:'Cascade',sub:'Prints of mixed sizes flowing in a wave.'},
+  {id:'bauhaus',name:'Bauhaus',sub:'B&W photo bands with red, pink and blue shapes.'},
+  {id:'letter',name:'Letter',sub:'A handwritten page with the photo laid on top.'},
+  {id:'echo',name:'Echo',sub:'The same photo repeated, zooming out step by step.'},
+  {id:'polaroid',name:'Polaroid',sub:'Instant prints with a written note.'},
+  {id:'mirror',name:'Mirror',sub:'Each photo folded into its own reflection.'},
+  {id:'tiles',name:'Tiles',sub:'The photo cut into a grid with colour tiles and letters.'},
+  {id:'orbit',name:'Orbit',sub:'One photo in a circle, the others orbiting around it.'},
+  {id:'strata',name:'Strata',sub:'Horizon bands with an inset plate and a material swatch.'},
+  {id:'vellum',name:'Vellum',sub:'A frosted tracing sheet slides off the photo.'},
+  {id:'salon',name:'Salon',sub:'Big prints, then the whole series hung as one cluster.'},
+  {id:'ripple',name:'Ripple',sub:'Photos as islands ringed by contour echoes.'},
+  {id:'measure',name:'Measure',sub:'Heavy bars sweep across the photo like a score.'},
+  {id:'burst',name:'Burst',sub:'A narrow column holds the scene, the subject breaks out.'},
+  {id:'pano',name:'Panorama',sub:'One composition that flows across the slides.'},
+  {id:'serie',name:'Series',sub:'One photo per slide, wide margins.'},
+  {id:'letters',name:'Letters',sub:'The title in giant letters cut from your photos.'},
+  {id:'route',name:'Route',sub:'A dotted trail across the slides, with time and place.'},
+  {id:'fragments',name:'Fragments',sub:'One photo in strips, whole again on the last slide.'},
+  {id:'windows',name:'Windows',sub:'One photo as the wall, the others as openings.'},
+  {id:'scrap',name:'Scrapbook',sub:'Torn prints, masking tape, pencil notes.'},
+  {id:'glitch',name:'Glitch',sub:'RGB split, broken scanlines, pixel streaks.',group:'future'},
+  {id:'holo',name:'Holo glass',sub:'Frosted glass cards on iridescent foil.',group:'future'},
+  {id:'hud',name:'HUD',sub:'Viewfinder brackets with real camera data.',group:'future'},
+  {id:'dither',name:'Dither',sub:'1-bit pixels in two inks.',group:'future'},
+  {id:'float',name:'Float',sub:'Isometric prints hovering over their shadows.',group:'future'},
+  {id:'kaleido',name:'Kaleidoscope',sub:'Each photo turned into a mandala.',group:'future'},
+  {id:'swap',name:'Swap',sub:'Two photos trading squares across the seam.',group:'inspired'},
+  {id:'journal',name:'Journal',sub:'Marker notes, arrows and circles around the photos.',group:'inspired'},
+  {id:'halftone',name:'Halftone',sub:'CMYK dots on a colour block, line sketch on B&W.',group:'inspired'},
+  {id:'skyline',name:'Skyline',sub:'Your caption in vertical bars cutting into the photo.',group:'inspired'},
+  {id:'carto',name:'Map print',sub:'B&W photo with contours, stripes and coordinates.',group:'inspired'},
+  {id:'index',name:'Index',sub:'Numbered thumbnails, title running across slides.',group:'inspired'},
+  {id:'book',name:'Photo book',sub:'Paper spreads, with the gutter on every other seam.',group:'inspired'},
+  {id:'bento',name:'Bento',sub:'Rounded cards with photos, real palette and stats.',group:'objects'},
+  {id:'ticket',name:'Ticket',sub:'Each photo on a boarding-pass style ticket.',group:'objects'},
+  {id:'stamps',name:'Stamps',sub:'Perforated postage stamps with postmarks.',group:'objects'},
+  {id:'neon',name:'Neon',sub:'Glowing tube frames on a brick wall.',group:'objects'},
+  {id:'contact',name:'Contact sheet',sub:'Film strips marked up in red grease pencil.',group:'objects'},
+  {id:'blueprint',name:'Blueprint',sub:'White line drawings with dimensions on blue.',group:'objects'},
+  {id:'news',name:'Newspaper',sub:'Blackletter masthead, halftone photo, columns.',group:'objects'},
+  {id:'engraved',name:'Engraved',sub:'Banknote-style line engraving.',group:'objects'},
+  {id:'gatefold',name:'Gatefold',sub:'A folded wing that opens a little more each slide.'},
+  {id:'breath',name:'Breath',sub:'The photo grows to a full-bleed peak, then breathes out.'}
 ];
 const CAPTION_DEFAULT='Some places stay with you long after you leave them, and some light only happens once.';
 const pad2=i=>String(i).padStart(2,'0');
@@ -375,37 +437,47 @@ const kick=d=>((state.kicker||'').trim()||d);
 const DUOS={colour:null,ochre:['#2a1a05','#f2c230'],cobalt:['#0b1640','#6d98ff'],coral:['#3a0f12','#ff8066'],sage:['#13261d','#a4d6ad'],lilac:['#231636','#cdaeff'],rust:['#2b0f05','#e0703a'],teal:['#062625','#5cc8c0'],rose:['#33101e','#f59ac0']};
 const DUOLIST=[['colour','Colour'],['ochre','Ochre'],['cobalt','Cobalt'],['coral','Coral'],['sage','Sage'],['lilac','Lilac'],['rust','Rust'],['teal','Teal'],['rose','Rose']];
 const GPSS=[{id:'non',name:'GPS hidden'},{id:'oui',name:'GPS shown'}];
-// Treatments: optional, applied to every photo of the series, independent of the layout
+// Treatments: optional, applied to every photo of the series, independent of the layout.
+// name = a plain photographer word, hint = one line shown under the chosen chip; ids never change (saved projects).
 const TIRAGES=[
-  {id:'original',name:'None',medium:'photographs'},
-  {id:'grain',name:'Soft grain',medium:'photographs'},
-  {id:'naturel',name:'Pigment',medium:'pigment print'},
-  {id:'chrome',name:'Chromogenic',medium:'chromogenic print'},
-  {id:'argent',name:'Silver B&W',medium:'gelatin silver print'},
-  {id:'cyan',name:'Cyanotype',medium:'cyanotype'},
-  {id:'halftone',name:'Halftone',medium:'halftone print'},
-  {id:'dither',name:'1-bit',medium:'1-bit print'}
+  {id:'original',name:'As shot',hint:'Your photos exactly as they are.',medium:'photographs'},
+  {id:'grain',name:'Soft grain',hint:'A light film grain, colours untouched.',medium:'photographs'},
+  {id:'naturel',name:'Matte print',hint:'Gentle contrast, like a fine-art print on matte paper.',medium:'pigment print'},
+  {id:'chrome',name:'Muted colour',hint:'Softer colours, lifted blacks, warm lights and cool shadows.',medium:'chromogenic print'},
+  {id:'argent',name:'Black & white',hint:'A warm darkroom black and white, with grain.',medium:'gelatin silver print'},
+  {id:'cyan',name:'Sun print',hint:'Prussian blue, like a cyanotype left in the sun.',medium:'cyanotype'},
+  {id:'halftone',name:'Newsprint',hint:'Black dots on newsprint grey.',medium:'halftone print'},
+  {id:'dither',name:'Pixel',hint:'Two inks and square pixels, like an old screen.',medium:'1-bit print'},
+  {id:'portra',group:'film',name:'Portra 400',hint:'Soft contrast, peachy skin, highlights that never burn.',medium:'colour negative print'},
+  {id:'pastel',group:'film',name:'Overexposed',hint:'Shot a stop over: bright, airy, creamy pastels.',medium:'colour negative print'},
+  {id:'push',group:'film',name:'Pushed +2',hint:'More contrast and grain, warm reds in the shadows.',medium:'push-processed print'},
+  {id:'faded',group:'film',name:'Faded',hint:'A print left in the sun: washed blacks, soft colours.',medium:'faded colour print'},
+  {id:'print90',group:'film',name:'90s print',hint:'A corner-lab print: warm, a little faded, visible grain.',medium:'minilab print'},
+  {id:'cine',group:'film',name:'Cinema',hint:'Teal shadows, warm lights, dark corners.',medium:'motion picture film'},
+  {id:'cross',group:'film',name:'Cross-processed',hint:'Hard contrast, cyan shadows, yellow-green highlights.',medium:'cross-processed print'},
+  {id:'night',group:'film',name:'Night flash',hint:'A warm subject in the flash, a dark blue-green background.',medium:'flash photographs'}
 ];
-// The signature range: 13 layouts in four families. Each one is a recipe with a promise, the photos it suits and the role of the text.
-// r = the renderer it uses. Everything else lives in the Lab.
+const TIRAGE_GROUPS=[{id:'',name:'Plain'},{id:'film',name:'Film looks · from Labo'}];
+// The signature range: 17 layouts in four families. Each one is a recipe with a promise, the photos it suits and the role of the text.
+// r = the renderer it uses. Everything else lives in the Lab. Names are gallery objects or gestures; ids never change (saved projects).
 const SIG=[
-  {id:'gallery',fam:'Editorial',name:'Gallery',r:'smart',promise:'A calm series that lets each image speak.',best:'Any photos · portfolio, architecture',count:[1,10],text:'Title on the cover, small captions'},
+  {id:'gallery',fam:'Editorial',name:'Gallery',r:'smart',promise:'Each image alone on a calm wall of its own colour.',best:'Any photos · portfolio, architecture',count:[1,10],text:'Title on the cover, small captions'},
   {id:'suite',fam:'Editorial',name:'Suite',r:'pano',promise:'One continuous composition across the slides.',best:'Landscapes, wide shots',count:[2,10],text:'Title and signature',paper:true},
   {id:'book',fam:'Editorial',name:'Book',r:'book',promise:'Double pages, the gutter on every other seam.',best:'Photo projects, mixed formats',count:[2,10],text:'Short editorial notes'},
-  {id:'index',fam:'Editorial',name:'Index',r:'index',promise:'A numbered archive, the title running across.',best:'Many images, monthly recaps',count:[4,10],text:'Numbers and places'},
+  {id:'index',fam:'Editorial',name:'Index',r:'index',promise:'A numbered archive with the title running across.',best:'Many images, monthly recaps',count:[4,10],text:'Numbers and places'},
+  {id:'twin',fam:'Editorial',name:'Plate',r:'twin',promise:'Each photo beside a figure drawn from itself.',best:'Landscapes, skylines, night skies',count:[1,10],text:'Figure numbers'},
   {id:'route',fam:'Story',name:'Route',r:'route',promise:'Places and moments joined by a trail.',best:'Trips, hikes, road days',count:[3,10],text:'Place, date and time',paper:true},
   {id:'journal',fam:'Story',name:'Journal',r:'journal',promise:'Handwritten notes around your prints.',best:'A day, a trip, an event',count:[2,10],text:'Handwritten notes'},
-  {id:'correspondence',fam:'Story',name:'Correspondence',r:'mood',promise:'A short note, two prints, an annotated card.',best:'Souvenirs, small stories',count:[2,8],text:'Caption and place'},
+  {id:'correspondence',fam:'Story',name:'Correspondence',r:'mood',promise:'A short note, two prints and an annotated card.',best:'Souvenirs, small stories',count:[2,8],text:'Caption and place'},
   {id:'contact',fam:'Material',name:'Contact sheet',r:'contact',promise:'Strips of frames, the best ones circled.',best:'Many frames of one moment',count:[3,10],text:'Frame numbers'},
-  {id:'print',fam:'Material',name:'Print',r:'serie',promise:'Each photo printed on paper, with wide margins.',best:'Muted, film-like photos',count:[1,10],text:'Minimal',paper:true},
+  {id:'print',fam:'Material',name:'Print',r:'serie',promise:'Each photo printed on paper with wide margins.',best:'Muted, film-like photos',count:[1,10],text:'Minimal',paper:true},
+  {id:'sketch',fam:'Material',name:'Study',r:'sketch',promise:'The photo fades into a pencil study at its edges.',best:'Landscapes, mountains, architecture',count:[1,10],text:'Place and date'},
   {id:'poster',fam:'Signal',name:'Poster',r:'split',promise:'Half as shot, half halftone, cut through the subject.',best:'Portraits, strong subjects',count:[1,6],text:'A bold title'},
   {id:'diptych',fam:'Signal',name:'Diptych',r:'swap',promise:'Two photos trading squares across the seam.',best:'Pairs that answer each other',count:[2,10],text:'Minimal'},
   {id:'detail',fam:'Signal',name:'Detail',r:'zoom',promise:'A framed close-up of the subject, a red line across.',best:'Portraits, textures, details',count:[1,8],text:'Frame numbers'},
-  {id:'window',fam:'Signal',name:'Window',r:'windows',promise:'The first photo becomes the wall, the others open in it.',best:'A wide first photo, then others',count:[3,10],text:'Title and signature'},
-  {id:'twin',fam:'Editorial',name:'Twin',r:'twin',promise:'Each photo beside a drawing computed from itself.',best:'Landscapes, skylines, night skies',count:[1,10],text:'Figure numbers'},
-  {id:'sketch',fam:'Material',name:'Sketch',r:'sketch',promise:'The photo turns into a pencil drawing of itself at the edges.',best:'Landscapes, mountains, architecture',count:[1,10],text:'Place and date'},
-  {id:'fault',fam:'Signal',name:'Fault',r:'fault',promise:'One colour plane, and the image slips along it.',best:'Mountains, cities, strong lines',count:[1,10],text:'One vertical word'},
-  {id:'slats',fam:'Signal',name:'Slats',r:'slats',promise:'Vertical slats show the scene a moment later, a little closer.',best:'Landscapes, weather, light',count:[1,10],text:'Title on the cover'}
+  {id:'window',fam:'Signal',name:'Window',r:'windows',promise:'The first photo becomes a wall, the others open in it.',best:'A wide first photo, then others',count:[3,10],text:'Title and signature'},
+  {id:'fault',fam:'Signal',name:'Offset',r:'fault',promise:'One colour plane, and the image slips along it.',best:'Mountains, cities, strong lines',count:[1,10],text:'One vertical word'},
+  {id:'slats',fam:'Signal',name:'Shutter',r:'slats',promise:'Vertical slats show the scene a moment later.',best:'Landscapes, weather, light',count:[1,10],text:'Title on the cover'}
 ];
 const FAMS=[{id:'Editorial',sub:'Quiet editions: gallery, sequence, book, archive.'},{id:'Story',sub:'Field notes: places, dates, a few words.'},{id:'Material',sub:'Printed matter: paper, frames, contact sheets.'},{id:'Signal',sub:'Strong images: poster, pairs, close-ups.'}];
 const INTENTS=[{id:'editorial',name:'An editorial series',sub:'Calm and precise, like an exhibition.',fams:['Editorial','Material']},
@@ -437,12 +509,15 @@ const FORMATS=[{id:'34',name:'3:4 · 1080 × 1440',W:1080,H:1440},{id:'45',name:
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
 // A new series starts empty: no title, no name, no year. The example photos are only an inspiration until the first import.
-const state={photos:[],mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',kitMarks:'on',kitStamp:'on',kitPaper:''};
+const state={photos:[],mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',kitMarks:'on',kitStamp:'on',kitPaper:'',terrain:'inv'};
 const KEYS=['title','artist','year','caption','kicker','duo','inset','kitMarks','kitStamp','kitPaper','mode','intent','tirage','fond','texte','gps','format','seed'];
 try{const s=JSON.parse(localStorage.getItem('vernissage-v2')||'null');
   if(s)KEYS.forEach(k=>{if(k==='seed'){if(typeof s.seed==='number')state.seed=s.seed}else if(typeof s[k]==='string')state[k]=s[k]});
   else{const o=JSON.parse(localStorage.getItem('vernissage-en')||'{}');['title','artist','year','caption','tirage','fond','texte','gps','format'].forEach(k=>{if(typeof o[k]==='string')state[k]=o[k]});if(o.mode)state.mode=LEGACY[o.mode]||o.mode}}catch(e){}
-const persist=()=>{try{const o={};KEYS.forEach(k=>o[k]=state[k]);localStorage.setItem('vernissage-v2',JSON.stringify(o))}catch(e){}};
+const persist=()=>{try{const o={};KEYS.forEach(k=>o[k]=state[k]);localStorage.setItem('vernissage-v2',JSON.stringify(o))}catch(e){storeWarn('settings')}};
+// storage can fail (private browsing, full disk): say it once, quietly, instead of losing work in silence
+let storeWarned=false;
+function storeWarn(what){if(storeWarned)return;storeWarned=true;const el=document.getElementById('storeMsg');if(el)el.textContent=`This browser could not keep your ${what} on this device (private browsing or storage full). Export before you close the page.`}
 
 const $=id=>document.getElementById(id);
 const rngOf=seed=>{let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
@@ -456,6 +531,44 @@ function buildMips(p){p.mips=[];let c=p.el;while(c.width>320){const m=canvas(c.w
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a),0,1);return t*t*(3-2*t)};
 const slug=(s,sep)=>s.toLowerCase().normalize('NFD').replace(ACCENTS,'').replace(/[^a-z0-9]+/g,sep).replace(new RegExp('^\\'+sep+'|\\'+sep+'$','g'),'');
+
+/* ---------- Terrain: invented noise, or the real relief from swisstopo around the series ----------
+   Only fetched when the user picks "From GPS". What leaves the device: the Swiss coordinates (LV95) of a
+   12 × 6 km rectangle around the centre of the photos, row by row. Same service and maths as alpage studio. */
+const TERRAINS=[{id:'inv',name:'Invented'},{id:'gps',name:'From GPS'}];
+const TER={cols:96,rows:48,w:12000,h:6000};
+let terrain={key:'',grid:null,busy:''};
+const toLV95=(lat,lon)=>{const p=(lat*3600-169028.66)/10000,l=(lon*3600-26782.5)/10000;
+  return {e:2600072.37+211455.93*l-10938.51*l*p-.36*l*p*p-44.54*l*l*l,n:1200147.07+308807.95*p+3745.25*l*l+76.63*p*p-194.56*l*l*p+119.79*p*p*p}};
+const inCH=c=>c.lat>45.8&&c.lat<47.85&&c.lon>5.9&&c.lon<10.55;
+const useTerrain=()=>state.terrain==='gps'&&!!terrain.grid&&!state.photos.some(p=>p.sample);
+function terrainSample(u,v){const {grid}=terrain,cols=TER.cols,rows=TER.rows,x=clamp(u,0,1)*(cols-1),y=clamp(v,0,1)*(rows-1),i=Math.min(cols-2,Math.floor(x)),j=Math.min(rows-2,Math.floor(y)),fx=x-i,fy=y-j;
+  const a=grid[j*cols+i],b=grid[j*cols+i+1],c=grid[(j+1)*cols+i],d=grid[(j+1)*cols+i+1];return (a*(1-fx)+b*fx)*(1-fy)+(c*(1-fx)+d*fx)*fy}
+// fill a contour field with real heights, stretched to the range the contour levels expect (at least 40 m of relief)
+function terrainFill(f,cols,rows,map){let mn=1e9,mx=-1e9;for(let j=0;j<rows;j++)for(let i=0;i<cols;i++){const uv=map(i,j),z=terrainSample(uv[0],uv[1]);f[j*cols+i]=z;if(z<mn)mn=z;if(z>mx)mx=z}
+  const span=Math.max(mx-mn,40);for(let k=0;k<f.length;k++)f[k]=.2+.6*(f[k]-mn)/span}
+// where a photo sits in the terrain rectangle (0..1), or null
+function terrainUV(p){if(!terrain.grid||!p||!p.meta||p.meta.lat==null)return null;const q=toLV95(p.meta.lat,p.meta.lon);return [.5+(q.e-terrain.e)/TER.w,.5-(q.n-terrain.n)/TER.h]}
+async function profileRow(e0,e1,n,pts){const geom=JSON.stringify({type:'LineString',coordinates:[[e0,n],[e1,n]]});
+  for(let k=0;;k++){try{const r=await fetch('https://api3.geo.admin.ch/rest/services/profile.json?sr=2056&distinct_points=true&nb_points='+pts+'&geom='+encodeURIComponent(geom));
+      if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();return d.map(q=>q.alts?(q.alts.COMB!=null?q.alts.COMB:q.alts.DTM25!=null?q.alts.DTM25:null):null)}
+    catch(e){if(k>=2)throw e;await new Promise(r=>setTimeout(r,1200*(k+1)))}}}
+async function fetchTerrain(){const msg=document.getElementById('terrainMsg'),say=t=>{if(msg)msg.textContent=t};
+  const g=state.photos.filter(p=>!p.sample&&p.meta&&p.meta.lat!=null);
+  if(!g.length){terrain.grid=null;say('No GPS position in these photos: the terrain stays invented.');return}
+  const c={lat:g.reduce((a,p)=>a+p.meta.lat,0)/g.length,lon:g.reduce((a,p)=>a+p.meta.lon,0)/g.length};
+  if(!inCH(c)){terrain.grid=null;say('These photos were taken outside Switzerland: the terrain stays invented.');return}
+  const lv=toLV95(c.lat,c.lon),key=Math.round(lv.e/50)+'|'+Math.round(lv.n/50);
+  if(terrain.key===key&&terrain.grid){say('Real relief from swisstopo around your photos.');return}
+  if(terrain.busy===key)return;terrain.busy=key;say('Asking swisstopo for the relief around your photos…');
+  const {cols,rows,w,h}=TER,grid=new Float32Array(cols*rows).fill(NaN);
+  try{let next=0;const worker=async()=>{while(next<rows){const j=next++,n=lv.n+h/2-j*h/(rows-1),vals=await profileRow(lv.e-w/2,lv.e+w/2,n,cols);
+        for(let i=0;i<cols;i++){const v=vals[Math.round(i*(vals.length-1)/(cols-1))];grid[j*cols+i]=v==null?NaN:v}}};
+    await Promise.all([worker(),worker(),worker(),worker()]);
+    let mn=Infinity;for(const v of grid)if(v<mn)mn=v;if(!isFinite(mn))throw new Error('no data');for(let k=0;k<grid.length;k++)if(!(grid[k]>=-500))grid[k]=mn;
+    if(terrain.busy!==key)return;terrain={key,grid,busy:'',e:lv.e,n:lv.n};say('Real relief from swisstopo around your photos.');
+    if(state.terrain==='gps'){thumbKey='';schedule();swatches()}}
+  catch(e){if(terrain.busy===key)terrain.busy='';say('swisstopo could not be reached (offline?): the terrain stays invented.')}}
 
 /* ---------- Colour ---------- */
 function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;let h=0,s=0;
@@ -494,6 +607,7 @@ function bgTopo(ctx,T,H,W,seed,tn,dark){
   ctx.fillStyle=dark?hsl(tn.h,.14,.1):hsl(tn.h,Math.min(tn.s,.22),.9);ctx.fillRect(0,0,T,H);
   const N=noise2(seed+5),step=Math.max(2,Math.round(W/150)),sc=W*.45,cols=Math.ceil(T/step)+1,rows=Math.ceil(H/step)+1,f=new Float32Array(cols*rows);
   for(let j=0;j<rows;j++)for(let i=0;i<cols;i++)f[j*cols+i]=N(i*step/sc,j*step/sc,4);
+  if(useTerrain()){const k=Math.max(T/2,H);terrainFill(f,cols,rows,(i,j)=>[.5+(i*step-T/2)/(2*k),.5+(j*step-H/2)/k])}
   const levels=18,u=W/1080;ctx.lineCap='round';ctx.lineJoin='round';
   for(let k=0;k<levels;k++){
     const th=.24+k*(.52/levels);ctx.beginPath();
@@ -634,6 +748,35 @@ const GRADES={
   chrome:{k:.22,sat:.78,lift:18,split:true,grain:11},
   cyan:{k:.3,mono:true,cyan:true,grain:11}
 };
+/* Film looks, ported from Labo (alpage labo-serie): the same look maths, with a neutral auto-correction and no camera profile.
+   Each look builds three tone curves in linear light (exposure, warmth, shadows, highlights, contrast, split toning, fade),
+   then saturation, vignette and luminance-weighted grain per pixel. */
+const FILM={
+  portra:{contrast:-.08,sat:-.06,warm:.22,fade:.18,grain:.12,vign:0,tint:-.04,shadows:.12,highlights:-.28,ss:[-.08,.03,.07],sh:[.14,.07,-.06]},
+  pastel:{ev:.45,contrast:-.25,sat:-.2,warm:.15,fade:.3,grain:.1,vign:0,tint:-.03,shadows:.3,highlights:-.35,ss:[0,.04,.07],sh:[.08,.06,0]},
+  push:{ev:0,contrast:.3,sat:.15,warm:.3,fade:.05,grain:.4,vign:.2,tint:0,shadows:0,highlights:-.1,ss:[.25,.08,-.12],sh:[.1,.04,-.06]},
+  faded:{contrast:-.2,sat:-.25,warm:.1,fade:.7,grain:.3,vign:.15,tint:0,shadows:.15,highlights:-.1,ss:[0,.05,.12],sh:[.1,.05,0]},
+  print90:{ev:.1,contrast:.1,sat:-.05,warm:.5,fade:.4,grain:.3,vign:.25,tint:0,shadows:.1,highlights:-.2,ss:[.1,.02,-.1],sh:[.18,.1,-.15]},
+  cine:{contrast:.35,sat:-.1,warm:.05,fade:.15,grain:.15,vign:.35,tint:0,shadows:0,highlights:-.1,ss:[-.3,.05,.35],sh:[.3,.1,-.25]},
+  cross:{ev:.1,contrast:.5,sat:.3,warm:0,fade:0,grain:.25,vign:.3,tint:-.15,shadows:-.05,highlights:-.05,ss:[-.2,.05,.35],sh:[.2,.25,-.3]},
+  night:{ev:-.2,contrast:.35,sat:.1,warm:.1,fade:0,grain:.3,vign:.4,tint:0,shadows:-.15,highlights:-.1,ss:[-.15,.05,.2],sh:[.15,.05,-.1]}
+};
+const S2L=new Float32Array(256);for(let i=0;i<256;i++){const v=i/255;S2L[i]=v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)}
+const l2s=x=>{x=clamp(x,0,1);return x<=.0031308?12.92*x:1.055*Math.pow(x,1/2.4)-.055};
+function hash2(x,y){let n=(Math.imul(x,374761393)+Math.imul(y,668265263))|0;n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295}
+const filmCache={};
+function filmParams(L){const gain=Math.pow(2,L.ev||0),wb=[1+.1*L.warm,1-.06*L.tint,1-.1*L.warm];
+  const luts=[0,1,2].map(c=>{const t=new Uint8ClampedArray(256);for(let i=0;i<256;i++){let x=l2s(S2L[i]*wb[c]*gain);
+    x+=L.shadows*x*(1-x)*(1-x)*1.6;x+=L.highlights*x*x*(1-x)*1.6;x=clamp(x,0,1);
+    const sc=x<.5?2*x*x:1-2*(1-x)*(1-x);x+=L.contrast*(sc-x);x+=L.ss[c]*(1-x)*(1-x)*.25+L.sh[c]*x*x*.25;x=L.fade*.1+x*(1-L.fade*.14);
+    t[i]=Math.round(clamp(x,0,1)*255)}return t});
+  return {luts,sat:L.sat,vign:L.vign*.45,grain:L.grain}}
+function filmApply(d,w,h,P,seed){const [R,G,B]=P.luts,sat=1+P.sat,ga=P.grain*38,cx=w/2,cy=h/2,inv=1/(cx*cx+cy*cy),ox=(seed*977)|0;
+  for(let y=0;y<h;y++){const dy=(y-cy)*(y-cy);for(let x=0;x<w;x++){const i=(y*w+x)*4;let r=R[d[i]],g=G[d[i+1]],b=B[d[i+2]];const l=.2126*r+.7152*g+.0722*b;
+    r=l+(r-l)*sat;g=l+(g-l)*sat;b=l+(b-l)*sat;
+    if(P.vign){const f=1-P.vign*((x-cx)*(x-cx)+dy)*inv;r*=f;g*=f;b*=f}
+    if(ga){const yy=l/255,m=4*yy*(1-yy)+.25,nz=(hash2(x+ox,y)-.5)*ga*m;r+=nz;g+=nz;b+=nz}
+    d[i]=r;d[i+1]=g;d[i+2]=b}}}
 const gradeCache=new Map();
 function graded(p,w,h){
   w=Math.max(1,Math.round(w));h=Math.max(1,Math.round(h));
@@ -652,6 +795,8 @@ function graded(p,w,h){
       s=(s*1103515245+12345)|0;const n=(((s>>>16)&0x7fff)/32767-.5)*G.grain;d[i]=r+n;d[i+1]=g+n;d[i+2]=b+n;
     }
     x.putImageData(id,0,0)}
+  const FL=FILM[state.tirage];
+  if(FL){const P=filmCache[state.tirage]||(filmCache[state.tirage]=filmParams(FL)),id=x.getImageData(0,0,w,h);filmApply(id.data,w,h,P,p.id);x.putImageData(id,0,0)}
   let out=c;
   if(state.tirage==='halftone')out=monoHalftone(c,w,h,Math.max(3,Math.round(Math.max(w,h)/170)),'#ebe7df','#141414');
   if(state.tirage==='dither'){const cw=Math.max(1,Math.round(w/3)),ch=Math.max(1,Math.round(h/3)),dc=ditherCanvas(c,cw,ch,'#141414','#ebe7df',1.3);out=canvas(w,h);const ox=out.getContext('2d');ox.imageSmoothingEnabled=false;ox.drawImage(dc,0,0,w,h)}
@@ -1157,9 +1302,12 @@ function renderSkyline(W,H){
 }
 
 // Map print: a B&W photo with contour lines, a stripe triangle, coordinates, scale and north arrow
-function contourBlock(ctx,x,y,w,h,seed,col,W){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+function contourBlock(ctx,x,y,w,h,seed,col,W,p,j0){ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
   const N=noise2(seed),step=Math.max(2,Math.round(W/140)),sc=W*.2,cols=Math.ceil(w/step)+1,rows=Math.ceil(h/step)+1,f=new Float32Array(cols*rows);
   for(let j=0;j<rows;j++)for(let i=0;i<cols;i++)f[j*cols+i]=N((x+i*step)/sc,(y+j*step)/sc,3);
+  if(useTerrain()){const mpp=3000/w,hu=w*mpp/TER.w/2,hv=h*mpp/TER.h/2,uv=terrainUV(p)||[.5+((j0||0)%3-1)*.25,.5];
+    const cu=clamp(uv[0],hu,1-hu),cv=clamp(uv[1],Math.min(.5,hv),Math.max(.5,1-hv));
+    terrainFill(f,cols,rows,(i,j)=>[cu+(i*step-w/2)*mpp/TER.w,cv+(j*step-h/2)*mpp/TER.h])}
   ctx.strokeStyle=col;ctx.lineWidth=Math.max(1,W*.0024);ctx.lineCap='round';
   for(let k=0;k<12;k++){const th=.26+k*.042;ctx.beginPath();
     for(let j=0;j<rows-1;j++)for(let i=0;i<cols-1;i++){const a=f[j*cols+i],b=f[j*cols+i+1],c=f[(j+1)*cols+i+1],d=f[(j+1)*cols+i],idx=(a>th?8:0)|(b>th?4:0)|(c>th?2:0)|(d>th?1:0);if(!idx||idx===15)continue;
@@ -1180,7 +1328,7 @@ function renderCarto(W,H){
     (hdr.length?hdr:[(state.title||'').toUpperCase()]).forEach((l,k)=>ctx.fillText(l,gx+pw/2,top-H*.02+W*.008+k*W*.03));
     ctx.save();ctx.beginPath();ctx.moveTo(inner,top+ph*.18);ctx.lineTo(inner,top+ph);ctx.lineTo(inner+(outer-inner)*.88,top+ph);ctx.closePath();ctx.clip();ctx.fillStyle='rgba(59,61,51,.75)';
     for(let x=Math.min(inner,outer);x<Math.max(inner,outer);x+=W*.013)ctx.fillRect(x,top,W*.0045,ph);ctx.restore();
-    contourBlock(ctx,gx,top+ph*.82,pw,H*.38,state.seed+j*7,ink,W);
+    contourBlock(ctx,gx,top+ph*.82,pw,H*.38,state.seed+j*7,ink,W,p,j);
     if(txt){ctx.save();ctx.strokeStyle='rgba(59,61,51,.6)';ctx.lineWidth=Math.max(1,W*.002);ctx.font=`600 ${Math.round(W*.06)}px Archivo`;ctx.textAlign='left';
       wrap(ctx,(state.title||'').toUpperCase(),pw*.92).slice(0,3).forEach((l,k)=>ctx.strokeText(l,gx+W*.02,top+ph+H*.12+k*W*.065));ctx.restore()}
     ctx.fillStyle=ink;ctx.font=mono(W,.018);ctx.textAlign='left';ctx.fillText("5 ' 0 ' 5 ' 10 ' 15 ' 20 ' 25 ' 30",px+W*.01,top+ph+W*.05);
@@ -1925,7 +2073,7 @@ const isSample=()=>state.photos.some(p=>p.sample);
 async function render(){
   const my=++pending;setBusy(true);await fontsReady;await ensureFonts(rendererOf(state.mode));if(my!==pending)return;
   const F=FORMATS.find(f=>f.id===state.format);
-  const key=JSON.stringify([state.photos.map(p=>p.id+'|'+(p.place||'')+'|'+(p.note||'')),state.kicker,state.duo,state.inset,state.kitMarks,state.kitStamp,state.kitPaper,kit.ver,state.tirage,state.fond,state.texte,state.gps,state.format,state.seed,state.title,state.artist,state.year,state.caption]);
+  const key=JSON.stringify([state.photos.map(p=>p.id+'|'+(p.place||'')+'|'+(p.note||'')),state.kicker,state.duo,state.inset,state.kitMarks,state.kitStamp,state.kitPaper,kit.ver,state.tirage,state.fond,state.texte,state.gps,state.format,state.seed,state.title,state.artist,state.year,state.caption,state.terrain,useTerrain()?terrain.key:'']);
   if(key!==thumbKey){thumbKey=key;thumbs()}
   let cs;try{cs=renderWith(state.mode,F.W,F.H);applyStamp(cs,F.W,F.H)}catch(e){console.error(e);setBusy(false,'Rendering failed on this device. Try fewer photos or another layout.');return}
   const bs=await Promise.all(cs.map(c=>new Promise(r=>c.toBlob(r,'image/jpeg',.96))));if(my!==pending)return;
@@ -1944,7 +2092,9 @@ function updateMeta(){const m=metaOf(state.mode)||{},F=FORMATS.find(f=>f.id===st
   $('exampleBadge').hidden=!isSample();
   $('readyTitle').textContent=isSample()?'This is the example series':'Your series is ready';
   $('readyMeta').textContent=isSample()?'Import your own photos in step 1, then come back here to export them.':`${urls.length} images · ${F.name} · cover: photo 01 · ${m.name||''}`;
-  $('paperBox').hidden=!usesPaper();buildOpts()}
+  $('paperBox').hidden=!usesPaper();
+  $('terrainBox').hidden=!(rendererOf(state.mode)==='carto'||(usesPaper()&&['topo','toponuit'].includes(state.fond)));
+  $('terrainName').textContent=state.terrain==='gps'?(useTerrain()?'swisstopo relief':'invented for now'):'';buildOpts()}
 function buildOrder(){const o=$('order');o.innerHTML='';urls.forEach((u,i)=>{const f=document.createElement('figure'),im=new Image(),c=document.createElement('figcaption');im.src=u;im.alt=`Image ${i+1}`;c.textContent=i===0?'01 · cover':pad2(i+1);f.append(im,c);o.append(f)})}
 const curIndex=()=>Math.min(urls.length-1,Math.max(0,Math.round(car.scrollLeft/Math.max(1,car.clientWidth))));
 // Smooth scroll when the browser does it, otherwise jump: some browsers ignore scrollTo on a scroll-snap strip.
@@ -1963,10 +2113,12 @@ $('collapseBtn').onclick=()=>{const c=$('stage').classList.toggle('collapsed');$
 
 /* ---------- Undo: every structural change is remembered ---------- */
 const allPhotos=new Map(),hist=[];
-const snap=()=>JSON.stringify({mode:state.mode,seed:state.seed,tirage:state.tirage,fond:state.fond,texte:state.texte,gps:state.gps,format:state.format,duo:state.duo,inset:state.inset,order:state.photos.map(p=>p.id),places:state.photos.map(p=>p.place||''),notes:state.photos.map(p=>p.note||'')});
+const TEXTKEYS=['title','artist','year','caption','kicker'];
+const snap=()=>JSON.stringify({title:state.title,artist:state.artist,year:state.year,caption:state.caption,kicker:state.kicker,terrain:state.terrain,mode:state.mode,seed:state.seed,tirage:state.tirage,fond:state.fond,texte:state.texte,gps:state.gps,format:state.format,duo:state.duo,inset:state.inset,order:state.photos.map(p=>p.id),places:state.photos.map(p=>p.place||''),notes:state.photos.map(p=>p.note||'')});
 function remember(){hist.push(snap());if(hist.length>40)hist.shift();$('undoBtn').disabled=false}
-function undo(){const s=hist.pop();$('undoBtn').disabled=!hist.length;if(!s)return;const o=JSON.parse(s);
-  ['mode','seed','tirage','fond','texte','gps','format','duo','inset'].forEach(k=>{if(o[k]!==undefined)state[k]=o[k]});
+function undo(){commitField();const s=hist.pop();$('undoBtn').disabled=!hist.length;if(!s)return;const o=JSON.parse(s);
+  ['mode','seed','tirage','fond','texte','gps','format','duo','inset','terrain',...TEXTKEYS].forEach(k=>{if(o[k]!==undefined)state[k]=o[k]});
+  TEXTKEYS.forEach(k=>{$(k).value=state[k]||''});$('who').textContent=handle();if(fieldBase)fieldBase=snap();
   const ps=o.order.map(id=>allPhotos.get(id)).filter(Boolean);if(ps.length){ps.forEach((p,i)=>{p.place=o.places[i];p.note=(o.notes||[])[i]||''});state.photos=ps}
   persist();saveProject();refreshControls();renderSlots();schedule();status('Undone.')}
 $('undoBtn').onclick=undo;
@@ -2008,10 +2160,11 @@ function recommend(intent){const f=features(),pct=v=>Math.round(v*100)+' %';
     slats:[.36+f.land*.2,'Vertical slats show each scene a moment later, a little closer.']};
   const fams=intent?INTENTS.find(i=>i.id===intent).fams:null;
   return SIG.filter(s=>!fams||fams.includes(s.fam)).map(s=>({s,score:R[s.id][0],why:R[s.id][1]})).sort((a,b)=>b.score-a.score)}
-function tplCard(m,idPrefix,extra){const b=document.createElement('button');b.type='button';b.className='tpl'+(state.format==='45'?' r45':'');b.id=`${idPrefix}${m.id}`;b.dataset.id=m.id;b.setAttribute('aria-pressed',state.mode===m.id);
+function tplCard(m,idPrefix,extra,tag){const b=document.createElement('button');b.type='button';b.className='tpl'+(state.format==='45'?' r45':'');b.id=`${idPrefix}${m.id}`;b.dataset.id=m.id;b.setAttribute('aria-pressed',state.mode===m.id);
   const c=canvas(150,state.format==='45'?188:200),s=document.createElement('span'),sm=document.createElement('small');s.textContent=m.name;sm.textContent=m.promise||m.sub;b.append(c,s,sm);
   const info=extra||(m.best?`${m.best} · ${m.count[0]}–${m.count[1]} photos · text: ${m.text.toLowerCase()}`:'');if(info){const e=document.createElement('em');e.textContent=info;b.append(e)}
-  b.setAttribute('aria-label',`${m.name}. ${m.promise||m.sub}. ${info}`);b.onclick=()=>chooseMode(m.id);return b}
+  if(tag){const t=document.createElement('i');t.className='rec-tag';t.textContent=tag;b.append(t)}
+  b.setAttribute('aria-label',`${m.name}${tag?' ('+tag+')':''}. ${m.promise||m.sub}. ${info}`);b.onclick=()=>chooseMode(m.id);return b}
 function chooseMode(id){if(id===state.mode)return;remember();state.mode=id;persist();markMode();schedule()}
 function markMode(){document.querySelectorAll('.tpl').forEach(x=>x.setAttribute('aria-pressed',x.dataset.id===state.mode))}
 function buildStory(){
@@ -2019,15 +2172,26 @@ function buildStory(){
   INTENTS.forEach(i=>{const b=document.createElement('button');b.type='button';b.className='intent';b.id=`intent-${i.id}`;b.setAttribute('aria-pressed',state.intent===i.id);
     const bb=document.createElement('b'),sp=document.createElement('span');bb.textContent=i.name;sp.textContent=i.sub;b.append(bb,sp);
     b.onclick=()=>{state.intent=state.intent===i.id?'':i.id;persist();buildStory()};it.append(b)});
-  const gr=$('galRec');gr.innerHTML='';recommend(state.intent).slice(0,3).forEach((r,k)=>gr.append(tplCard(r.s,'rec-',(k===0?'Recommended. ':'')+r.why)));
-  const fb=$('famBox');fb.innerHTML='';
+  const top=recommend(state.intent).slice(0,3),topIds=top.map(r=>r.s.id);
+  const gr=$('galRec');gr.innerHTML='';top.forEach((r,k)=>gr.append(tplCard(r.s,'rec-',(k===0?'Best match. ':'')+r.why)));
+  // every signature layout once, folded: the three recommendations above are tagged, not repeated loose
+  const fb=$('famBox');fb.innerHTML='';let shown=0;
   (state.intent?INTENTS.find(i=>i.id===state.intent).fams:FAMS.map(f=>f.id)).forEach(fid=>{const F=FAMS.find(f=>f.id===fid),d=document.createElement('div');d.className='fam group';
     const h=document.createElement('h3'),p=document.createElement('p'),g=document.createElement('div');h.textContent=fid;p.className='sub';p.textContent=F.sub;g.className='gallery';
-    SIG.filter(s=>s.fam===fid).forEach(s=>g.append(tplCard(s,'mode-')));d.append(h,p,g);fb.append(d)});
-  const gl=$('galLab');if(!gl.children.length)LAB().forEach(m=>gl.append(tplCard(m,'mode-')));$('labCount').textContent=`(${LAB().length})`;
+    SIG.filter(s=>s.fam===fid).forEach(s=>{shown++;g.append(tplCard(s,'mode-',null,topIds.includes(s.id)?'Recommended':''))});d.append(h,p,g);fb.append(d)});
+  $('allCount').textContent=`(${shown})`;
+  if(SIG.some(x=>x.id===state.mode)&&!topIds.includes(state.mode))$('allBox').open=true;
+  const gl=$('galLab');if(!gl.children.length)LAB_GROUPS.forEach(G=>{const ms=LAB().filter(m=>(m.group||'')===G.id);if(!ms.length)return;
+    const d=document.createElement('div'),h=document.createElement('h4'),c=document.createElement('span'),p=document.createElement('p'),g=document.createElement('div');
+    d.className='lab-group';d.id=`lab-${G.id||'experiments'}`;h.textContent=G.name;c.textContent=`${ms.length}`;h.append(c);p.className='sub';p.textContent=G.sub;g.className='gallery';
+    ms.forEach(m=>g.append(tplCard(m,'mode-')));d.append(h,p,g);gl.append(d)});
+  $('labCount').textContent=`(${LAB().length})`;
   if(LAB().some(m=>m.id===state.mode))$('labBox').open=true;
   markMode();thumbs()}
-$('labBox').addEventListener('toggle',()=>thumbs());
+$('labBox').addEventListener('toggle',()=>thumbs());$('allBox').addEventListener('toggle',()=>thumbs());
+// the Lab, sorted by where each layout came from
+const LAB_GROUPS=[{id:'',name:'Experiments',sub:'Graphic games played with your own photos.'},{id:'inspired',name:'From the moodboards',sub:'Ideas borrowed from posters, zines and maps.'},
+  {id:'objects',name:'Objects',sub:'Your photos printed on tickets, stamps, signs and sheets.'},{id:'future',name:'Future',sub:'Screens, glass and pixels.'}];
 // Thumbnails: only the cards you can see, one at a time, after the main preview
 let thumbJob=0,thumbT;
 function visibleTpls(){return [...document.querySelectorAll('.tpl')].filter(b=>{const d=b.closest('details'),p=b.closest('.panel');return (!d||d.open)&&p&&!p.hidden})}
@@ -2048,11 +2212,12 @@ function fondButtons(){
       const c=canvas(180,120);const s=document.createElement('span');s.textContent=f.name;b.append(c,s);
       b.onclick=()=>{if(state.fond===f.id)return;remember();state.fond=f.id;persist();refreshControls();schedule()};box.append(b)})});
 }
-function chips(el,list,key,sub=x=>x.sub){
-  el.innerHTML='';list.forEach(it=>{const b=document.createElement('button');b.type='button';b.className='chip';b.id=`${key}-${it.id}`;b.dataset.key=key;b.dataset.val=it.id;b.setAttribute('aria-pressed',state[key]===it.id);
+function chips(el,list,key,sub=x=>x.sub,keep){
+  if(!keep)el.innerHTML='';list.forEach(it=>{const b=document.createElement('button');b.type='button';b.className='chip';b.id=`${key}-${it.id}`;b.dataset.key=key;b.dataset.val=it.id;b.setAttribute('aria-pressed',state[key]===it.id);
     const s=document.createElement('span');s.textContent=it.name;b.append(s);
     if(sub(it)){const m=document.createElement('small');m.textContent=sub(it);b.append(m)}
-    b.onclick=()=>{if(state[key]===it.id)return;remember();state[key]=it.id;persist();refreshControls();schedule();if(key==='tirage')swatches();if(key==='format')document.querySelectorAll('.tpl').forEach(t=>t.dataset.done='')};el.append(b)});
+    if(it.hint){const m=document.createElement('small');m.className='hint';m.textContent=it.hint;b.append(m);b.title=it.hint}
+    b.onclick=()=>{if(state[key]===it.id)return;remember();state[key]=it.id;persist();refreshControls();schedule();if(key==='tirage')swatches();if(key==='terrain'&&it.id==='gps')fetchTerrain();if(key==='format')document.querySelectorAll('.tpl').forEach(t=>t.dataset.done='')};el.append(b)});
 }
 // layout-specific options: the diptych colour, the detail inset
 let optFor='';
@@ -2067,7 +2232,9 @@ if(!FONDS.some(f=>f.id===state.fond))state.fond='auto';
 if(!TIRAGES.some(t=>t.id===state.tirage))state.tirage='original';
 if(LEGACY[state.mode])state.mode=LEGACY[state.mode];
 if(!metaOf(state.mode))state.mode='gallery';
-chips($('tirage'),TIRAGES,'tirage',()=>null);chips($('texte'),TEXTES,'texte',()=>null);chips($('gps'),GPSS,'gps',()=>null);chips($('format'),FORMATS,'format',()=>null);fondButtons();refreshControls();
+{const tb=$('tirage');tb.innerHTML='';tb.classList.remove('chips');TIRAGE_GROUPS.forEach(G=>{const d=document.createElement('div'),h=document.createElement('h4'),c=document.createElement('div');
+  d.className='chip-group';h.textContent=G.name;c.className='chips';c.id=`tirage-group-${G.id||'plain'}`;d.append(h,c);tb.append(d);chips(c,TIRAGES.filter(t=>(t.group||'')===G.id),'tirage',()=>null)})}
+chips($('terrain'),TERRAINS,'terrain',()=>null);chips($('texte'),TEXTES,'texte',()=>null);chips($('gps'),GPSS,'gps',()=>null);chips($('format'),FORMATS,'format',()=>null);fondButtons();refreshControls();
 $('vary').onclick=()=>{remember();state.seed=Math.floor(Math.random()*1e6);persist();schedule();swatches()};
 
 /* ---------- Photos: a sequence with a cover and an ending, drag to reorder ---------- */
@@ -2113,14 +2280,23 @@ const status=t=>{$('status').textContent=t;$('renderState').textContent=t||$('re
 $('importBtn').onclick=()=>{if(state.photos.length<MAX||isSample())$('fileMany').click()};
 $('fileMany').onchange=async e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;remember();
   if(isSample())state.photos=[];const room=MAX-state.photos.length,take=Math.min(files.length,room);
-  $('renderState').classList.add('busy');$('renderState').textContent=`Reading ${take} photo${take>1?'s':''}…`;let msg=files.length>room?`Ten photos maximum: ${files.length-room} ${files.length-room>1?'were':'was'} skipped.`:'';
-  for(const f of files.slice(0,room)){try{state.photos.push(await loadFile(f))}catch(err){msg=`Couldn't read "${err.message}". Try a JPEG or PNG.`}}
-  if(!state.photos.length)state.photos=makeSamples();renderSlots();schedule();swatches();saveProject();if(msg)setTimeout(()=>status(msg),300)};
+  $('renderState').classList.add('busy');$('renderState').textContent=`Reading ${take} photo${take>1?'s':''}…`;$('photoMsg').textContent='';
+  const failed=[],msgs=[];if(files.length>room)msgs.push(`Ten photos maximum: ${files.length-room} ${files.length-room>1?'were':'was'} skipped.`);
+  for(const f of files.slice(0,room)){try{state.photos.push(await loadFile(f))}catch(err){failed.push(f.name||err.message||'a file')}}
+  if(failed.length)msgs.unshift(unreadable(failed));
+  if(!state.photos.length)state.photos=makeSamples();renderSlots();schedule();swatches();saveProject();if(state.terrain==='gps')fetchTerrain();$('photoMsg').textContent=msgs.join(' ')};
+const unreadable=names=>names.length===1?`Couldn't read "${names[0]}". Save it as JPEG from Photos and try again.`:`Couldn't read ${names.length} files (${names.map(n=>'"'+n+'"').join(', ')}). Save them as JPEG from Photos and try again.`;
 $('fileOne').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f||replaceAt<0)return;remember();
-  try{const p=await loadFile(f);if(isSample())state.photos=[p];else state.photos[replaceAt]=p}catch(err){status(`Couldn't read "${err.message}". Try a JPEG or PNG.`)}
+  $('photoMsg').textContent='';try{const p=await loadFile(f);if(isSample())state.photos=[p];else state.photos[replaceAt]=p}catch(err){$('photoMsg').textContent=unreadable([f.name||err.message])}
   renderSlots();schedule();swatches();saveProject()};
 const handle=()=>slug(state.artist||'your.account','.')||'your.account';
-['title','artist','year','caption','kicker'].forEach(k=>{const el=$(k);el.value=state[k];el.oninput=()=>{state[k]=el.value;persist();$('who').textContent=handle();schedule()}});
+// text edits join the undo history: a snapshot when the field is left, or after a pause in typing
+let fieldBase=null,fieldT;
+function commitField(){clearTimeout(fieldT);if(fieldBase==null)return;const now=snap();if(fieldBase!==now){hist.push(fieldBase);if(hist.length>40)hist.shift();$('undoBtn').disabled=false}fieldBase=now}
+TEXTKEYS.forEach(k=>{const el=$(k);el.value=state[k];
+  el.addEventListener('focus',()=>{fieldBase=snap()});
+  el.addEventListener('blur',()=>{commitField();fieldBase=null});
+  el.oninput=()=>{if(fieldBase==null)fieldBase=snap();state[k]=el.value;persist();$('who').textContent=handle();schedule();$('undoBtn').disabled=false;clearTimeout(fieldT);fieldT=setTimeout(commitField,1200)}});
 $('who').textContent=handle();
 
 /* ---------- Local project: the photos survive a reload (stored only in this browser) ---------- */
@@ -2130,7 +2306,7 @@ const DB={open(){return new Promise((res,rej)=>{try{const r=indexedDB.open('vern
 let saveT;
 function saveProject(){clearTimeout(saveT);saveT=setTimeout(async()=>{try{if(isSample()){await DB.set('photos',[]);return}
   const list=[];for(const p of state.photos){if(!p.blob)p.blob=await new Promise(r=>p.el.toBlob(r,'image/jpeg',.92));list.push({blob:p.blob,place:p.place||'',note:p.note||'',name:p.name,meta:p.meta||null})}
-  await DB.set('photos',list)}catch(e){}},700)}
+  await DB.set('photos',list)}catch(e){storeWarn('photos')}},700)}
 function blobToPhoto(blob,name){return new Promise((res,rej)=>{const url=URL.createObjectURL(blob),im=new Image();im.onload=()=>{const c=canvas(im.naturalWidth,im.naturalHeight);c.getContext('2d').drawImage(im,0,0);URL.revokeObjectURL(url);
   res(finishPhoto({el:c,w:c.width,h:c.height,sample:false,name}))};im.onerror=()=>{URL.revokeObjectURL(url);rej(new Error(name))};im.src=url})}
 async function loadProject(){try{const list=await DB.get('photos');if(!list||!list.length)return false;const out=[];
@@ -2173,7 +2349,7 @@ function applyStamp(cs,W,H){const st=state.kitStamp==='off'?null:kitOf('stamp')[
 const __drawBackground=drawBackground;drawBackground=function(ctx,T,H,W,S,id,seed){__drawBackground(ctx,T,H,W,S,id,seed);kitPaperOver(ctx,0,0,T,H,W)};
 
 // storage and UI
-async function saveKit(){try{const list=[];for(const it of kit.items){if(!it.blob)it.blob=await new Promise(r=>it.canvas.toBlob(r,it.type==='paper'?'image/jpeg':'image/png',.9));list.push({id:it.id,type:it.type,blob:it.blob})}await DB.set('kit',list)}catch(e){}}
+async function saveKit(){try{const list=[];for(const it of kit.items){if(!it.blob)it.blob=await new Promise(r=>it.canvas.toBlob(r,it.type==='paper'?'image/jpeg':'image/png',.9));list.push({id:it.id,type:it.type,blob:it.blob})}await DB.set('kit',list)}catch(e){storeWarn('studio kit')}}
 async function loadKit(){try{const list=await DB.get('kit');if(!list)return;for(const it of list){try{const im=await blobImage(it.blob);const c=canvas(im.naturalWidth,im.naturalHeight);c.getContext('2d').drawImage(im,0,0);kit.items.push({id:it.id,type:it.type,canvas:c,blob:it.blob})}catch(e){}}}catch(e){}}
 function blobImage(blob){return new Promise((res,rej)=>{const u=URL.createObjectURL(blob),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('image'))};im.src=u})}
 const kid=()=>'kit'+Date.now().toString(36)+Math.floor(Math.random()*1e4);
@@ -2197,13 +2373,17 @@ function renderKit(){const g=$('kitGrid');g.innerHTML='';const names={mark:'Mark
     const c=canvas(180,120);if(o.c)c.getContext('2d').drawImage(o.c,0,0,180,120);const s=document.createElement('span');s.textContent=o.name;b.append(c,s);
     b.onclick=()=>{remember();state.kitPaper=o.id;persist();renderKit();schedule()};pb.append(b)});
   $('kitUse').hidden=!kit.items.length;refreshControls()}
-$('studioBtn').onclick=()=>showStep('studio');
+$('studioBtn').onclick=()=>showStep('studio');$('kitLink').onclick=()=>showStep('studio');
 
 chips($('kitMarksChips'),[{id:'on',name:'My marks'},{id:'off',name:'Generated marks'}],'kitMarks',()=>null);chips($('kitStampChips'),[{id:'on',name:'Stamp on cover and end'},{id:'off',name:'No stamp'}],'kitStamp',()=>null);
-let resetArmed=0;
-$('resetBtn').onclick=async()=>{if(Date.now()-resetArmed>3000){resetArmed=Date.now();$('resetBtn').textContent='Tap again to reset';setTimeout(()=>{$('resetBtn').textContent='Reset'},3000);return}
-  resetArmed=0;$('resetBtn').textContent='Reset';hist.length=0;$('undoBtn').disabled=true;
-  Object.assign(state,{mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom'});
+// Reset asks first, in words, with two distinct buttons: nothing is cleared by a stray double tap
+const resetAsk=open=>{$('resetConfirm').hidden=!open;$('resetBtn').setAttribute('aria-expanded',open);if(open)$('resetKeep').focus()};
+$('resetBtn').setAttribute('aria-expanded','false');
+$('resetBtn').onclick=()=>resetAsk($('resetConfirm').hidden);
+$('resetKeep').onclick=()=>{resetAsk(false);$('resetBtn').focus()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('resetConfirm').hidden)resetAsk(false)});
+$('resetGo').onclick=async()=>{resetAsk(false);fieldBase=null;hist.length=0;$('undoBtn').disabled=true;$('photoMsg').textContent='';
+  Object.assign(state,{mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',terrain:'inv'});
   ['title','artist','year','caption','kicker'].forEach(k=>$(k).value='');state.photos=makeSamples();state.photos.forEach(p=>allPhotos.set(p.id,p));
   persist();try{await DB.set('photos',[])}catch(e){}refreshControls();renderSlots();schedule();swatches();showStep('photos');status('Started a new series.')};
 
