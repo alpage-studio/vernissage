@@ -11,15 +11,15 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><title>Vernissage</title>
-<meta name="theme-color" content="#151517">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style><title>alpage vernissage</title>
+<meta name="theme-color" content="#14140F">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;900&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=DM+Mono:wght@400&family=Reenie+Beanie&family=Permanent+Marker&family=UnifrakturMaguntia&family=Homemade+Apple&display=swap">
 <style>
 /* Layout: a light table — the carousel as it will look on Instagram, the full strip below, settings after (phone) or to the right (desktop). One dark theme, so only the photos carry colour. */
 :root{
-  --bg:#151517; --panel:#1d1d21; --line:#2f2f35; --fg:#ecebe6; --muted:#9b9993; --accent:#e2d6bf; --accent-ink:#1a1814;
+  --bg:#14140F; --panel:#1E1E17; --line:#34332A; --fg:#EDEAE0; --muted:#948F80; --accent:#C99A32; --accent-ink:#17150E; --signal:#3d95f0;
   --display:"Bodoni Moda", "Didot", "Bodoni 72", Georgia, serif;
   --ui:"Archivo", "Helvetica Neue", Arial, sans-serif;
   --mono:"DM Mono", ui-monospace, Menlo, monospace;
@@ -29,7 +29,11 @@
 html,body{background:var(--bg);color:var(--fg)}
 body{font-family:var(--ui);font-size:15px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px;-webkit-font-smoothing:antialiased}
 .top{max-width:1180px;margin:0 auto 18px;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
-.mark{font-family:var(--display);font-style:italic;font-size:34px;line-height:1}
+.mark{display:flex;align-items:center;gap:9px;font-family:var(--ui);font-weight:600;font-size:23px;letter-spacing:-.02em;line-height:1}
+.mark .logo{width:28px;height:28px;fill:none;stroke:var(--fg);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mark .logo circle{fill:var(--accent);stroke:none}
+.mark .house{color:var(--muted);font-weight:500}
+.mark>span{white-space:nowrap}
 .top p{margin:0;color:var(--muted);font-size:14px;max-width:52ch}
 .app{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr;gap:24px}
 @media (min-width:900px){.app{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
@@ -94,13 +98,13 @@ body{font-family:var(--ui);font-size:15px;line-height:1.45;padding-left:max(16px
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{all:unset;cursor:pointer;border:1px solid var(--line);padding:8px 12px;font-size:14px;display:flex;flex-direction:column;gap:1px;min-width:0}
 .chip small{color:var(--muted);font-size:11.5px}
-.chip[aria-pressed="true"]{border-color:var(--accent);background:rgba(226,214,191,.08)}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:rgba(201,154,50,.10)}
 .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .fonds{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
 .fond{all:unset;cursor:pointer;border:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
 .fond canvas{display:block;width:100%;aspect-ratio:3/2;max-width:100%;background:var(--panel)}
 .fond span{font-size:12.5px;padding:5px 7px}
-.fond[aria-pressed="true"]{border-color:var(--accent);background:rgba(226,214,191,.08)}
+.fond[aria-pressed="true"]{border-color:var(--accent);background:rgba(201,154,50,.10)}
 .fond:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.4fr) minmax(0,.8fr);gap:8px}
 @media (max-width:520px){.fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.fields .f-title{grid-column:1/-1}}
@@ -191,7 +195,7 @@ body{padding-block:14px 96px}
 
 
 <header class="top">
-  <div class="brand"><div class="mark">Vernissage</div><p>Turn a set of photos into a signed visual story.</p></div>
+  <div class="brand"><div class="mark" aria-label="alpage vernissage"><svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.8 4.6 C7.3 10 9.6 15 12 19.6 C14.2 14.6 16.4 9.6 18.8 4.8 C19.6 3.6 20.8 3.4 21.4 4.4"/><circle cx="12" cy="2.6" r="1.2"/></svg><span><span class="house">alpage</span> vernissage</span></div><p>Turn a set of photos into a signed visual story.</p></div>
   <div class="top-actions"><button class="ghost" id="studioBtn" type="button">Studio kit</button><button class="ghost" id="undoBtn" type="button" disabled>Undo</button><button class="ghost" id="resetBtn" type="button">Reset</button></div>
 </header>
 
