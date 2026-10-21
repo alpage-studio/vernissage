@@ -189,6 +189,10 @@ body{padding-block:14px 96px}
 .kit-item span{font-size:12px;color:var(--mut);padding:5px 7px}
 .kit-item button{all:unset;cursor:pointer;position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,var(--scrim) 13px,transparent 14px);color:var(--ink);display:grid;place-items:center}
 .kit-item button:focus-visible{outline:2px solid var(--acc)}
+.kit-item.bi{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+.kit-item.bi[aria-pressed="false"]{opacity:.38}
+.kit-item.bi:disabled{cursor:default}
+.kit-item.bi:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .kit-item .looks{display:flex;flex-wrap:wrap;gap:4px;padding:0 6px 6px}
 .kit-item .looks button{position:static;width:auto;height:auto;min-height:32px;padding:0 7px;white-space:nowrap;border-radius:999px;background:none;border:1px solid var(--line);font-size:12px;color:var(--mut)}
 .kit-item .looks button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
@@ -481,6 +485,11 @@ body{font:400 13.5px/1.5 var(--ui);padding:0 0 96px}
         <input type="file" id="kitFile" accept="image/*" multiple hidden>
         <div class="kit-grid" id="kitGrid"></div>
       </div>
+      <div class="group" id="builtinBox"><div class="label">Ready-made <i>·</i> drawn by hand <span id="builtinCount"></span></div>
+        <p class="sub">Brush strokes and drawings made by hand for Vernissage, used by the Hand-made layouts. Tap one to leave it out; your own imports are added on top.</p>
+        <div class="chips" id="kitBuiltinChips"></div>
+        <div class="kit-grid" id="builtinGrid"><p class="sub">Loading the ready-made set…</p></div>
+      </div>
       <div class="group" id="kitUse" hidden><div class="label">Use in the series</div>
         <div class="chips" id="kitMarksChips"></div><div class="chips" id="kitStampChips"></div>
         <p class="sub">Paper for the backgrounds</p><div class="fonds" id="kitPapers"></div>
@@ -554,7 +563,8 @@ const MODES=[
   {id:'stroke',name:'Stroke',sub:'Each photo seen through one big brush stroke.',group:'hand'},
   {id:'swatch',name:'Swatch',sub:'Round, block, bar, arc: the photo changes shape, then opens up.',group:'hand'},
   {id:'gesture',name:'Gesture',sub:'One colour brush stroke painted across the seams.',group:'hand'},
-  {id:'sketchbook',name:'Sketchbook',sub:'Your drawings and your photos in dialogue.',group:'hand'}
+  {id:'sketchbook',name:'Sketchbook',sub:'Your drawings and your photos in dialogue.',group:'hand'},
+  {id:'herbarium',name:'Herbarium',sub:'A drawing pressed like a specimen beside each photo.',group:'hand'}
 ];
 const CAPTION_DEFAULT='Some places stay with you long after you leave them, and some light only happens once.';
 const pad2=i=>String(i).padStart(2,'0');
@@ -636,8 +646,8 @@ const FORMATS=[{id:'34',name:'3:4 · 1080 × 1440',W:1080,H:1440},{id:'45',name:
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
 // A new series starts empty: no title, no name, no year. The example photos are only an inspiration until the first import.
-const state={photos:[],mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',kitMarks:'on',kitStamp:'on',kitPaper:'',terrain:'inv'};
-const KEYS=['title','artist','year','caption','kicker','duo','inset','kitMarks','kitStamp','kitPaper','mode','intent','tirage','fond','texte','gps','format','seed'];
+const state={photos:[],mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',kitMarks:'on',kitStamp:'on',kitPaper:'',kitBuiltin:'on',kitOff:'',terrain:'inv'};
+const KEYS=['title','artist','year','caption','kicker','duo','inset','kitMarks','kitStamp','kitPaper','kitBuiltin','kitOff','mode','intent','tirage','fond','texte','gps','format','seed'];
 try{const s=JSON.parse(localStorage.getItem('vernissage-v2')||'null');
   if(s)KEYS.forEach(k=>{if(k==='seed'){if(typeof s.seed==='number')state.seed=s.seed}else if(typeof s[k]==='string')state[k]=s[k]});
   else{const o=JSON.parse(localStorage.getItem('vernissage-en')||'{}');['title','artist','year','caption','tirage','fond','texte','gps','format'].forEach(k=>{if(typeof o[k]==='string')state[k]=o[k]});if(o.mode)state.mode=LEGACY[o.mode]||o.mode}}catch(e){}
@@ -2162,6 +2172,20 @@ function renderBreath(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,
 
 
 /* ---------- Hand-made: brush strokes and drawings from the Atelier, or a few drawn in code until the owner adds his own ---------- */
+// The ready-made set: brush strokes and drawings made by hand for Vernissage, shipped in atelier/ and only fetched when a Hand-made layout
+// or the Atelier needs them. They feed the Hand-made layouts only: marks, papers and stamps elsewhere still come from the user's own imports.
+const HAND=['stroke','swatch','gesture','sketchbook','herbarium'];
+const builtin={items:[],p:null,ready:false};
+function ensureAtelier(again){if(builtin.ready)return Promise.resolve();if(builtin.p)return builtin.p;
+  builtin.p=(async()=>{try{const J=await (await fetch('atelier/atelier.json')).json();
+      const list=await Promise.all((J.items||[]).map(async e=>{try{const im=await blobImage(await (await fetch('atelier/'+e.file)).blob()),c=canvas(im.naturalWidth,im.naturalHeight);c.getContext('2d').drawImage(im,0,0);
+        return {...e,id:'bi:'+e.file,canvas:c,builtin:true,look:e.name==='Tree with colours'?'paint':'ink'}}catch(err){return null}}));
+      builtin.items=list.filter(Boolean);builtin.ready=builtin.items.length>0}catch(e){}
+    builtin.p=null;if(builtin.ready){kit.ver++;renderBuiltin();if(again)schedule()}})();
+  return builtin.p}
+const offList=()=>(state.kitOff||'').split(',').filter(Boolean);
+const builtinOf=type=>state.kitBuiltin==='off'?[]:builtin.items.filter(i=>i.type===type&&!offList().includes(i.file));
+const drawingsAll=()=>[...kitOf('drawing'),...builtinOf('drawing')];
 const procCache={};
 function procBrush(shape){if(procCache[shape])return procCache[shape];const r=rngOf(9000+[...shape].reduce((a,ch)=>a+ch.charCodeAt(0),0)),ink=a=>`rgba(20,20,20,${a.toFixed(3)})`;let c;
   if(shape==='round'){const R=380;c=canvas(2*R+40,2*R*.86+40);const x=c.getContext('2d'),cx=c.width/2,cy=c.height/2;
@@ -2183,7 +2207,7 @@ function procBrush(shape){if(procCache[shape])return procCache[shape];const r=rn
 // share of the piece's box really covered by ink (alpha over a half)
 function fillOf(c){if(c.__fill!=null)return c.__fill;const t=canvas(48,48),x=t.getContext('2d');x.drawImage(c,0,0,48,48);const d=x.getImageData(0,0,48,48).data;let s=0;for(let i=3;i<d.length;i+=4)if(d[i]>110)s++;return c.__fill=s/2304}
 // the owner's pieces of these shapes, or the drawn ones when he has none
-function brushPool(shapes,minFill){const own=kitOf('brush').filter(i=>shapes.includes(i.shape)&&(!minFill||fillOf(i.canvas)>=minFill)).map(i=>i.canvas);return own.length?own:shapes.map(procBrush)}
+function brushPool(shapes,minFill){const own=[...kitOf('brush'),...builtinOf('brush')].filter(i=>shapes.includes(i.shape)&&(!minFill||fillOf(i.canvas)>=minFill)).map(i=>i.canvas);return own.length?own:shapes.map(procBrush)}
 // the piece stretched into a box (turned upright if asked), its alpha made crisp with a little paper grain, so an enlarged stroke keeps a hand-made edge
 const maskCache=new Map();
 function brushMask(m,w,h,rot,seed){w=Math.max(1,Math.round(w));h=Math.max(1,Math.round(h));if(!m.__id)m.__id='k'+(kitSeq++);const key=`${m.__id}|${w}|${h}|${rot?1:0}|${seed}`;if(maskCache.has(key))return maskCache.get(key);
@@ -2260,7 +2284,7 @@ function procSprig(){if(sprig)return sprig;const c=canvas(640,960),x=c.getContex
   rotated(x,P(1)[0],P(1)[1],-.2,()=>{x.beginPath();x.ellipse(0,-30,26,52,0,0,7);x.fill()});return sprig=c}
 
 // Sketchbook: the owner's drawings and the photos in dialogue; cover = a drawing and the title, last = a small drawing and the signature
-function renderSketchbook(W,H){const n=state.photos.length,S=n+2,{big,ctx,ink,mute,txt,F}=setup(W,H,S),ds=kitOf('drawing'),mult=!(F.dark&&!F.busy);
+function renderSketchbook(W,H){const n=state.photos.length,S=n+2,{big,ctx,ink,mute,txt,F}=setup(W,H,S),ds=drawingsAll(),mult=!(F.dark&&!F.busy);
   const art=k=>{if(!ds.length)return tinted(procSprig(),ink);const it=ds[k%ds.length];return it.look==='paint'?it.canvas:tinted(it.canvas,ink)};
   {const c=art(0),bh=H*(txt?.6:.74),[w,h]=fitIn(c,W*.78,bh);ctx.drawImage(c,(W-w)/2,H*.1+(bh-h)/2,w,h);
     if(txt){ctx.fillStyle=mute;ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(kick('SKETCHBOOK').toUpperCase(),W*.08,H*.06);
@@ -2273,6 +2297,20 @@ function renderSketchbook(W,H){const n=state.photos.length,S=n+2,{big,ctx,ink,mu
   {const ox=(S-1)*W,c=art(n+1),[w,h]=fitIn(c,W*.34,H*.3);ctx.drawImage(c,ox+(W-w)/2,H*.36,w,h);
     if(txt){ctx.fillStyle=ink;if(state.artist){ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),ox+W/2,H*.36+h+W*.1,W*.005,'center')}
       else if(state.title){fitFont(ctx,state.title,W*.7,Math.round(W*.04),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='center';ctx.fillText(state.title,ox+W/2,H*.36+h+W*.1)}}}
+  return slice(big,W,H,S)}
+
+// Herbarium: one drawing per slide, pressed like a specimen and taped beside the photo, with a small label: its name and the place
+function renderHerbarium(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,ink,mute,txt,F}=setup(W,H,S),ds=drawingsAll(),mult=!(F.dark&&!F.busy);
+  state.photos.forEach((p,j)=>{const ox=j*W,top=j%2===0,ph=H*.64,pw=W*.88,px=ox+W*.06,py=top?H*.05:H*.31;photoRect(ctx,p,px,py,pw,ph);
+    const it=ds.length?ds[(j+state.seed)%ds.length]:null,c=it?(it.look==='paint'?it.canvas:tinted(it.canvas,ink)):tinted(procSprig(),ink),zy=top?py+ph+H*.025:H*.025,zh=H*.255,[dw,dh]=fitIn(c,W*.44,zh),dx=ox+W*.08,dy=zy+(zh-dh)/2;
+    ctx.save();if(mult)ctx.globalCompositeOperation='multiply';ctx.drawImage(c,dx,dy,dw,dh);ctx.restore();
+    tape(ctx,dx+dw*.5,dy+dh*.62,Math.max(W*.1,dw*.45),W*.03,(j%2?.18:-.14));
+    if(!txt)return;const lx=ox+W*.56,name=(it?it.name||'Drawing':'Sprig').toUpperCase(),place=(j===0?state.title:(p.place||p.note))||'';
+    ctx.textAlign='left';ctx.fillStyle=mute;ctx.font=mono(W,.015);ctx.fillText(`N° ${pad2(j+1)}`,lx,zy+zh*.34);
+    ctx.fillStyle=ink;fitFont(ctx,name,W*.36,Math.round(W*.022),q=>`400 ${q}px "DM Mono"`);ctx.fillText(name,lx,zy+zh*.34+W*.045);
+    if(place){ctx.fillStyle=mute;fitFont(ctx,place,W*.36,Math.round(W*.03),q=>`italic 400 ${q}px "Bodoni Moda"`);ctx.fillText(place,lx,zy+zh*.34+W*.1)}
+    ctx.fillStyle=mute;ctx.fillRect(lx,zy+zh*.34+W*.018,W*.3,Math.max(1,W*.0012));
+    if(j===n-1&&state.artist){ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),lx,zy+zh*.34+W*.15,W*.005,'left')}});
   return slice(big,W,H,S)}
 
 /* ---------- Photo metadata (EXIF date and GPS) ---------- */
@@ -2305,7 +2343,7 @@ function RENDERERS(){return {twin:renderTwin,sketch:renderSketch,fault:renderFau
   glitch:renderGlitch,holo:renderHolo,hud:renderHud,dither:renderDither,float:renderFloat,kaleido:renderKaleido,
   swap:renderSwap,journal:renderJournal,halftone:renderHalftone,skyline:renderSkyline,carto:renderCarto,index:renderIndex,book:renderBook,
   bento:renderBento,ticket:renderTicket,stamps:renderStamps,neon:renderNeon,contact:renderContact,blueprint:renderBlueprint,news:renderNews,engraved:renderEngraved,gatefold:renderGatefold,breath:renderBreath,
-  stroke:renderStroke,swatch:renderSwatch,gesture:renderGesture,sketchbook:renderSketchbook}}
+  stroke:renderStroke,swatch:renderSwatch,gesture:renderGesture,sketchbook:renderSketchbook,herbarium:renderHerbarium}}
 const rendererOf=id=>{const s=SIG.find(x=>x.id===id);return s?s.r:id};
 const metaOf=id=>SIG.find(x=>x.id===id)||MODES.find(m=>m.id===id);
 const LAB=()=>MODES.filter(m=>!SIG.some(s=>s.r===m.id));
@@ -2314,9 +2352,9 @@ async function ensureFonts(rid){const f=FONT_NEEDS[rid];if(!f)return;try{await P
 function renderWith(id,W,H){const R=RENDERERS();let rid=rendererOf(id);if(state.photos.length<2&&['pano','fragments','windows'].includes(rid))rid='serie';return (R[rid]||renderSmart)(W,H)}
 const isSample=()=>state.photos.some(p=>p.sample);
 async function render(){
-  const my=++pending;setBusy(true);await fontsReady;await ensureFonts(rendererOf(state.mode));if(my!==pending)return;
+  const my=++pending;setBusy(true);await fontsReady;await ensureFonts(rendererOf(state.mode));if(HAND.includes(rendererOf(state.mode)))await ensureAtelier();if(my!==pending)return;
   const F=FORMATS.find(f=>f.id===state.format);
-  const key=JSON.stringify([state.photos.map(p=>p.id+'|'+(p.place||'')+'|'+(p.note||'')),state.kicker,state.duo,state.inset,state.kitMarks,state.kitStamp,state.kitPaper,kit.ver,state.tirage,state.fond,state.texte,state.gps,state.format,state.seed,state.title,state.artist,state.year,state.caption,state.terrain,useTerrain()?terrain.key:'']);
+  const key=JSON.stringify([state.photos.map(p=>p.id+'|'+(p.place||'')+'|'+(p.note||'')),state.kicker,state.duo,state.inset,state.kitMarks,state.kitStamp,state.kitPaper,state.kitBuiltin,state.kitOff,kit.ver,state.tirage,state.fond,state.texte,state.gps,state.format,state.seed,state.title,state.artist,state.year,state.caption,state.terrain,useTerrain()?terrain.key:'']);
   if(key!==thumbKey){thumbKey=key;thumbs()}
   let cs;try{cs=renderWith(state.mode,F.W,F.H);applyStamp(cs,F.W,F.H)}catch(e){console.error(e);setBusy(false,'Rendering failed on this device. Try fewer photos or another layout.');return}
   const bs=await Promise.all(cs.map(c=>new Promise(r=>c.toBlob(r,'image/jpeg',.96))));if(my!==pending)return;
@@ -2329,7 +2367,7 @@ async function render(){
 }
 function setBusy(b,msg){const el=$('renderState');el.classList.toggle('busy',b);el.textContent=b?'Composing the series…':(msg||`Ready · ${urls.length} image${urls.length>1?'s':''}`);
   const s=$('saveAll');s.disabled=b||!blobs.length||isSample();s.textContent=b?'Composing…':isSample()?'Import your photos to export':`Export ${urls.length} images`}
-function usesPaper(){const s=SIG.find(x=>x.id===state.mode);return s?!!s.paper:['letters','fragments','scrap','route','pano','serie','stroke','swatch','gesture','sketchbook'].includes(state.mode)}
+function usesPaper(){const s=SIG.find(x=>x.id===state.mode);return s?!!s.paper:['letters','fragments','scrap','route','pano','serie','stroke','swatch','gesture','sketchbook','herbarium'].includes(state.mode)}
 function updateMeta(){const m=metaOf(state.mode)||{},F=FORMATS.find(f=>f.id===state.format),t=TIRAGES.find(t=>t.id===state.tirage);
   $('stageInfo').textContent=`${m.name||''} · ${urls.length} slides · ${F.id==='34'?'3:4':'4:5'}${t&&t.id!=='original'?' · '+t.name:''}`;
   $('exampleBadge').hidden=!isSample();
@@ -2431,10 +2469,10 @@ function buildStory(){
   $('labCount').textContent=`(${LAB().length})`;
   if(LAB().some(m=>m.id===state.mode))$('labBox').open=true;
   markMode();thumbs()}
-$('labBox').addEventListener('toggle',()=>thumbs());$('allBox').addEventListener('toggle',()=>thumbs());
+$('labBox').addEventListener('toggle',()=>{thumbs();if($('labBox').open)ensureAtelier(true)});$('allBox').addEventListener('toggle',()=>thumbs());
 // the Lab, sorted by where each layout came from
 const LAB_GROUPS=[{id:'',name:'Experiments',sub:'Graphic games played with your own photos.'},{id:'inspired',name:'From the moodboards',sub:'Ideas borrowed from posters, zines and maps.'},
-  {id:'objects',name:'Objects',sub:'Your photos printed on tickets, stamps, signs and sheets.'},{id:'hand',name:'Hand-made',sub:'Brush strokes and drawings from your Atelier, or drawn ones until you add yours.'},{id:'future',name:'Future',sub:'Screens, glass and pixels.'}];
+  {id:'objects',name:'Objects',sub:'Your photos printed on tickets, stamps, signs and sheets.'},{id:'hand',name:'Hand-made',sub:'Brush strokes and drawings made by hand, ready to use; yours are added from the Atelier.'},{id:'future',name:'Future',sub:'Screens, glass and pixels.'}];
 // Thumbnails: only the cards you can see, one at a time, after the main preview
 let thumbJob=0,thumbT;
 function visibleTpls(){return [...document.querySelectorAll('.tpl')].filter(b=>{const d=b.closest('details'),p=b.closest('.panel');return (!d||d.open)&&p&&!p.hidden})}
@@ -2733,8 +2771,16 @@ function renderKit(){const g=$('kitGrid');g.innerHTML='';const names={mark:'Mark
     const c=canvas(180,120);if(o.c)c.getContext('2d').drawImage(o.c,0,0,180,120);const s=document.createElement('span');s.textContent=o.name;b.append(c,s);
     b.onclick=()=>{remember();state.kitPaper=o.id;persist();renderKit();schedule()};pb.append(b)});
   $('kitUse').hidden=!kit.items.length;refreshControls()}
-$('studioBtn').onclick=()=>showStep('studio');$('kitLink').onclick=()=>showStep('studio');
+$('studioBtn').onclick=()=>{showStep('studio');ensureAtelier(true)};$('kitLink').onclick=()=>{showStep('studio');ensureAtelier(true)};
 
+function renderBuiltin(){const g=$('builtinGrid');if(!g||!builtin.ready)return;g.innerHTML='';const off=offList(),all=state.kitBuiltin==='off';
+  builtin.items.forEach(it=>{const b=document.createElement('button');b.type='button';b.className='kit-item bi';const on=!all&&!off.includes(it.file);b.setAttribute('aria-pressed',on);b.disabled=all;
+    b.setAttribute('aria-label',`${it.name}: ${on?'used':'left out'}`);const c=canvas(120,120),x=c.getContext('2d');x.fillStyle='#f2f0ea';x.fillRect(0,0,120,120);const m=it.canvas,s=Math.min(104/m.width,104/m.height);x.drawImage(m,60-m.width*s/2,60-m.height*s/2,m.width*s,m.height*s);
+    const t=document.createElement('span');t.textContent=it.type==='brush'?`Brush · ${it.shape}`:it.name;b.append(c,t);
+    b.onclick=()=>{remember();const o=offList(),k=o.indexOf(it.file);if(k<0)o.push(it.file);else o.splice(k,1);state.kitOff=o.join(',');persist();renderBuiltin();schedule()};g.append(b)});
+  const used=all?0:builtin.items.filter(i=>!off.includes(i.file)).length;$('builtinCount').textContent=`${used} of ${builtin.items.length} in use`}
+chips($('kitBuiltinChips'),[{id:'on',name:'Use ready-made pieces'},{id:'off',name:'Only my own'}],'kitBuiltin',()=>null);
+$('kitBuiltinChips').addEventListener('click',()=>setTimeout(renderBuiltin,0));
 chips($('kitMarksChips'),[{id:'on',name:'My marks'},{id:'off',name:'Generated marks'}],'kitMarks',()=>null);chips($('kitStampChips'),[{id:'on',name:'Stamp on cover and end'},{id:'off',name:'No stamp'}],'kitStamp',()=>null);
 // Reset asks first, in words, with two distinct buttons: nothing is cleared by a stray double tap
 const resetAsk=open=>{$('resetConfirm').hidden=!open;$('resetBtn').setAttribute('aria-expanded',open);if(open)$('resetKeep').focus()};

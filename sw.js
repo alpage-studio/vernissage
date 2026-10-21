@@ -1,6 +1,6 @@
 // Offline cache: the app shell up front, fonts and anything else on first use.
-const CACHE = 'vernissage-v18';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/icon-maskable-512.png'];
+const CACHE = 'vernissage-v19';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png', './icons/icon-maskable-512.png', './atelier/atelier.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -24,7 +24,7 @@ self.addEventListener('fetch', e => {
       .catch(() => caches.match('./index.html')));
     return;
   }
-  // Everything else (fonts, icons): cache first.
+  // Everything else (fonts, icons, the ready-made atelier/*.webp pieces): cache first, stored on first use.
   e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => {
     if (res.ok || res.type === 'opaque') { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
     return res;
