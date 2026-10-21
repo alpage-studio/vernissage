@@ -189,6 +189,9 @@ body{padding-block:14px 96px}
 .kit-item span{font-size:12px;color:var(--mut);padding:5px 7px}
 .kit-item button{all:unset;cursor:pointer;position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,var(--scrim) 13px,transparent 14px);color:var(--ink);display:grid;place-items:center}
 .kit-item button:focus-visible{outline:2px solid var(--acc)}
+.kit-item .looks{display:flex;flex-wrap:wrap;gap:4px;padding:0 6px 6px}
+.kit-item .looks button{position:static;width:auto;height:auto;min-height:32px;padding:0 7px;white-space:nowrap;border-radius:999px;background:none;border:1px solid var(--line);font-size:12px;color:var(--mut)}
+.kit-item .looks button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
 .seq .slot.add{all:unset;cursor:pointer;aspect-ratio:3/4;border:1px dashed var(--line);display:grid;place-items:center;color:var(--mut);font-size:13px}
 .seq .slot.add:focus-visible{outline:2px solid var(--acc)}
 /* ---------- alpage family: radius, Archivo headings, mono labels, 44 px targets ---------- */
@@ -282,7 +285,7 @@ body{font:400 13.5px/1.5 var(--ui);padding:0 0 96px}
   .top .marque-nom{gap:6px}
   .top .mark{width:26px;height:26px}
   .top-actions{gap:4px}
-  /* no room for a third icon: the studio kit stays one tap away in Finish (Make it yours) */
+  /* no room for a third icon: the atelier stays one tap away in Finish (Make it yours) */
   #studioBtn{display:none}
 }
 @media (max-width:370px){.top{gap:6px}.top .theme{padding:4px 7px}.top-actions .pill{padding:5px 6px}}
@@ -355,7 +358,7 @@ body{font:400 13.5px/1.5 var(--ui);padding:0 0 96px}
   <span class="sub">photos, hung as a signed story</span>
   <div class="spacer"></div>
   <div class="top-actions">
-    <button class="pill" id="studioBtn" type="button" aria-label="Studio kit"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span class="txt">Studio kit</span></button>
+    <button class="pill" id="studioBtn" type="button" aria-label="Atelier"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span class="txt">Atelier</span></button>
     <button class="pill" id="undoBtn" type="button" aria-label="Undo" disabled><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span class="txt">Undo</span></button>
     <button class="pill" id="resetBtn" type="button" aria-label="Reset"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span class="txt">Reset</span></button>
   </div>
@@ -369,7 +372,7 @@ body{font:400 13.5px/1.5 var(--ui);padding:0 0 96px}
   <button class="theme" id="theme" type="button" aria-label="Paper or dark">◐</button>
 </header>
 <div class="confirm-row" id="resetConfirm" role="alertdialog" aria-labelledby="resetQ" hidden>
-  <p id="resetQ"><b>Clear everything?</b> Your photos, text and settings will be removed from this device. The studio kit stays.</p>
+  <p id="resetQ"><b>Clear everything?</b> Your photos, text and settings will be removed from this device. Your atelier stays.</p>
   <button class="btn" id="resetKeep" type="button">Keep my series</button>
   <button class="btn danger" id="resetGo" type="button">Clear everything</button>
 </div>
@@ -459,15 +462,17 @@ body{font:400 13.5px/1.5 var(--ui);padding:0 0 96px}
         <p class="sub">GPS prints the coordinates stored in your photos on Route and some Lab layouts. Keep it off for private places and type a place under each photo instead.</p></div>
       <div class="group" id="terrainBox" hidden><div class="label">Terrain <span id="terrainName"></span></div><div class="chips" id="terrain"></div>
         <p class="sub" id="terrainMsg">Contour lines on the Map print layout and the Topo papers. From GPS asks swisstopo for the real relief around your photos (Switzerland only).</p></div>
-      <div class="group"><button class="kit-link" id="kitLink" type="button"><b>Make it yours <i>·</i> Studio kit</b><span>Your own hand-drawn marks, papers and stamp, used in every layout.</span></button></div>
+      <div class="group"><button class="kit-link" id="kitLink" type="button"><b>Make it yours <i>·</i> Atelier</b><span>Your own hand-drawn marks, brush strokes, drawings, papers and stamp, used in every layout.</span></button></div>
       <button class="btn primary next" data-goto="export" type="button">Next: export</button>
     </div>
 
     <div class="panel" id="panel-studio" hidden>
-      <div class="group"><div class="label">Your studio kit <span id="kitCount"></span></div>
+      <div class="group"><div class="label">Your atelier <span id="kitCount"></span></div>
         <p class="sub">Hand-made elements that make every series yours: they replace the marks, papers and stamps the app would draw. Photograph them flat in daylight, black ink on white paper; the white disappears by itself. Everything stays on this device.</p>
         <div class="mini-actions">
           <button class="btn small" type="button" data-kit="mark">+ A sheet of marks</button>
+          <button class="btn small" type="button" data-kit="brush">+ Brush strokes</button>
+          <button class="btn small" type="button" data-kit="drawing">+ A drawing</button>
           <button class="btn small" type="button" data-kit="paper">+ Paper</button>
           <button class="btn small" type="button" data-kit="stamp">+ Stamp or monogram</button>
           <button class="btn small" type="button" data-kit="texture">+ Tape, torn paper, wash</button>
@@ -545,7 +550,11 @@ const MODES=[
   {id:'news',name:'Newspaper',sub:'Blackletter masthead, halftone photo, columns.',group:'objects'},
   {id:'engraved',name:'Engraved',sub:'Banknote-style line engraving.',group:'objects'},
   {id:'gatefold',name:'Gatefold',sub:'A folded wing that opens a little more each slide.'},
-  {id:'breath',name:'Breath',sub:'The photo grows to a full-bleed peak, then breathes out.'}
+  {id:'breath',name:'Breath',sub:'The photo grows to a full-bleed peak, then breathes out.'},
+  {id:'stroke',name:'Stroke',sub:'Each photo seen through one big brush stroke.',group:'hand'},
+  {id:'swatch',name:'Swatch',sub:'Round, block, bar, arc: the photo changes shape, then opens up.',group:'hand'},
+  {id:'gesture',name:'Gesture',sub:'One colour brush stroke painted across the seams.',group:'hand'},
+  {id:'sketchbook',name:'Sketchbook',sub:'Your drawings and your photos in dialogue.',group:'hand'}
 ];
 const CAPTION_DEFAULT='Some places stay with you long after you leave them, and some light only happens once.';
 const pad2=i=>String(i).padStart(2,'0');
@@ -2116,7 +2125,7 @@ function renderGatefold(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ct
     // printer's fold marks above and below each crease; a hairline crease once the page is flat
     ctx.strokeStyle=acc;ctx.lineWidth=Math.max(2,W*.0025);[x0+cw,x0+2*cw].forEach(x=>{ctx.beginPath();ctx.moveTo(x,y0-W*.05);ctx.lineTo(x,y0-W*.018);ctx.moveTo(x,y0+ph+W*.018);ctx.lineTo(x,y0+ph+W*.05);ctx.stroke()});
     if(lift<.05){ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(hx,y0,1,ph);ctx.fillStyle='rgba(0,0,0,.14)';ctx.fillRect(hx+1,y0,1,ph)}
-    // the bottom-right corner of the first and last slides is kept free for the studio stamp
+    // the bottom-right corner of the first and last slides is kept free for the atelier stamp
     if(j===0&&n>1){const y=y0-W*.08;arrowMark(ctx,hx-dir*cw*.5,y+W*.015,hx+dir*cw*.3,y,W*.004,acc,rnd)}
     if(txt){const ly=y0+ph+W*.1,lt=right||last;ctx.fillStyle='#55524c';ctx.font=mono(W,.016);ctx.textAlign=lt?'left':'right';const lx=lt?x0+L:x0+R;
       ctx.fillText([`${pad2(j+1)} / ${pad2(n)}`,j>0&&(p.note||p.place)?(p.note||p.place).toUpperCase():''].filter(Boolean).join('  ·  '),lx,ly);
@@ -2151,6 +2160,121 @@ function renderBreath(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,
   });
   return slice(big,W,H,S)}
 
+
+/* ---------- Hand-made: brush strokes and drawings from the Atelier, or a few drawn in code until the owner adds his own ---------- */
+const procCache={};
+function procBrush(shape){if(procCache[shape])return procCache[shape];const r=rngOf(9000+[...shape].reduce((a,ch)=>a+ch.charCodeAt(0),0)),ink=a=>`rgba(20,20,20,${a.toFixed(3)})`;let c;
+  if(shape==='round'){const R=380;c=canvas(2*R+40,2*R*.86+40);const x=c.getContext('2d'),cx=c.width/2,cy=c.height/2;
+    x.fillStyle=ink(.95);x.beginPath();for(let i=0;i<=90;i++){const a=i/90*Math.PI*2,rr=R*(.94+.04*Math.sin(a*3+1)+r()*.02);x.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*.86)}x.fill();
+    // bristle gaps swirl inside the disc
+    x.globalCompositeOperation='destination-out';x.lineCap='round';for(let k=0;k<46;k++){const rr=R*(.2+.72*Math.sqrt(r())),a0=r()*7,sw=.5+r()*1.6;x.lineWidth=R*(.004+r()*.012);x.strokeStyle=ink(.35+r()*.4);x.beginPath();x.ellipse(cx,cy,rr,rr*.86,0,a0,a0+sw);x.stroke()}}
+  else if(shape==='arc'){c=canvas(1400,480);const x=c.getContext('2d'),cx=700,cy=1250,R=1060,N=24,T=150;x.lineCap='round';
+    for(let i=0;i<N;i++){const v=(i+.5)/N-.5,a0=-Math.PI/2-.6+r()*.03,a1=-Math.PI/2+.6-r()*.08;let a=a0;
+      while(a<a1){const b=a+.012,t=(a-a0)/(a1-a0),th=T*(.15+.85*Math.sin(Math.PI*clamp(t,0,1))),rr=R+v*th;
+        if(!(t>.72&&r()<(t-.72)*2.2)){x.strokeStyle=ink(.82+r()*.15);x.lineWidth=th/N*1.9;x.beginPath();x.moveTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr);x.lineTo(cx+Math.cos(b)*rr,cy+Math.sin(b)*rr);x.stroke()}a=b}}}
+  else if(shape==='dots'){c=canvas(800,560);const x=c.getContext('2d');for(let i=0;i<24;i++){const a=r()*7,d=Math.sqrt(r()),px=400+Math.cos(a)*d*340,py=280+Math.sin(a)*d*230;
+    rotated(x,px,py,r()*3,()=>{for(let k=0;k<3;k++){x.fillStyle=ink(.5+r()*.4);x.beginPath();x.ellipse((r()-.5)*8,(r()-.5)*6,9+r()*12,5+r()*6,0,0,7);x.fill()}})}}
+  else{const L=shape==='block'?820:1600,T=shape==='line'?64:shape==='block'?520:230,N=shape==='line'?10:Math.round(T/5);c=canvas(L+40,T+40);const x=c.getContext('2d');x.lineCap='round';
+    // a dry-brush bar: one line per bristle, ragged at both ends, running dry toward the end
+    for(let i=0;i<N;i++){const v=(i+.5)/N,edge=Math.abs(v-.5)*2,y0=20+v*T,xs=20+r()*L*.03+edge*edge*L*.05,xe=20+L*(1-r()*.06-edge*edge*r()*.14),lw=T/N*((shape==='block'?2.4:1.5)+r()*.9),ph=r()*6;
+      let px=xs,py=y0;while(px<xe){const nx=Math.min(xe,px+L*(.01+r()*.015)),t=(nx-xs)/(xe-xs),ny=y0+Math.sin(nx*.003+ph)*T*.03;
+        if(!(t>.7&&r()<(t-.7)*(shape==='block'?.8:1.6))){x.strokeStyle=ink(t>.75?.55+r()*.35:.85+r()*.13);x.lineWidth=lw*(t>.85?.7:1);x.beginPath();x.moveTo(px,py);x.lineTo(nx,ny);x.stroke()}px=nx;py=ny}}}
+  c.__shape=shape;procCache[shape]=c;return c}
+// share of the piece's box really covered by ink (alpha over a half)
+function fillOf(c){if(c.__fill!=null)return c.__fill;const t=canvas(48,48),x=t.getContext('2d');x.drawImage(c,0,0,48,48);const d=x.getImageData(0,0,48,48).data;let s=0;for(let i=3;i<d.length;i+=4)if(d[i]>110)s++;return c.__fill=s/2304}
+// the owner's pieces of these shapes, or the drawn ones when he has none
+function brushPool(shapes,minFill){const own=kitOf('brush').filter(i=>shapes.includes(i.shape)&&(!minFill||fillOf(i.canvas)>=minFill)).map(i=>i.canvas);return own.length?own:shapes.map(procBrush)}
+// the piece stretched into a box (turned upright if asked), its alpha made crisp with a little paper grain, so an enlarged stroke keeps a hand-made edge
+const maskCache=new Map();
+function brushMask(m,w,h,rot,seed){w=Math.max(1,Math.round(w));h=Math.max(1,Math.round(h));if(!m.__id)m.__id='k'+(kitSeq++);const key=`${m.__id}|${w}|${h}|${rot?1:0}|${seed}`;if(maskCache.has(key))return maskCache.get(key);
+  const c=canvas(w,h),x=c.getContext('2d'),f=Math.max(rot?h/m.width:w/m.width,rot?w/m.height:h/m.height);x.imageSmoothingQuality='high';
+  // a strongly enlarged piece is softened before its edge is made crisp again, so dry grains become smears, not pixel blocks
+  if(f>3)x.filter=`blur(${Math.min(14,f*.9).toFixed(1)}px)`;if(rot){x.translate(w,0);x.rotate(Math.PI/2);x.drawImage(m,0,0,h,w)}else x.drawImage(m,0,0,w,h);x.filter='none';
+  const id=x.getImageData(0,0,w,h),d=id.data;let s=(seed*2654435761)|0;
+  for(let i=0;i<d.length;i+=4){let a=d[i+3]/255;if(!a)continue;s=(s*1103515245+12345)|0;a+=(((s>>>16)&0x7fff)/32767-.5)*.16;a=clamp((a-.14)/.6,0,1);d[i+3]=Math.round(a*a*(3-2*a)*255);d[i]=d[i+1]=d[i+2]=20}
+  x.putImageData(id,0,0);if(maskCache.size>40)maskCache.clear();maskCache.set(key,c);return c}
+// long bars cannot become a window on their own without being stretched out of shape: a few of them stacked, like strokes laid side by side
+const longOf=m=>Math.max(m.width/m.height,m.height/m.width);
+function barsMask(pool,w,h,rows,seed){w=Math.round(w);h=Math.round(h);const c=canvas(w,h),x=c.getContext('2d'),r=rngOf(seed*31+rows),rh=h/rows;
+  for(let k=0;k<rows;k++){const m=pool[(seed+k)%pool.length],up=m.height>m.width,bw=w*(.9+r()*.1),bh=rh*1.22;x.drawImage(brushMask(m,bw,bh,up,seed+k),k%2?w-bw:0,k*rh-rh*.11+(r()-.5)*rh*.06)}
+  return c}
+// the photo cropped to a box around its subject (analyze keeps faces and subjects inside), with the series treatment
+function photoRect(ctx,p,x,y,w,h){w=Math.round(w);h=Math.round(h);const ai=analyze(p),s=Math.max(w/p.w,h/p.h),gw=Math.max(w,Math.round(p.w*s)),gh=Math.max(h,Math.round(p.h*s)),g=graded(p,gw,gh),
+  sx=clamp(ai.sub.x*gw-w/2,0,gw-w),sy=clamp(ai.sub.y*gh-h/2,0,gh-h);ctx.drawImage(g,sx,sy,w,h,x,y,w,h)}
+// a photo seen through a brush stroke: the stroke's dry edges become the photo's edges
+function photoThrough(ctx,p,mk,x,y,w,h,tilt){const o=canvas(mk.width,mk.height),ox=o.getContext('2d');photoRect(ox,p,0,0,mk.width,mk.height);ox.globalCompositeOperation='destination-in';ox.drawImage(mk,0,0);
+  rotated(ctx,x+w/2,y+h/2,tilt||0,()=>ctx.drawImage(o,-w/2,-h/2,w,h))}
+// a piece painted in one colour, centred on (cx,cy), w×h, turned by a
+function paintBrush(ctx,m,cx,cy,w,h,a,col,rot,alpha){const mk=brushMask(m,rot?h:w,rot?w:h,false,7),t=tinted(mk,col);ctx.save();ctx.globalAlpha=alpha??1;rotated(ctx,cx,cy,a+(rot?Math.PI/2:0),()=>ctx.drawImage(t,-(rot?h:w)/2,-(rot?w:h)/2,rot?h:w,rot?w:h));ctx.restore()}
+const fitIn=(c,mw,mh)=>{const s=Math.min(mw/c.width,mh/c.height);return [c.width*s,c.height*s]};
+
+// Stroke: each photo seen through one big brush stroke, on the series paper
+function renderStroke(W,H){const S=Math.max(1,state.photos.length),{big,ctx,ink,mute,txt,n}=setup(W,H,S),pool=brushPool(['block','bar'],.7);
+  state.photos.forEach((p,j)=>{const ox=j*W,m=pool[(j+state.seed)%pool.length],up=m.width>m.height*1.25,band=txt?H*.12:H*.045,low=j%2===0,
+    w=Math.round(W*.94),h=Math.round(H-band-H*.04),x=ox+(W-w)/2,y=low?H*.03:band+H*.01,tilt=(j%2?1:-1)*.012;
+    photoThrough(ctx,p,longOf(m)>4?barsMask(pool.filter(q=>longOf(q)>4),w,h,3,j+1):brushMask(m,w,h,up,j+1),x,y,w,h,tilt);
+    if(!txt)return;const word=(j===0?state.title:(p.note||p.place))||'',ty=low?H-band*.4:band*.64;
+    ctx.fillStyle=ink;ctx.textAlign='left';
+    if(word){const fs=j===0?fitFont(ctx,word,W*.66,Math.round(W*.055),s=>`italic 400 ${s}px "Bodoni Moda"`):fitFont(ctx,word,W*.66,Math.round(W*.03),s=>`600 ${s}px Archivo`);ctx.fillText(word,ox+W*.06,ty)}
+    ctx.fillStyle=mute;ctx.font=mono(W,.016);ctx.textAlign='right';ctx.fillText(j===n-1&&state.artist&&n>1?signature():`${pad2(j+1)} / ${pad2(n)}`,ox+W*.94,ty)});
+  return slice(big,W,H,S)}
+
+// Swatch: the photo takes the shape of a round, a block, a bar, then an arc frames it; the last slide opens up, a brush line under the signature
+function renderSwatch(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,ink,mute,txt}=setup(W,H,S),acc=seriesAccent(),cyc=['block','bar','arc','round'],small=['dots','line','arc'];
+  const pick=(sh,j,min)=>{const P=brushPool([sh],min);return P[(j+state.seed)%P.length]};
+  state.photos.forEach((p,j)=>{const ox=j*W,last=n>1&&j===n-1,role=j===0?'round':last?'final':cyc[(j-1)%4],band=txt?H*.11:H*.04;let accDone=false;
+    if(role==='final'){const w=W*.94,h=H-band-H*.1,x=ox+W*.03,y=H*.03;photoRect(ctx,p,x,y,w,h);const ly=y+h+(txt?W*.075:W*.04),line=pick('line',j);
+      let lw=W*.4;if(txt&&state.artist){ctx.fillStyle=ink;ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;lw=Math.max(W*.2,spaced(ctx,signature(),x,ly,W*.005,'left')*1.1)}
+      else if(txt&&state.title){ctx.fillStyle=ink;fitFont(ctx,state.title,W*.7,Math.round(W*.04),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='left';ctx.fillText(state.title,x,ly);lw=Math.max(W*.2,ctx.measureText(state.title).width*1.05)}
+      const lr=line.width>line.height,lh=clamp(lw/Math.max(lr?line.width/line.height:line.height/line.width,1)*1.4,W*.012,W*.03);paintBrush(ctx,line,x+lw/2,ly+W*.022,lw,lh,-.01,acc,!lr);return}
+    if(role==='arc'){const w=W*.88,h=H*.7,x=ox+W*.06,y=H*.05;photoRect(ctx,p,x,y,w,h);const a=pick('arc',j),ar=a.width>=a.height,aw=W*.74,ah=aw/Math.max(ar?a.width/a.height:a.height/a.width,1);
+      paintBrush(ctx,a,x+W*.24,y+h-ah*.05,aw,ah,-.42,ink,!ar,.92);
+      const d=pick('dots',j);paintBrush(ctx,d,x+w-W*.06,y+h+W*.06,W*.22,W*.22*d.height/d.width,0,acc,false,.95);accDone=true}
+    else{const m=pick(role,j,role==='round'?.55:.7),up=role==='bar'?m.width>m.height:role==='block'?m.width>m.height*1.25:false,w=Math.round(W*(role==='round'?.97:.92)),h=Math.round(H-band-H*.045),x=ox+(W-w)/2,y=H*.03;
+      photoThrough(ctx,p,role==='bar'?barsMask(brushPool(['bar'],.7),w,h,4,j+3):brushMask(m,w,h,up,j+3),x,y,w,h,(j%2?1:-1)*.01)}
+    if(!accDone){const sh=small[j%3],m=pick(sh,j),wide=m.width>=m.height,sw=W*(sh==='line'?.26:.2),shh=sw/Math.max(wide?m.width/m.height:m.height/m.width,1);paintBrush(ctx,m,ox+W*.84,H*.07,sw,Math.max(shh,W*.012),sh==='line'?-.5:.2,acc,!wide,.95)}
+    if(!txt)return;const word=(j===0?state.title:(p.note||p.place))||'',ty=H-band*.38;ctx.textAlign='left';ctx.fillStyle=ink;
+    if(word){if(j===0)fitFont(ctx,word,W*.7,Math.round(W*.05),s=>`italic 400 ${s}px "Bodoni Moda"`);else fitFont(ctx,word.toUpperCase(),W*.7,Math.round(W*.018),s=>`400 ${s}px "DM Mono"`);ctx.fillText(j===0?word:word.toUpperCase(),ox+W*.06,ty)}
+    ctx.fillStyle=mute;ctx.font=mono(W,.016);ctx.textAlign='right';ctx.fillText(pad2(j+1),ox+W*.94,ty)});
+  return slice(big,W,H,S)}
+
+// Gesture: photos near full-bleed; one colour brush bar crosses each other seam, painted over the whole carousel
+function renderGesture(W,H){const n=state.photos.length,S=Math.max(1,n),{big,ctx,ink,mute,txt}=setup(W,H,S),acc=seriesAccent(),bars=brushPool(['bar'],.6),dots=brushPool(['dots']);
+  const mx=W*.045,y=H*.04,h=H*(txt?.85:.91);
+  state.photos.forEach((p,j)=>{const ox=j*W;photoRect(ctx,p,ox+mx,y,W-2*mx,h);
+    const d=dots[j%dots.length],dw=W*.27,dh=dw*d.height/d.width;paintBrush(ctx,d,ox+(j%2?W*.17:W*.83),y+h+dh*.12,dw,dh,(j%2?-.2:.25),ink,false,.85);
+    if(txt){ctx.fillStyle=mute;ctx.font=mono(W,.016);ctx.textAlign=j%2?'right':'left';ctx.fillText(`${pad2(j+1)} / ${pad2(n)}`,j%2?ox+W-mx:ox+mx,y+h+W*.055)}});
+  const seams=[];if(n>1)for(let k=0;k<n-1;k+=2)seams.push({sx:(k+1)*W,k,len:W*1.3});else seams.push({sx:W/2,k:0,len:W*.92});
+  seams.forEach((s,i)=>{const m=bars[(i+state.seed)%bars.length],up=m.height>m.width,asp=up?m.height/m.width:m.width/m.height,th=clamp(s.len/asp,H*.07,H*.13),cy=H*(i%2?.3:.64),a=i%2?.05:-.06;
+    paintBrush(ctx,m,s.sx,cy,s.len,th,a,acc,up,.96);
+    if(!txt)return;const p=state.photos[s.k],word=((i===0?state.title:(p.note||p.place))||'').toUpperCase();if(!word)return;
+    const cx=n>1?s.sx-s.len*.27:s.sx,dx=cx-s.sx;ctx.fillStyle='#141414';rotated(ctx,s.sx,cy,a,()=>{fitFont(ctx,word,n>1?s.len*.38:s.len*.7,Math.round(th*.4),q=>`800 ${q}px Archivo`);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(word,dx,0);ctx.textBaseline='alphabetic'})});
+  if(txt&&state.artist){ctx.fillStyle=mute;ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),S*W-W/2,y+h+W*.055,W*.005,'center')}
+  return slice(big,W,H,S)}
+
+// a simple ink sprig, drawn in code, for Sketchbook until the owner adds a drawing
+let sprig=null;
+function procSprig(){if(sprig)return sprig;const c=canvas(640,960),x=c.getContext('2d'),r=rngOf(4401);x.fillStyle=x.strokeStyle='rgba(20,20,20,.92)';x.lineCap='round';
+  const P=t=>[320+Math.sin(t*2.6)*70-t*40,920-t*840];x.lineWidth=9;x.beginPath();for(let t=0;t<=1.001;t+=.02){const [a,b]=P(t);t?x.lineTo(a,b):x.moveTo(a,b)}x.stroke();
+  for(let k=0;k<9;k++){const t=.16+k*.09,[a,b]=P(t),side=k%2?1:-1,len=150-k*9;rotated(x,a,b,side*(1.05-t*.5)-Math.PI/2*side*.1,()=>{x.beginPath();x.ellipse(side*len/2,0,len/2,len*.16,0,0,7);x.fill()})}
+  rotated(x,P(1)[0],P(1)[1],-.2,()=>{x.beginPath();x.ellipse(0,-30,26,52,0,0,7);x.fill()});return sprig=c}
+
+// Sketchbook: the owner's drawings and the photos in dialogue; cover = a drawing and the title, last = a small drawing and the signature
+function renderSketchbook(W,H){const n=state.photos.length,S=n+2,{big,ctx,ink,mute,txt,F}=setup(W,H,S),ds=kitOf('drawing'),mult=!(F.dark&&!F.busy);
+  const art=k=>{if(!ds.length)return tinted(procSprig(),ink);const it=ds[k%ds.length];return it.look==='paint'?it.canvas:tinted(it.canvas,ink)};
+  {const c=art(0),bh=H*(txt?.6:.74),[w,h]=fitIn(c,W*.78,bh);ctx.drawImage(c,(W-w)/2,H*.1+(bh-h)/2,w,h);
+    if(txt){ctx.fillStyle=mute;ctx.font=mono(W,.016);ctx.textAlign='left';ctx.fillText(kick('SKETCHBOOK').toUpperCase(),W*.08,H*.06);
+      const t=state.title||'';ctx.fillStyle=ink;fitFont(ctx,t,W*.84,Math.round(W*.07),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='center';ctx.fillText(t,W/2,H*.83);
+      ctx.fillStyle=mute;ctx.font=mono(W,.016);ctx.fillText(`${n} PHOTOGRAPH${n>1?'S':''}${ds.length?` · ${ds.length} DRAWING${ds.length>1?'S':''}`:''}`,W/2,H*.83+W*.06)}}
+  state.photos.forEach((p,j)=>{const ox=(j+1)*W,even=j%2===0,w=W*(even?.8:.88),h=H*(even?.76:.68),x=ox+W*.06,y=H*(even?.06:.26);photoRect(ctx,p,x,y,w,h);
+    const c=art(j+1),[dw,dh]=fitIn(c,W*(even?.48:.56),H*(even?.4:.22)),dx=even?ox+W*.95-dw:ox+W*.07,dy=even?y+h-dh*.62:y-dh*.72;
+    ctx.save();if(mult)ctx.globalCompositeOperation='multiply';ctx.drawImage(c,dx,dy,dw,dh);ctx.restore();
+    if(txt){const lab=[pad2(j+1),(p.note||p.place||'').toUpperCase()].filter(Boolean).join('  ·  ');ctx.fillStyle=mute;ctx.font=mono(W,.016);ctx.textAlign='left';fitFont(ctx,lab,even?W*.5:W*.8,Math.round(W*.016),s=>`400 ${s}px "DM Mono"`);ctx.fillText(lab,x,y+h+W*.055)}});
+  {const ox=(S-1)*W,c=art(n+1),[w,h]=fitIn(c,W*.34,H*.3);ctx.drawImage(c,ox+(W-w)/2,H*.36,w,h);
+    if(txt){ctx.fillStyle=ink;if(state.artist){ctx.font=`500 ${Math.round(W*.0175)}px Archivo`;spaced(ctx,signature(),ox+W/2,H*.36+h+W*.1,W*.005,'center')}
+      else if(state.title){fitFont(ctx,state.title,W*.7,Math.round(W*.04),s=>`italic 400 ${s}px "Bodoni Moda"`);ctx.textAlign='center';ctx.fillText(state.title,ox+W/2,H*.36+h+W*.1)}}}
+  return slice(big,W,H,S)}
+
 /* ---------- Photo metadata (EXIF date and GPS) ---------- */
 function readExif(buf){
   const v=new DataView(buf);if(v.byteLength<4||v.getUint16(0)!==0xFFD8)return null;let o=2;
@@ -2180,7 +2304,8 @@ let thumbKey='';
 function RENDERERS(){return {twin:renderTwin,sketch:renderSketch,fault:renderFault,slats:renderSlats,strata:renderStrata,vellum:renderVellum,salon:renderSalon,ripple:renderRipple,measure:renderMeasure,burst:renderBurst,polaroid:renderPolaroid,mirror:renderMirror,tiles:renderTiles,orbit:renderOrbit,smart:renderSmart,split:renderSplit,zoom:renderZoom,mood:renderMood,cascade:renderCascade,bauhaus:renderBauhaus,letter:renderLetter,echo:renderEcho,pano:renderPano,serie:renderSerie,letters:renderLetters,route:renderRoute,fragments:renderFragments,film:renderFilm,windows:renderWindows,scrap:renderScrap,
   glitch:renderGlitch,holo:renderHolo,hud:renderHud,dither:renderDither,float:renderFloat,kaleido:renderKaleido,
   swap:renderSwap,journal:renderJournal,halftone:renderHalftone,skyline:renderSkyline,carto:renderCarto,index:renderIndex,book:renderBook,
-  bento:renderBento,ticket:renderTicket,stamps:renderStamps,neon:renderNeon,contact:renderContact,blueprint:renderBlueprint,news:renderNews,engraved:renderEngraved,gatefold:renderGatefold,breath:renderBreath}}
+  bento:renderBento,ticket:renderTicket,stamps:renderStamps,neon:renderNeon,contact:renderContact,blueprint:renderBlueprint,news:renderNews,engraved:renderEngraved,gatefold:renderGatefold,breath:renderBreath,
+  stroke:renderStroke,swatch:renderSwatch,gesture:renderGesture,sketchbook:renderSketchbook}}
 const rendererOf=id=>{const s=SIG.find(x=>x.id===id);return s?s.r:id};
 const metaOf=id=>SIG.find(x=>x.id===id)||MODES.find(m=>m.id===id);
 const LAB=()=>MODES.filter(m=>!SIG.some(s=>s.r===m.id));
@@ -2204,7 +2329,7 @@ async function render(){
 }
 function setBusy(b,msg){const el=$('renderState');el.classList.toggle('busy',b);el.textContent=b?'Composing the series…':(msg||`Ready · ${urls.length} image${urls.length>1?'s':''}`);
   const s=$('saveAll');s.disabled=b||!blobs.length||isSample();s.textContent=b?'Composing…':isSample()?'Import your photos to export':`Export ${urls.length} images`}
-function usesPaper(){const s=SIG.find(x=>x.id===state.mode);return s?!!s.paper:['letters','fragments','scrap','route','pano','serie'].includes(state.mode)}
+function usesPaper(){const s=SIG.find(x=>x.id===state.mode);return s?!!s.paper:['letters','fragments','scrap','route','pano','serie','stroke','swatch','gesture','sketchbook'].includes(state.mode)}
 function updateMeta(){const m=metaOf(state.mode)||{},F=FORMATS.find(f=>f.id===state.format),t=TIRAGES.find(t=>t.id===state.tirage);
   $('stageInfo').textContent=`${m.name||''} · ${urls.length} slides · ${F.id==='34'?'3:4':'4:5'}${t&&t.id!=='original'?' · '+t.name:''}`;
   $('exampleBadge').hidden=!isSample();
@@ -2309,7 +2434,7 @@ function buildStory(){
 $('labBox').addEventListener('toggle',()=>thumbs());$('allBox').addEventListener('toggle',()=>thumbs());
 // the Lab, sorted by where each layout came from
 const LAB_GROUPS=[{id:'',name:'Experiments',sub:'Graphic games played with your own photos.'},{id:'inspired',name:'From the moodboards',sub:'Ideas borrowed from posters, zines and maps.'},
-  {id:'objects',name:'Objects',sub:'Your photos printed on tickets, stamps, signs and sheets.'},{id:'future',name:'Future',sub:'Screens, glass and pixels.'}];
+  {id:'objects',name:'Objects',sub:'Your photos printed on tickets, stamps, signs and sheets.'},{id:'hand',name:'Hand-made',sub:'Brush strokes and drawings from your Atelier, or drawn ones until you add yours.'},{id:'future',name:'Future',sub:'Screens, glass and pixels.'}];
 // Thumbnails: only the cards you can see, one at a time, after the main preview
 let thumbJob=0,thumbT;
 function visibleTpls(){return [...document.querySelectorAll('.tpl')].filter(b=>{const d=b.closest('details'),p=b.closest('.panel');return (!d||d.open)&&p&&!p.hidden})}
@@ -2430,26 +2555,136 @@ function blobToPhoto(blob,name){return new Promise((res,rej)=>{const url=URL.cre
 async function loadProject(){try{const list=await DB.get('photos');if(!list||!list.length)return false;const out=[];
   for(const it of list){try{const p=await blobToPhoto(it.blob,it.name);p.place=it.place;p.note=it.note||'';p.meta=it.meta;p.blob=it.blob;out.push(p)}catch(e){}}
   if(out.length){state.photos=out;return true}}catch(e){}return false}
-/* ---------- Studio kit: hand-made marks, papers, a stamp and textures, kept on this device ---------- */
+/* ---------- Atelier (ids and keys still say kit/studio): hand-made marks, brush strokes, drawings, papers, a stamp and textures, kept on this device ---------- */
 const kit={items:[],ver:0};let kitSeq=1;
-// black ink on white paper becomes ink on transparency: no cut-out needed
+// Ink on a photographed sheet: the paper is found first (bright blocks not reached from the photo's border),
+// the local paper level is estimated block by block, so uneven daylight keeps thin and dry strokes.
+function sheetAlpha(d,w,h,colour){const b=Math.max(4,Math.round(Math.max(w,h)/250)),bw=Math.ceil(w/b),bh=Math.ceil(h/b),N=bw*bh,L=new Float32Array(w*h);
+  for(let i=0,k=0;k<w*h;i+=4,k++)L[k]=.299*d[i]+.587*d[i+1]+.114*d[i+2];
+  const mean=new Float32Array(N),top=new Float32Array(N),cnt=new Float32Array(N),sq=new Float32Array(N),mr=new Float32Array(N),mg=new Float32Array(N),mb=new Float32Array(N);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const k=((y/b)|0)*bw+((x/b)|0),p=y*w+x,l=L[p];mean[k]+=l;sq[k]+=l*l;cnt[k]++;if(l>top[k])top[k]=l;mr[k]+=d[p*4];mg[k]+=d[p*4+1];mb[k]+=d[p*4+2]}
+  const sd=new Float32Array(N),chr=new Float32Array(N);
+  for(let k=0;k<N;k++){const c=cnt[k]||1;mean[k]/=c;mr[k]/=c;mg[k]/=c;mb[k]/=c;sd[k]=Math.sqrt(Math.max(0,sq[k]/c-mean[k]*mean[k]));chr[k]=Math.max(mr[k],mg[k],mb[k])-Math.min(mr[k],mg[k],mb[k])}
+  // Otsu on block means separates paper from fabric, table and ink
+  const hist=new Float64Array(256);for(let k=0;k<N;k++)hist[Math.min(255,mean[k]|0)]++;let sum=0;for(let i=0;i<256;i++)sum+=i*hist[i];
+  let wB=0,sB=0,best=0,thr=128;for(let i=0;i<256;i++){wB+=hist[i];if(!wB)continue;const wF=N-wB;if(!wF)break;sB+=i*hist[i];const mB=sB/wB,mF=(sum-sB)/wF,v=wB*wF*(mB-mF)*(mB-mF);if(v>best){best=v;thr=i}}
+  const bright=new Uint8Array(N);for(let k=0;k<N;k++)bright[k]=mean[k]>thr?1:0;
+  // a shadow on the paper (the phone, a hand) is a wide, smooth, neutral grey: it is still paper, only darker
+  {const pl=[],pc=[];for(let k=0;k<N;k++)if(bright[k]){pl.push(mean[k]);pc.push(chr[k])}pl.sort((a,b)=>a-b);pc.sort((a,b)=>a-b);const hi=pl[Math.floor(pl.length*.9)]||255,c0=pc[Math.floor(pc.length*.5)]||0;
+    const sh=new Uint8Array(N);for(let y=2;y<bh-2;y++)for(let x=2;x<bw-2;x++){const k=y*bw+x;if(bright[k]||mean[k]<hi*.6||chr[k]>c0+10)continue;let ok=1;for(let a=-2;a<=2&&ok;a++)for(let e=-2;e<=2;e++)if(sd[k+a*bw+e]>2.2){ok=0;break}sh[k]=ok}
+    for(let k=0;k<N;k++)if(sh[k])bright[k]=1}
+  // the sheet is the largest bright region: a page behind it, a white wall or a lamp are not
+  {const cl=new Int32Array(N);let id=0,bestId=0,bestN=0;for(let i=0;i<N;i++){if(!bright[i]||cl[i])continue;id++;let c=0;const s=[i];cl[i]=id;
+    while(s.length){const k=s.pop(),x=k%bw,y=(k/bw)|0;c++;if(x>0&&bright[k-1]&&!cl[k-1]){cl[k-1]=id;s.push(k-1)}if(x<bw-1&&bright[k+1]&&!cl[k+1]){cl[k+1]=id;s.push(k+1)}if(y>0&&bright[k-bw]&&!cl[k-bw]){cl[k-bw]=id;s.push(k-bw)}if(y<bh-1&&bright[k+bw]&&!cl[k+bw]){cl[k+bw]=id;s.push(k+bw)}}
+    if(c>bestN){bestN=c;bestId=id}}
+    for(let k=0;k<N;k++)bright[k]=cl[k]===bestId?1:0}
+  // background: what is not paper and is reached from the border (fabric, spiral rings, table)
+  const bg=new Uint8Array(N),st=[];for(let x=0;x<bw;x++){st.push(x,(bh-1)*bw+x)}for(let y=0;y<bh;y++){st.push(y*bw,y*bw+bw-1)}
+  while(st.length){const k=st.pop();if(bg[k]||bright[k])continue;bg[k]=1;const x=k%bw,y=(k/bw)|0;if(x>0)st.push(k-1);if(x<bw-1)st.push(k+1);if(y>0)st.push(k-bw);if(y<bh-1)st.push(k+bw)}
+  // local paper level (and colour): bright paper blocks are known, the others are filled from their neighbours, then smoothed
+  const F=colour?4:1;let V=[new Float32Array(N),new Float32Array(N),new Float32Array(N),new Float32Array(N)].slice(0,F),known=new Uint8Array(N),pv=[];
+  for(let k=0;k<N;k++)if(bright[k]&&!bg[k]){V[0][k]=top[k]*.5+mean[k]*.5;if(colour){V[1][k]=mr[k];V[2][k]=mg[k];V[3][k]=mb[k]}known[k]=1;pv.push(V[0][k])}
+  pv.sort((a,b)=>a-b);const Pg=pv.length?pv[Math.floor(pv.length*.5)]:255;
+  const nz=[];for(let k=0;k<N;k++)if(bright[k]&&!bg[k])nz.push(sd[k]);nz.sort((a,b)=>a-b);const noise=nz.length?nz[Math.floor(nz.length*.5)]:1;
+  for(let it=0;it<400;it++){let left=0;const nk=known.slice(),nV=V.map(a=>a.slice());
+    for(let y=0;y<bh;y++)for(let x=0;x<bw;x++){const k=y*bw+x;if(known[k])continue;const nb=[];if(x>0&&known[k-1])nb.push(k-1);if(x<bw-1&&known[k+1])nb.push(k+1);if(y>0&&known[k-bw])nb.push(k-bw);if(y<bh-1&&known[k+bw])nb.push(k+bw);
+      if(nb.length){for(let f=0;f<F;f++){let s=0;nb.forEach(q=>s+=V[f][q]);nV[f][k]=s/nb.length}nk[k]=1}else left++}
+    V=nV;known=nk;if(!left)break}
+  for(let k=0;k<N;k++)if(!known[k])for(let f=0;f<F;f++)V[f][k]=Pg;
+  for(let pass=0;pass<3;pass++)V=V.map(P=>{const Q=new Float32Array(N);for(let y=0;y<bh;y++)for(let x=0;x<bw;x++){let s=0,c=0;for(let a=-1;a<=1;a++)for(let e=-1;e<=1;e++){const yy=y+a,xx=x+e;if(yy<0||xx<0||yy>=bh||xx>=bw)continue;s+=P[yy*bw+xx];c++}Q[y*bw+x]=s/c}return Q});
+  const P=V[0];
+  // the darkest ink on the paper
+  const iv=[];for(let k=0;k<w*h;k+=7){const bk=((((k/w)|0)/b)|0)*bw+(((k%w)/b)|0);if(!bg[bk])iv.push(L[k])}iv.sort((a,b)=>a-b);const ink=iv.length?iv[Math.floor(iv.length*.01)]:0;
+  const A=new Uint8Array(w*h),C=colour?new Uint8ClampedArray(w*h*3):null;
+  for(let y=0;y<h;y++){const fy=clamp(y/b-.5,0,bh-1),y0=fy|0,y1=Math.min(bh-1,y0+1),ty=fy-y0;
+    for(let x=0;x<w;x++){const bx=(x/b)|0,by=(y/b)|0;if(bg[by*bw+bx])continue;const fx=clamp(x/b-.5,0,bw-1),x0=fx|0,x1=Math.min(bw-1,x0+1),tx=fx-x0,
+      bil=Q=>(Q[y0*bw+x0]*(1-tx)+Q[y0*bw+x1]*tx)*(1-ty)+(Q[y1*bw+x0]*(1-tx)+Q[y1*bw+x1]*tx)*ty,p=bil(P),ref=p-Math.max(6,p*.028),q=y*w+x;let a=clamp((ref-L[q])/Math.max(25,ref-ink),0,1);
+      if(colour){// colour counts as ink too: a watercolour wash is often lighter than the paper's grey but far more saturated; its colour is lifted off the paper
+        const pr=bil(V[1]),pg=bil(V[2]),pb=bil(V[3]),r=d[q*4],g=d[q*4+1],bl=d[q*4+2],ca=clamp((Math.max(r,g,bl)-Math.min(r,g,bl)-(Math.max(pr,pg,pb)-Math.min(pr,pg,pb))-14)/70,0,1);a=Math.max(Math.pow(a,.8),ca);
+        if(a>.02){const k3=q*3;C[k3]=(r-(1-a)*pr)/a;C[k3+1]=(g-(1-a)*pg)/a;C[k3+2]=(bl-(1-a)*pb)/a}A[q]=Math.round(a*255)}
+      else A[q]=Math.round(Math.pow(a,.8)*255)}}
+  return {A,C,L,P,w,h,b,bw,bh,bg,noise}}
+// pieces: connected strokes after a small closing; fragments of a dry stroke are merged, a cluster of dots becomes one piece
+function sheetPieces(S,o={}){const {A,L,P,w,h,b,bw,bh,bg}=S,nzs=S.noise||1,sc=Math.max(1,Math.round(Math.max(w,h)/1000)),gw=Math.ceil(w/sc),gh=Math.ceil(h/sc),G=gw*gh,ink=new Uint8Array(G);
+  // solid ink: the cell is clearly darker than its paper; grain: a faint cell whose neighbourhood is rough (dry brush), paper is smooth
+  const acc=new Float32Array(G),n=new Float32Array(G),sl=new Float32Array(G),sq=new Float32Array(G),gr=new Uint8Array(G);
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){const k=((y/sc)|0)*gw+((x/sc)|0),l=L[y*w+x];acc[k]+=A[y*w+x];n[k]++;sl[k]+=l;sq[k]+=l*l}
+  for(let k=0;k<G;k++){acc[k]/=n[k];ink[k]=acc[k]>46?1:0}
+  for(let y=1;y<gh-1;y++)for(let x=1;x<gw-1;x++){const k=y*gw+x;if(ink[k])continue;let s1=0,s2=0,c=0;for(let a=-1;a<=1;a++)for(let e=-1;e<=1;e++){const q=k+a*gw+e;s1+=sl[q];s2+=sq[q];c+=n[q]}
+    const m=s1/c,sd=Math.sqrt(Math.max(0,s2/c-m*m)),p=P[(((y*sc)/b)|0)*bw+(((x*sc)/b)|0)];if(sd>Math.max(3,nzs*2.5)&&m<p-Math.max(3,nzs*2)&&m>p*.55)gr[k]=1}
+  const dil=(M,r)=>{const t=new Uint8Array(G),o=new Uint8Array(G);for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){let v=0;for(let e=-r;e<=r&&!v;e++){const xx=x+e;if(xx>=0&&xx<gw&&M[y*gw+xx])v=1}t[y*gw+x]=v}
+    for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){let v=0;for(let e=-r;e<=r&&!v;e++){const yy=y+e;if(yy>=0&&yy<gh&&t[yy*gw+x])v=1}o[y*gw+x]=v}return o};
+  const D=dil(ink,o.drawing?1:2);if(!o.drawing){const D1=dil(gr,1);for(let k=0;k<G;k++){if(D1[k])D[k]=1;if(gr[k])ink[k]=1}}
+  // background seen from the grid, grown by one block
+  const bgG=new Uint8Array(G);for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){const bx=((x*sc)/b)|0,by=((y*sc)/b)|0;let v=0;for(let a=-1;a<=1&&!v;a++)for(let e=-1;e<=1&&!v;e++){const yy=by+a,xx=bx+e;if(yy>=0&&xx>=0&&yy<bh&&xx<bw&&bg[yy*bw+xx])v=1}bgG[y*gw+x]=v}
+  // the rim of the sheet (its shadow, the binding) is never a stroke: a stroke that runs to the edge is cut there, not welded to it
+  for(let k=0;k<G;k++)if(bgG[k]){D[k]=0;ink[k]=0}
+  const lab=new Int32Array(G),C=[];let nl=0;
+  for(let i=0;i<G;i++){if(!D[i]||lab[i])continue;nl++;const c={id:nl,x0:gw,y0:gh,x1:0,y1:0,n:0,raw:0,as:0,near:0,edge:false,sx:0,sy:0,sxx:0,syy:0,sxy:0};const s=[i];lab[i]=nl;
+    while(s.length){const k=s.pop(),x=k%gw,y=(k/gw)|0;c.n++;if(ink[k]){c.raw++;c.as+=acc[k]}if((x>0&&bgG[k-1])||(x<gw-1&&bgG[k+1])||(y>0&&bgG[k-gw])||(y<gh-1&&bgG[k+gw]))c.near++;if(x===0||y===0||x===gw-1||y===gh-1)c.edge=true;
+      if(x<c.x0)c.x0=x;if(x>c.x1)c.x1=x;if(y<c.y0)c.y0=y;if(y>c.y1)c.y1=y;c.sx+=x;c.sy+=y;c.sxx+=x*x;c.syy+=y*y;c.sxy+=x*y;
+      for(let a=-1;a<=1;a++)for(let e=-1;e<=1;e++){if(!a&&!e)continue;const xx=x+e,yy=y+a;if(xx<0||yy<0||xx>=gw||yy>=gh)continue;const q=yy*gw+xx;if(D[q]&&!lab[q]){lab[q]=nl;s.push(q)}}}
+    C.push(c)}
+  // paper area (in grid cells) to judge what is too big to be a stroke
+  let paper=0;for(let k=0;k<bw*bh;k++)if(!bg[k])paper++;paper*=b*b/(sc*sc);
+  const gmax=Math.max(gw,gh),speck=Math.max(6,Math.round(gmax*gmax*.000012)),small=gmax*gmax*.0006;
+  let live=o.drawing?C.slice():C.filter(c=>!c.edge&&c.near<Math.sqrt(c.n)*.45&&c.n<paper*.25&&(c.x1-c.x0+1)*(c.y1-c.y0+1)<paper*.4);
+  // fragments of one dry stroke: a small piece whose box lies mostly inside a bigger piece's box joins it
+  const into=new Map(),join=(B,a)=>{['n','raw','as','near','sx','sy','sxx','syy','sxy'].forEach(k=>B[k]+=a[k]);B.x0=Math.min(B.x0,a.x0);B.y0=Math.min(B.y0,a.y0);B.x1=Math.max(B.x1,a.x1);B.y1=Math.max(B.y1,a.y1);into.set(a.id,B.id)};
+  live.sort((p,q)=>q.n-p.n);
+  for(let i=live.length-1;i>0;i--){const a=live[i],ab=(a.x1-a.x0+1)*(a.y1-a.y0+1);
+    for(let j=0;j<i;j++){const B=live[j];if(B.n<a.n*3)continue;const ix=Math.max(0,Math.min(a.x1,B.x1)-Math.max(a.x0,B.x0)+1),iy=Math.max(0,Math.min(a.y1,B.y1)-Math.max(a.y0,B.y0)+1);
+      if(ix*iy>=ab*.6){join(B,a);live.splice(i,1);break}}}
+  // dots: small pieces with close small neighbours become one cluster; a lone speck is dropped
+  const sm=live.filter(c=>c.n<small),big=live.filter(c=>c.n>=small),link=gmax*.035,cen=c=>[(c.x0+c.x1)/2,(c.y0+c.y1)/2],grp=sm.map((_,i)=>i),fd=i=>grp[i]===i?i:(grp[i]=fd(grp[i]));
+  for(let i=0;i<sm.length;i++)for(let j=i+1;j<sm.length;j++){const [ax,ay]=cen(sm[i]),[bx2,by2]=cen(sm[j]);if(Math.hypot(ax-bx2,ay-by2)<link)grp[fd(i)]=fd(j)}
+  const clusters=new Map();sm.forEach((c,i)=>{const g=fd(i);if(!clusters.has(g))clusters.set(g,[]);clusters.get(g).push(c)});
+  const out=big.map(c=>Object.assign(c,{shape:shapeOf(c,gmax)}));
+  // a drawing's photo: the faint straight edge of a sheet lying underneath is not part of it
+  if(o.drawing)for(let i=out.length-1;i>=0;i--){const c=out[i];if(c.shape==='line'&&c.as/Math.max(1,c.raw)<110&&c.stat.len>gmax*.2)out.splice(i,1)}
+  for(const list of clusters.values()){if(list.length>=5){const B=list[0];list.slice(1).forEach(a=>join(B,a));B.shape='dots';out.push(B)}else list.forEach(c=>{if(c.raw>=speck*4)out.push(Object.assign(c,{shape:'other'}))})}
+  const fin=new Int32Array(nl+1);for(let i=1;i<=nl;i++){let k=i,g=0;while(into.has(k)&&g++<60)k=into.get(k);fin[i]=k}
+  return {pieces:out.sort((p,q)=>p.y0-q.y0||p.x0-q.x0).slice(0,o.max||40),lab,fin,sc,gw,gh}}
+// line, bar, block, round, arc or other, from the stroke's own extent: length, thickness, bend and fill
+function shapeOf(c,gmax){const n=c.n,mx=c.sx/n,my=c.sy/n,vxx=c.sxx/n-mx*mx,vyy=c.syy/n-my*my,vxy=c.sxy/n-mx*my,tr=vxx+vyy,dt=vxx*vyy-vxy*vxy,q=Math.sqrt(Math.max(0,tr*tr/4-dt)),l1=tr/2+q,l2=Math.max(.01,tr/2-q);
+  const len=Math.sqrt(12*l1),wid=Math.sqrt(12*l2),thick=n/len,aspect=len/wid,fill=n/(len*wid),slim=len/thick,bend=wid/thick,ink=c.raw/len;
+  c.stat={len,wid,thick,aspect,fill,slim,bend,ink};
+  if(slim>=5&&bend>2.2&&fill<.5)return 'arc';
+  if(slim>=17||(slim>=6&&ink<gmax*.014&&bend<1.6))return 'line';
+  if(slim>=4.5)return bend>1.6?'arc':'bar';
+  if(n<gmax*gmax*.0015)return 'other';
+  if(aspect<1.6)return fill>.3?'round':'other';
+  if(fill>.62)return 'block';
+  return 'other'}
+// a drawing is one piece: the biggest ink and everything close to it; another sheet's drawing at the edge of the photo stays out
+function drawingKeep(R,S){const gm=Math.max(R.gw,R.gh);let cx=0,cy=0,cn=0;for(let k=0;k<S.bg.length;k++)if(!S.bg[k]){cx+=k%S.bw;cy+=(k/S.bw)|0;cn++}
+  cx=(cn?cx/cn:S.bw/2)*S.b/R.sc;cy=(cn?cy/cn:S.bh/2)*S.b/R.sc;
+  // the drawing is the most ink nearest the middle of the sheet: a drawing on a sheet underneath lies off-centre
+  const score=c=>{const d=Math.hypot((c.x0+c.x1)/2-cx,(c.y0+c.y1)/2-cy)/gm;return c.raw/(1+10*d*d)},all=R.pieces.slice().sort((a,b)=>score(b)-score(a));if(!all.length)return null;
+  // faint specks (paper grain) and what runs off the photo's border are not the drawing, unless it is the drawing itself
+  const P=[all[0],...all.slice(1).filter(c=>!c.edge&&!(c.raw<gm*gm*.0008&&c.as/Math.max(1,c.raw)<100))],g=gm*.03,keep=new Set([P[0]]),bx={x0:P[0].x0,y0:P[0].y0,x1:P[0].x1,y1:P[0].y1};
+  for(let grew=true;grew;){grew=false;for(const p of P){if(keep.has(p))continue;const dx=Math.max(0,bx.x0-p.x1,p.x0-bx.x1),dy=Math.max(0,bx.y0-p.y1,p.y0-bx.y1);
+    if(Math.hypot(dx,dy)<g){keep.add(p);bx.x0=Math.min(bx.x0,p.x0);bx.y0=Math.min(bx.y0,p.y0);bx.x1=Math.max(bx.x1,p.x1);bx.y1=Math.max(bx.y1,p.y1);grew=true}}}
+  return {ids:new Set([...keep].map(p=>p.id)),box:bx}}
+// black ink on white paper becomes ink on transparency: no cut-out needed. The paper level is read locally, so uneven daylight keeps faint strokes.
 function inkMask(img,maxSide){const s=Math.min(1,maxSide/Math.max(img.width,img.height)),c=canvas(img.width*s,img.height*s),x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);
-  const id=x.getImageData(0,0,c.width,c.height),d=id.data,L=[];for(let i=0;i<d.length;i+=16)L.push(.299*d[i]+.587*d[i+1]+.114*d[i+2]);L.sort((a,b)=>a-b);
-  const paper=L[Math.floor(L.length*.9)]||255,ink=L[Math.floor(L.length*.02)]||0,span=Math.max(30,paper*.9-ink);
-  for(let i=0;i<d.length;i+=4){const l=.299*d[i]+.587*d[i+1]+.114*d[i+2],a=clamp((paper*.9-l)/span,0,1);d[i]=d[i+1]=d[i+2]=20;d[i+3]=Math.round(Math.pow(a,.8)*255)}
-  x.putImageData(id,0,0);return c}
-// one sheet of marks becomes separate marks: strokes that touch (after a small dilation) stay together
-function sliceMarks(mask){const sc=4,w=Math.ceil(mask.width/sc),h=Math.ceil(mask.height/sc),sm=canvas(w,h),sx=sm.getContext('2d');sx.drawImage(mask,0,0,w,h);
-  const d=sx.getImageData(0,0,w,h).data;let D=new Uint8Array(w*h);for(let i=0;i<w*h;i++)D[i]=d[i*4+3]>40?1:0;
-  for(let it=0;it<3;it++){const N=new Uint8Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const k=y*w+x;N[k]=D[k]||(x>0&&D[k-1])||(x<w-1&&D[k+1])||(y>0&&D[k-w])||(y<h-1&&D[k+w])?1:0}D=N}
-  const lab=new Int32Array(w*h),boxes=[];let L=0;
-  for(let i=0;i<w*h;i++){if(!D[i]||lab[i])continue;L++;let x0=w,y0=h,x1=0,y1=0,cnt=0;const st=[i];lab[i]=L;
-    while(st.length){const k=st.pop(),x=k%w,y=(k/w)|0;cnt++;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;
-      if(x>0&&D[k-1]&&!lab[k-1]){lab[k-1]=L;st.push(k-1)}if(x<w-1&&D[k+1]&&!lab[k+1]){lab[k+1]=L;st.push(k+1)}
-      if(y>0&&D[k-w]&&!lab[k-w]){lab[k-w]=L;st.push(k-w)}if(y<h-1&&D[k+w]&&!lab[k+w]){lab[k+w]=L;st.push(k+w)}}
-    boxes.push({x0,y0,x1,y1,cnt})}
-  const area=w*h;return boxes.filter(b=>b.cnt>area*.0015&&(b.x1-b.x0+1)*(b.y1-b.y0+1)<area*.6).sort((a,b)=>a.y0-b.y0||a.x0-b.x0).slice(0,40).map(b=>{const x=Math.max(0,(b.x0-1)*sc),y=Math.max(0,(b.y0-1)*sc),
-    ww=Math.min(mask.width-x,(b.x1-b.x0+3)*sc),hh=Math.min(mask.height-y,(b.y1-b.y0+3)*sc),c=canvas(ww,hh);c.getContext('2d').drawImage(mask,x,y,ww,hh,0,0,ww,hh);return c})}
+  const id=x.getImageData(0,0,c.width,c.height),d=id.data,S=sheetAlpha(d,c.width,c.height);
+  for(let k=0,i=0;k<S.A.length;k++,i+=4){d[i]=d[i+1]=d[i+2]=20;d[i+3]=S.A[k]}x.putImageData(id,0,0);c.__sheet=S;return c}
+// one sheet of marks becomes separate marks: each piece holds only its own ink, never a neighbour's; whole = every kept piece on one canvas (a stamp)
+function sliceMarks(mask,whole){const S=mask.__sheet;if(!S)return [];const R=sheetPieces(S),{A,w,h}=S,{lab,fin,sc,gw}=R,pad=3*sc;
+  const crop=(keep,x0,y0,x1,y1,shape)=>{x0=Math.max(0,x0*sc-pad);y0=Math.max(0,y0*sc-pad);x1=Math.min(w,(x1+1)*sc+pad);y1=Math.min(h,(y1+1)*sc+pad);
+    const c=canvas(x1-x0,y1-y0),x=c.getContext('2d'),id=x.createImageData(c.width,c.height),d=id.data;
+    for(let y=y0;y<y1;y++)for(let q=x0;q<x1;q++){const l=lab[((y/sc)|0)*gw+((q/sc)|0)];if(!l||!keep.has(fin[l]))continue;const i=((y-y0)*c.width+(q-x0))*4;d[i]=d[i+1]=d[i+2]=20;d[i+3]=A[y*w+q]}
+    x.putImageData(id,0,0);c.__shape=shape;return c};
+  if(whole){if(!R.pieces.length)return [];const P=R.pieces;return [crop(new Set(P.map(p=>p.id)),Math.min(...P.map(p=>p.x0)),Math.min(...P.map(p=>p.y0)),Math.max(...P.map(p=>p.x1)),Math.max(...P.map(p=>p.y1)),'other')]}
+  return R.pieces.map(p=>crop(new Set([p.id]),p.x0,p.y0,p.x1,p.y1,p.shape))}
+// a whole drawing, never sliced: the sheet is found, the drawing lifted off it with its colours and grey washes, then trimmed to itself
+function drawingCut(img,maxSide){const s=Math.min(1,maxSide/Math.max(img.width,img.height)),c=canvas(img.width*s,img.height*s),x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);
+  const w=c.width,h=c.height,d=x.getImageData(0,0,w,h).data,S=sheetAlpha(d,w,h,true),R=sheetPieces(S,{drawing:true,max:400}),K=drawingKeep(R,S);if(!K)return null;
+  const {lab,fin,sc,gw}=R,pad=Math.round(Math.max(w,h)*.012);let {x0,y0,x1,y1}=K.box;x0=Math.max(0,x0*sc-pad);y0=Math.max(0,y0*sc-pad);x1=Math.min(w,(x1+1)*sc+pad);y1=Math.min(h,(y1+1)*sc+pad);
+  const o=canvas(x1-x0,y1-y0),ox=o.getContext('2d'),id=ox.createImageData(o.width,o.height),q=id.data;
+  for(let y=y0;y<y1;y++)for(let k=x0;k<x1;k++){const l=lab[((y/sc)|0)*gw+((k/sc)|0)];if(!l||!K.ids.has(fin[l]))continue;const p=y*w+k,i=((y-y0)*o.width+(k-x0))*4;q[i]=S.C[p*3];q[i+1]=S.C[p*3+1];q[i+2]=S.C[p*3+2];q[i+3]=S.A[p]}
+  ox.putImageData(id,0,0);return o}
 const tintCache=new Map();
 function tinted(c,col){if(!c.__id)c.__id='k'+(kitSeq++);const k=c.__id+'|'+col;if(tintCache.has(k))return tintCache.get(k);const t=canvas(c.width,c.height),x=t.getContext('2d');x.drawImage(c,0,0);
   x.globalCompositeOperation='source-in';x.fillStyle=col;x.fillRect(0,0,t.width,t.height);if(tintCache.size>200)tintCache.clear();tintCache.set(k,t);return t}
@@ -2467,26 +2702,33 @@ function applyStamp(cs,W,H){const st=state.kitStamp==='off'?null:kitOf('stamp')[
 const __drawBackground=drawBackground;drawBackground=function(ctx,T,H,W,S,id,seed){__drawBackground(ctx,T,H,W,S,id,seed);kitPaperOver(ctx,0,0,T,H,W)};
 
 // storage and UI
-async function saveKit(){try{const list=[];for(const it of kit.items){if(!it.blob)it.blob=await new Promise(r=>it.canvas.toBlob(r,it.type==='paper'?'image/jpeg':'image/png',.9));list.push({id:it.id,type:it.type,blob:it.blob})}await DB.set('kit',list)}catch(e){storeWarn('studio kit')}}
-async function loadKit(){try{const list=await DB.get('kit');if(!list)return;for(const it of list){try{const im=await blobImage(it.blob);const c=canvas(im.naturalWidth,im.naturalHeight);c.getContext('2d').drawImage(im,0,0);kit.items.push({id:it.id,type:it.type,canvas:c,blob:it.blob})}catch(e){}}}catch(e){}}
+async function saveKit(){try{const list=[];for(const it of kit.items){if(!it.blob)it.blob=await new Promise(r=>it.canvas.toBlob(r,it.type==='paper'?'image/jpeg':'image/png',.9));list.push({id:it.id,type:it.type,blob:it.blob,shape:it.shape,look:it.look})}await DB.set('kit',list)}catch(e){storeWarn('atelier')}}
+async function loadKit(){try{const list=await DB.get('kit');if(!list)return;for(const it of list){try{const im=await blobImage(it.blob);const c=canvas(im.naturalWidth,im.naturalHeight);c.getContext('2d').drawImage(im,0,0);kit.items.push({id:it.id,type:it.type,canvas:c,blob:it.blob,shape:it.shape||(it.type==='brush'?'other':undefined),look:it.look||(it.type==='drawing'?'ink':undefined)})}catch(e){}}}catch(e){}}
 function blobImage(blob){return new Promise((res,rej)=>{const u=URL.createObjectURL(blob),im=new Image();im.onload=()=>{URL.revokeObjectURL(u);res(im)};im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('image'))};im.src=u})}
 const kid=()=>'kit'+Date.now().toString(36)+Math.floor(Math.random()*1e4);
 let kitType='mark';
 document.querySelectorAll('[data-kit]').forEach(b=>b.onclick=()=>{kitType=b.dataset.kit;$('kitFile').multiple=kitType!=='stamp';$('kitFile').click()});
-$('kitFile').onchange=async e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;let added=0;$('kitMsg').textContent='Reading…';
+$('kitFile').onchange=async e=>{const files=[...e.target.files];e.target.value='';if(!files.length)return;let added=0;const shapes={};$('kitMsg').textContent='Reading…';
   for(const f of files){try{const im=await blobImage(f);
     if(kitType==='mark'){const marks=sliceMarks(inkMask(im,2400));marks.forEach(c=>kit.items.push({id:kid(),type:'mark',canvas:c}));added+=marks.length}
-    else if(kitType==='stamp'){const parts=sliceMarks(inkMask(im,1600)).sort((a,b)=>b.width*b.height-a.width*a.height);const c=parts[0]||inkMask(im,1600);kit.items=kit.items.filter(i=>i.type!=='stamp');kit.items.push({id:kid(),type:'stamp',canvas:c});added++}
+    else if(kitType==='brush'){const ps=sliceMarks(inkMask(im,2400));ps.forEach(c=>{kit.items.push({id:kid(),type:'brush',canvas:c,shape:c.__shape||'other'});shapes[c.__shape||'other']=(shapes[c.__shape||'other']||0)+1});added+=ps.length}
+    else if(kitType==='drawing'){const c=drawingCut(im,2000);if(c){kit.items.push({id:kid(),type:'drawing',canvas:c,look:'ink'});added++}}
+    else if(kitType==='stamp'){const parts=sliceMarks(inkMask(im,1600),true);const c=parts[0]||inkMask(im,1600);kit.items=kit.items.filter(i=>i.type!=='stamp');kit.items.push({id:kid(),type:'stamp',canvas:c});added++}
     else{const s=Math.min(1,(kitType==='paper'?2000:1400)/Math.max(im.naturalWidth,im.naturalHeight)),c=canvas(im.naturalWidth*s,im.naturalHeight*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
       const it={id:kid(),type:kitType,canvas:c};kit.items.push(it);added++;if(kitType==='paper'&&!state.kitPaper){state.kitPaper=it.id;persist()}}}catch(err){}}
-  $('kitMsg').textContent=added?`${added} element${added>1?'s':''} added.${kitType==='mark'?' Each drawing on the sheet became its own mark.':''}`:'Nothing found. Use black ink on white paper, in daylight.';
+  $('kitMsg').textContent=added?(kitType==='brush'?`${added} brush stroke${added>1?'s':''} added: ${Object.entries(shapes).map(([k,v])=>`${v} ${v>1?SHAPE_NAMES[k]||k:(SHAPE_NAMES[k]||k).replace(/s$/,'')}`).join(', ')}.`:kitType==='drawing'?`${added} drawing${added>1?'s':''} added, lifted off the paper.`:`${added} element${added>1?'s':''} added.${kitType==='mark'?' Each drawing on the sheet became its own mark.':''}`):'Nothing found. Use black ink on white paper, in daylight.';
   kit.ver++;saveKit();renderKit();schedule()};
-function renderKit(){const g=$('kitGrid');g.innerHTML='';const names={mark:'Mark',paper:'Paper',stamp:'Stamp',texture:'Texture'};
+const SHAPE_NAMES={line:'lines',bar:'bars',block:'blocks',round:'rounds',arc:'arcs',dots:'dot clusters',other:'others'};
+function renderKit(){const g=$('kitGrid');g.innerHTML='';const names={mark:'Mark',paper:'Paper',stamp:'Stamp',texture:'Texture',brush:'Brush',drawing:'Drawing'};
   kit.items.forEach(it=>{const d=document.createElement('div');d.className='kit-item';const c=canvas(120,120),x=c.getContext('2d');x.fillStyle='#f2f0ea';x.fillRect(0,0,120,120);
     const m=it.canvas,s=Math.min(104/m.width,104/m.height);x.drawImage(m,60-m.width*s/2,60-m.height*s/2,m.width*s,m.height*s);
-    const t=document.createElement('span');t.textContent=names[it.type];const rm=document.createElement('button');rm.type='button';rm.textContent='×';rm.setAttribute('aria-label',`Remove this ${names[it.type].toLowerCase()}`);
-    rm.onclick=()=>{kit.items=kit.items.filter(i=>i!==it);if(state.kitPaper===it.id){state.kitPaper='';persist()}kit.ver++;saveKit();renderKit();schedule()};d.append(c,t,rm);g.append(d)});
-  const n=t=>kitOf(t).length;$('kitCount').textContent=`${n('mark')} marks · ${n('paper')} papers · ${n('stamp')} stamp · ${n('texture')} textures`;
+    const t=document.createElement('span');t.textContent=it.type==='brush'?`Brush · ${it.shape||'other'}`:names[it.type];const rm=document.createElement('button');rm.type='button';rm.textContent='×';rm.setAttribute('aria-label',`Remove this ${names[it.type].toLowerCase()}`);
+    rm.onclick=()=>{kit.items=kit.items.filter(i=>i!==it);if(state.kitPaper===it.id){state.kitPaper='';persist()}kit.ver++;saveKit();renderKit();schedule()};d.append(c,t,rm);
+    // a drawing is used in ink (one colour, like the marks) or as painted (its own colours)
+    if(it.type==='drawing'){const lk=document.createElement('div');lk.className='looks';[['ink','Ink'],['paint','As painted']].forEach(([v,nm])=>{const b=document.createElement('button');b.type='button';b.textContent=nm;b.setAttribute('aria-pressed',(it.look||'ink')===v);
+      b.onclick=()=>{it.look=v;kit.ver++;saveKit();renderKit();schedule()};lk.append(b)});d.append(lk)}
+    g.append(d)});
+  const n=t=>kitOf(t).length;$('kitCount').textContent=`${n('mark')} marks · ${n('brush')} brush strokes · ${n('drawing')} drawings · ${n('paper')} papers · ${n('stamp')} stamp · ${n('texture')} textures`;
   const pb=$('kitPapers');pb.innerHTML='';[{id:'',name:'No paper'},...kitOf('paper').map((p,i)=>({id:p.id,name:`Paper ${i+1}`,c:p.canvas}))].forEach(o=>{const b=document.createElement('button');b.type='button';b.className='fond';b.setAttribute('aria-pressed',state.kitPaper===o.id);
     const c=canvas(180,120);if(o.c)c.getContext('2d').drawImage(o.c,0,0,180,120);const s=document.createElement('span');s.textContent=o.name;b.append(c,s);
     b.onclick=()=>{remember();state.kitPaper=o.id;persist();renderKit();schedule()};pb.append(b)});
