@@ -190,7 +190,19 @@ body{padding-block:14px 96px}
 .kit-item button{all:unset;cursor:pointer;position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,var(--scrim) 13px,transparent 14px);color:var(--ink);display:grid;place-items:center}
 .kit-item button:focus-visible{outline:2px solid var(--acc)}
 .kit-item.bi{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
-.kit-item.bi[aria-pressed="false"] canvas{opacity:.4}
+.kit-item.bi.off canvas{opacity:.4}
+.kit-item button.kit-pick{position:static;width:auto;height:auto;border-radius:0;background:none;display:block;cursor:pointer}
+.kit-item button.kit-pick:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.kit-item.bi[aria-expanded="true"],.kit-item.open{border:2px solid var(--acc)}
+/* tapping a piece in the Atelier: put it on a slide */
+.piece-act{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:var(--raised);border:1px solid var(--line-2);border-radius:var(--r-card)}
+.piece-act .pa-name{margin:0;font-weight:600;font-size:13px;color:var(--ink);flex:1 1 100%}
+.piece-act select{min-height:44px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:0 10px;font:inherit}
+.piece-act .btn{min-height:44px}
+/* free pieces on any slide */
+.stk-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:8px;padding:3px}
+#stkMoveBtn[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.hand-piece .auto.plus{font-size:13px;letter-spacing:.04em;text-transform:none;color:var(--acc)}
 /* Hand-made, slide by slide */
 .hand-now{font-size:12.5px;color:var(--ink);margin:8px 0 0}
 .hand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:8px;max-height:340px;overflow-y:auto;padding:3px;grid-auto-rows:max-content}
@@ -212,7 +224,7 @@ body{padding-block:14px 96px}
 .hand-overlay{position:absolute;left:0;top:0;touch-action:none;cursor:move;z-index:4;overflow:hidden}
 .hand-outline{position:absolute;border:2px dashed var(--acc);border-radius:6px;box-shadow:0 0 0 1px rgba(255,255,255,.7),0 0 0 9999px rgba(0,0,0,.12);transform-origin:center;pointer-events:none}
 .kit-item .bi-state{position:absolute;left:5px;top:5px;font:600 9.5px "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:999px;background:var(--acc);color:var(--acc-ink)}
-.kit-item.bi[aria-pressed="false"] .bi-state{background:var(--raised);color:var(--mut);border:1px solid var(--line-2)}
+.kit-item .bi-off{position:absolute;right:5px;top:5px;font:600 9.5px "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:999px;background:var(--raised);color:var(--mut);border:1px solid var(--line-2)}
 .kit-item.bi .where{font-size:11px;color:var(--ink);padding:0 7px 6px}
 @media (max-width:420px){.hand-sliders{grid-template-columns:1fr}}
 
@@ -479,6 +491,26 @@ body{font:400 13.5px/1.5 var(--ui);padding:0 0 96px}
     </div>
 
     <div class="panel" id="panel-finish" hidden>
+      <div class="group" id="stkBox" hidden><div class="label"><span>Pieces on slide <span id="stkSlide"></span></span></div>
+        <p class="sub" id="stkEmpty">No piece on this slide yet. Add one of your drawings or brush strokes.</p>
+        <div class="stk-row" id="stkList" aria-label="Pieces on this slide"></div>
+        <div class="hand-grid" id="stkPick" hidden aria-label="Pick a piece to add"></div>
+        <div id="stkPlace" hidden>
+          <div class="hand-sliders">
+            <div class="field"><label for="stkSize">Size <span id="stkSizeV"></span></label><input type="range" id="stkSize" min="5" max="120" step="1"></div>
+            <div class="field"><label for="stkTurn">Turn <span id="stkTurnV"></span></label><input type="range" id="stkTurn" min="-180" max="180" step="1"></div>
+          </div>
+          <div class="chips" id="stkLook"></div>
+          <div class="mini-actions hand-nudge">
+            <button class="btn small" type="button" data-snudge="-1,0" aria-label="Move left">←</button>
+            <button class="btn small" type="button" data-snudge="0,-1" aria-label="Move up">↑</button>
+            <button class="btn small" type="button" data-snudge="0,1" aria-label="Move down">↓</button>
+            <button class="btn small" type="button" data-snudge="1,0" aria-label="Move right">→</button>
+            <button class="btn small" type="button" id="stkMoveBtn" aria-pressed="false">Move on the preview</button>
+            <button class="btn small danger" type="button" id="stkRemove">Remove</button>
+          </div>
+        </div>
+      </div>
       <div class="group" id="handBox" hidden><div class="label"><span>Hand-made <i>·</i> slide <span id="handSlide"></span></span></div>
         <p class="sub">Pick and place the pieces slide by slide below. Swipe the preview to change slide.</p>
         <div class="chips" id="handEls"></div>
@@ -512,7 +544,7 @@ body{font:400 13.5px/1.5 var(--ui);padding:0 0 96px}
         <p class="sub">GPS prints the coordinates stored in your photos on Route and some Lab layouts. Keep it off for private places and type a place under each photo instead.</p></div>
       <div class="group" id="terrainBox" hidden><div class="label">Terrain <span id="terrainName"></span></div><div class="chips" id="terrain"></div>
         <p class="sub" id="terrainMsg">Contour lines on the Map print layout and the Topo papers. From GPS asks swisstopo for the real relief around your photos (Switzerland only).</p></div>
-      <div class="group"><button class="kit-link" id="kitLink" type="button"><b>Make it yours <i>·</i> Atelier</b><span>Your own hand-drawn marks, brush strokes, drawings, papers and stamp, used in every layout.</span></button></div>
+      <div class="group"><button class="kit-link" id="kitLink" type="button"><b>Make it yours <i>·</i> Atelier</b><span>Add your drawings and brush strokes to any slide</span></button></div>
       <button class="btn primary next" data-goto="export" type="button">Next: export</button>
     </div>
 
@@ -532,7 +564,7 @@ body{font:400 13.5px/1.5 var(--ui);padding:0 0 96px}
         <div class="kit-grid" id="kitGrid"></div>
       </div>
       <div class="group" id="builtinBox"><div class="label">Ready-made <i>·</i> drawn by hand <span id="builtinCount"></span></div>
-        <p class="sub">Brush strokes and drawings made by hand for Vernissage, used by the Hand-made layouts. Tap one to leave it out; your own imports are added on top.</p>
+        <p class="sub">Tap a piece to put it on a slide.</p>
         <div class="chips" id="kitBuiltinChips"></div>
         <div class="kit-grid" id="builtinGrid"><p class="sub">Loading the ready-made set…</p></div>
       </div>
@@ -692,8 +724,8 @@ const FORMATS=[{id:'34',name:'3:4 · 1080 × 1440',W:1080,H:1440},{id:'45',name:
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
 // A new series starts empty: no title, no name, no year. The example photos are only an inspiration until the first import.
-const state={photos:[],mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',kitMarks:'on',kitStamp:'on',kitPaper:'',kitBuiltin:'on',kitOff:'',handX:'',terrain:'inv'};
-const KEYS=['title','artist','year','caption','kicker','duo','inset','kitMarks','kitStamp','kitPaper','kitBuiltin','kitOff','handX','mode','intent','tirage','fond','texte','gps','format','seed'];
+const state={photos:[],mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',kitMarks:'on',kitStamp:'on',kitPaper:'',kitBuiltin:'on',kitOff:'',handX:'',stickers:'',terrain:'inv'};
+const KEYS=['title','artist','year','caption','kicker','duo','inset','kitMarks','kitStamp','kitPaper','kitBuiltin','kitOff','handX','stickers','mode','intent','tirage','fond','texte','gps','format','seed'];
 try{const s=JSON.parse(localStorage.getItem('vernissage-v2')||'null');
   if(s)KEYS.forEach(k=>{if(k==='seed'){if(typeof s.seed==='number')state.seed=s.seed}else if(typeof s[k]==='string')state[k]=s[k]});
   else{const o=JSON.parse(localStorage.getItem('vernissage-en')||'{}');['title','artist','year','caption','tirage','fond','texte','gps','format'].forEach(k=>{if(typeof o[k]==='string')state[k]=o[k]});if(o.mode)state.mode=LEGACY[o.mode]||o.mode}}catch(e){}
@@ -2236,7 +2268,7 @@ const drawingsAll=()=>[...kitOf('drawing'),...builtinOf('drawing')].map(tagPiece
 /* ---------- Pieces slide by slide: every piece has an id and a name, the renderers record what they used, the owner can swap and place them ---------- */
 // a piece's canvas carries its id and display name, so a renderer that only holds the canvas can say what it drew
 function pieceName(i){if(i.builtin)return i.type==='brush'?`Brush ${(i.file.match(/\d+/)||['?'])[0]} · ${i.shape}`:i.name;
-  const k=kitOf(i.type).indexOf(i)+1;return i.type==='brush'?`My brush ${k} · ${i.shape||'other'}`:`My drawing ${k}`}
+  const k=kitOf(i.type).indexOf(i)+1;return i.type==='brush'?`My brush ${k} · ${i.shape||'other'}`:i.type==='mark'?`My mark ${k}`:`My drawing ${k}`}
 function tagPiece(i){if(i.canvas&&!i.canvas.__pid){i.canvas.__pid=i.id;i.canvas.__pname=pieceName(i)}return i}
 const brushesAll=()=>[...kitOf('brush'),...builtinOf('brush')].map(tagPiece);
 // candidates offered for one element: drawings for the drawing layouts, brush strokes otherwise; the drawn ones when the owner has none
@@ -2434,18 +2466,18 @@ async function ensureFonts(rid){const f=FONT_NEEDS[rid];if(!f)return;try{await P
 function renderWith(id,W,H){const R=RENDERERS();let rid=rendererOf(id);if(state.photos.length<2&&['pano','fragments','windows'].includes(rid))rid='serie';return (R[rid]||renderSmart)(W,H)}
 const isSample=()=>state.photos.some(p=>p.sample);
 async function render(){
-  const my=++pending;setBusy(true);await fontsReady;await ensureFonts(rendererOf(state.mode));if(HAND.includes(rendererOf(state.mode)))await ensureAtelier();if(my!==pending)return;
+  const my=++pending;setBusy(true);await fontsReady;await ensureFonts(rendererOf(state.mode));if(HAND.includes(rendererOf(state.mode))||state.stickers)await ensureAtelier();if(my!==pending)return;
   const F=FORMATS.find(f=>f.id===state.format);
   const key=JSON.stringify([state.photos.map(p=>p.id+'|'+(p.place||'')+'|'+(p.note||'')),state.kicker,state.duo,state.inset,state.kitMarks,state.kitStamp,state.kitPaper,state.kitBuiltin,state.kitOff,kit.ver,state.tirage,state.fond,state.texte,state.gps,state.format,state.seed,state.title,state.artist,state.year,state.caption,state.terrain,useTerrain()?terrain.key:'']);
   if(key!==thumbKey){thumbKey=key;thumbs()}
-  let cs;try{handRec=[];cs=renderWith(state.mode,F.W,F.H);handUsed=handRec;handRec=null;applyStamp(cs,F.W,F.H)}catch(e){handRec=null;console.error(e);setBusy(false,'Rendering failed on this device. Try fewer photos or another layout.');return}
+  let cs;try{handRec=[];cs=renderWith(state.mode,F.W,F.H);handUsed=handRec;handRec=null;applyStamp(cs,F.W,F.H);drawStickers(cs,F.W,F.H)}catch(e){handRec=null;console.error(e);setBusy(false,'Rendering failed on this device. Try fewer photos or another layout.');return}
   const bs=await Promise.all(cs.map(c=>new Promise(r=>c.toBlob(r,'image/jpeg',.96))));if(my!==pending)return;
   urls.forEach(u=>URL.revokeObjectURL(u));blobs=bs;urls=bs.map(b=>URL.createObjectURL(b));
   const keep=car.scrollLeft/Math.max(1,car.clientWidth);
   car.className='carousel'+(state.format==='45'?' r45':'');car.innerHTML='';const strip=$('strip');strip.innerHTML='';strip.className='strip'+(rendererOf(state.mode)==='serie'?' sep':'');
   urls.forEach((u,i)=>{const im=new Image();im.src=u;im.alt=`Image ${i+1} of ${urls.length}`;car.append(im);const s=new Image();s.src=u;s.alt=`Show image ${i+1}`;s.onclick=()=>go(i);strip.append(s)});lastDots='';
   car.scrollLeft=Math.min(Math.round(keep),urls.length-1)*car.clientWidth;dots();
-  setBusy(false);updateMeta();buildOrder();handGen++;updateHand();if(!$('panel-studio').hidden)renderBuiltin();
+  setBusy(false);updateMeta();buildOrder();handGen++;updateHand();updateStk();if(!$('panel-studio').hidden){renderBuiltin();renderKit()}
 }
 function setBusy(b,msg){const el=$('renderState');el.classList.toggle('busy',b);el.textContent=b?'Composing the series…':(msg||`Ready · ${urls.length} image${urls.length>1?'s':''}`);
   const s=$('saveAll');s.disabled=b||!blobs.length||isSample();s.textContent=b?'Composing…':isSample()?'Import your photos to export':`Export ${urls.length} images`}
@@ -2464,7 +2496,7 @@ const curIndex=()=>Math.min(urls.length-1,Math.max(0,Math.round(car.scrollLeft/M
 function go(i){i=clamp(i,0,urls.length-1);const t=i*car.clientWidth;try{car.scrollTo({left:t,behavior:'smooth'})}catch(e){}
   setTimeout(()=>{if(Math.abs(car.scrollLeft-t)>2){car.scrollLeft=t;dots()}},380)}
 let lastDots='';
-function dots(){const n=urls.length,i=curIndex();$('pos').textContent=`${i+1}/${n}`;updateHand();$('prevBtn').hidden=i<=0;$('nextBtn').hidden=i>=n-1;
+function dots(){const n=urls.length,i=curIndex();$('pos').textContent=`${i+1}/${n}`;updateHand();updateStk();$('prevBtn').hidden=i<=0;$('nextBtn').hidden=i>=n-1;
   document.querySelectorAll('#strip img').forEach((s,k)=>s.classList.toggle('on',k===i));
   if(lastDots===`${n}|${i}`)return;lastDots=`${n}|${i}`;
   const d=$('dots');d.innerHTML='';for(let k=0;k<n;k++){const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',`Image ${k+1}`);if(k===i)b.className='on';b.onclick=()=>go(k);d.append(b)}}
@@ -2477,13 +2509,13 @@ $('collapseBtn').onclick=()=>{const c=$('stage').classList.toggle('collapsed');$
 /* ---------- Undo: every structural change is remembered ---------- */
 const allPhotos=new Map(),hist=[];
 const TEXTKEYS=['title','artist','year','caption','kicker'];
-const snap=()=>JSON.stringify({title:state.title,artist:state.artist,year:state.year,caption:state.caption,kicker:state.kicker,terrain:state.terrain,mode:state.mode,seed:state.seed,tirage:state.tirage,fond:state.fond,texte:state.texte,gps:state.gps,format:state.format,duo:state.duo,inset:state.inset,order:state.photos.map(p=>p.id),places:state.photos.map(p=>p.place||''),notes:state.photos.map(p=>p.note||''),hands:state.photos.map(p=>p.hand||null),handX:state.handX||''});
+const snap=()=>JSON.stringify({title:state.title,artist:state.artist,year:state.year,caption:state.caption,kicker:state.kicker,terrain:state.terrain,mode:state.mode,seed:state.seed,tirage:state.tirage,fond:state.fond,texte:state.texte,gps:state.gps,format:state.format,duo:state.duo,inset:state.inset,order:state.photos.map(p=>p.id),places:state.photos.map(p=>p.place||''),notes:state.photos.map(p=>p.note||''),hands:state.photos.map(p=>p.hand||null),handX:state.handX||'',stickers:state.stickers||''});
 function remember(){hist.push(snap());if(hist.length>40)hist.shift();$('undoBtn').disabled=false}
 function undo(){commitField();const s=hist.pop();$('undoBtn').disabled=!hist.length;if(!s)return;const o=JSON.parse(s);
   ['mode','seed','tirage','fond','texte','gps','format','duo','inset','terrain',...TEXTKEYS].forEach(k=>{if(o[k]!==undefined)state[k]=o[k]});
   TEXTKEYS.forEach(k=>{$(k).value=state[k]||''});$('who').textContent=handle();if(fieldBase)fieldBase=snap();
   const ps=o.order.map(id=>allPhotos.get(id)).filter(Boolean);if(ps.length){ps.forEach((p,i)=>{p.place=o.places[i];p.note=(o.notes||[])[i]||'';p.hand=(o.hands||[])[i]||undefined});state.photos=ps}
-  state.handX=o.handX||'';
+  state.handX=o.handX||'';state.stickers=o.stickers||'';stkMemo='';
   persist();saveProject();refreshControls();renderSlots();schedule();status('Undone.')}
 $('undoBtn').onclick=undo;
 
@@ -2843,12 +2875,17 @@ const SHAPE_NAMES={line:'lines',bar:'bars',block:'blocks',round:'rounds',arc:'ar
 function renderKit(){const g=$('kitGrid');g.innerHTML='';const names={mark:'Mark',paper:'Paper',stamp:'Stamp',texture:'Texture',brush:'Brush',drawing:'Drawing'};
   kit.items.forEach(it=>{const d=document.createElement('div');d.className='kit-item';const c=canvas(120,120),x=c.getContext('2d');x.fillStyle='#f2f0ea';x.fillRect(0,0,120,120);
     const m=it.canvas,s=Math.min(104/m.width,104/m.height);x.drawImage(m,60-m.width*s/2,60-m.height*s/2,m.width*s,m.height*s);
-    const t=document.createElement('span');t.textContent=it.type==='brush'?`Brush · ${it.shape||'other'}`:names[it.type];const rm=document.createElement('button');rm.type='button';rm.textContent='×';rm.setAttribute('aria-label',`Remove this ${names[it.type].toLowerCase()}`);
-    rm.onclick=()=>{kit.items=kit.items.filter(i=>i!==it);if(state.kitPaper===it.id){state.kitPaper='';persist()}kit.ver++;saveKit();renderKit();schedule()};d.append(c,t,rm);
+    const t=document.createElement('span');t.textContent=['brush','drawing','mark'].includes(it.type)?pieceName(it):names[it.type];const rm=document.createElement('button');rm.type='button';rm.textContent='×';rm.setAttribute('aria-label',`Remove this ${names[it.type].toLowerCase()}`);
+    rm.onclick=()=>{kit.items=kit.items.filter(i=>i!==it);if(state.kitPaper===it.id){state.kitPaper='';persist()}kit.ver++;saveKit();renderKit();schedule()};
+    if(['brush','drawing','mark'].includes(it.type)){tagPiece(it);const pk=document.createElement('button');pk.type='button';pk.className='kit-pick';pk.dataset.pid=it.id;const on=stkSlidesOf(it.id);
+      pk.setAttribute('aria-label',`${pieceName(it)}${on?', '+on.toLowerCase():''}. Put it on a slide.`);pk.append(c);pk.onclick=()=>pieceAction(d,it,null);d.append(pk,t,rm);
+      if(on){const st=document.createElement('span');st.className='bi-state';st.textContent=on;d.append(st)}}
+    else d.append(c,t,rm);
     // a drawing is used in ink (one colour, like the marks) or as painted (its own colours)
     if(it.type==='drawing'){const lk=document.createElement('div');lk.className='looks';[['ink','Ink'],['paint','As painted']].forEach(([v,nm])=>{const b=document.createElement('button');b.type='button';b.textContent=nm;b.setAttribute('aria-pressed',(it.look||'ink')===v);
       b.onclick=()=>{it.look=v;kit.ver++;saveKit();renderKit();schedule()};lk.append(b)});d.append(lk)}
     g.append(d)});
+  if(actFor){const pk=g.querySelector(`.kit-pick[data-pid="${actFor}"]`);if(pk){actFor=null;pk.click()}}
   const n=t=>kitOf(t).length;$('kitCount').textContent=`${n('mark')} marks · ${n('brush')} brush strokes · ${n('drawing')} drawings · ${n('paper')} papers · ${n('stamp')} stamp · ${n('texture')} textures`;
   const pb=$('kitPapers');pb.innerHTML='';[{id:'',name:'No paper'},...kitOf('paper').map((p,i)=>({id:p.id,name:`Paper ${i+1}`,c:p.canvas}))].forEach(o=>{const b=document.createElement('button');b.type='button';b.className='fond';b.setAttribute('aria-pressed',state.kitPaper===o.id);
     const c=canvas(180,120);if(o.c)c.getContext('2d').drawImage(o.c,0,0,180,120);const s=document.createElement('span');s.textContent=o.name;b.append(c,s);
@@ -2857,26 +2894,44 @@ function renderKit(){const g=$('kitGrid');g.innerHTML='';const names={mark:'Mark
 $('studioBtn').onclick=()=>{showStep('studio');ensureAtelier(true).then(renderBuiltin)};$('kitLink').onclick=()=>{showStep('studio');ensureAtelier(true).then(renderBuiltin)};
 
 function renderBuiltin(){const g=$('builtinGrid');if(!g||!builtin.ready)return;g.innerHTML='';const off=offList(),all=state.kitBuiltin==='off';
-  builtin.items.forEach(it=>{const b=document.createElement('button');b.type='button';b.className='kit-item bi';const on=!all&&!off.includes(it.file);b.setAttribute('aria-pressed',on);b.disabled=all;
-    b.setAttribute('aria-label',`${it.name}: ${on?'used':'left out'}`);const c=canvas(120,120),x=c.getContext('2d');x.fillStyle='#f2f0ea';x.fillRect(0,0,120,120);const m=it.canvas,s=Math.min(104/m.width,104/m.height);x.drawImage(m,60-m.width*s/2,60-m.height*s/2,m.width*s,m.height*s);
-    tagPiece(it);const t=document.createElement('span');t.textContent=pieceName(it);const st=document.createElement('span');st.className='bi-state';st.textContent=on?'Available':'Left out';b.append(c,t,st);
-    const wh=on&&slidesUsing(it.id);if(wh){const w=document.createElement('span');w.className='where';w.textContent=wh;b.append(w)}
-    b.onclick=()=>{remember();const o=offList(),k=o.indexOf(it.file);if(k<0)o.push(it.file);else o.splice(k,1);state.kitOff=o.join(',');persist();renderBuiltin();schedule()};g.append(b)});
-  const used=all?0:builtin.items.filter(i=>!off.includes(i.file)).length;$('builtinCount').textContent=`${used} of ${builtin.items.length} in use`}
+  [...builtin.items.filter(i=>i.type==='drawing'),...builtin.items.filter(i=>i.type!=='drawing')].forEach(it=>{const b=document.createElement('button');b.type='button';b.className='kit-item bi';tagPiece(it);b.dataset.pid=it.id;const out=all||off.includes(it.file);if(out)b.classList.add('off');
+    b.setAttribute('aria-expanded',actFor===it.id);const c=canvas(120,120),x=c.getContext('2d');x.fillStyle='#f2f0ea';x.fillRect(0,0,120,120);const m=it.canvas,s=Math.min(104/m.width,104/m.height);x.drawImage(m,60-m.width*s/2,60-m.height*s/2,m.width*s,m.height*s);
+    const t=document.createElement('span');t.textContent=pieceName(it);b.append(c,t);const on=stkSlidesOf(it.id);
+    if(on){const st=document.createElement('span');st.className='bi-state';st.textContent=on;b.append(st)}
+    if(out){const st=document.createElement('span');st.className='bi-off';st.textContent='Left out';b.append(st)}
+    const wh=!out&&slidesUsing(it.id);if(wh){const w=document.createElement('span');w.className='where';w.textContent=wh;b.append(w)}
+    b.setAttribute('aria-label',`${pieceName(it)}${on?', '+on.toLowerCase():''}${out?', left out of auto picks':''}. Put it on a slide.`);
+    b.onclick=()=>pieceAction(b,it,all?null:{off:off.includes(it.file),toggle:()=>{remember();const o=offList(),k=o.indexOf(it.file);if(k<0)o.push(it.file);else o.splice(k,1);state.kitOff=o.join(',');persist();renderBuiltin();schedule()}});
+    g.append(b)});
+  if(actFor){const b=g.querySelector(`[data-pid="${actFor}"]`);if(b){actFor=null;b.click()}}
+  const used=all?0:builtin.items.filter(i=>!off.includes(i.file)).length;$('builtinCount').textContent=`${used} of ${builtin.items.length} in auto picks`}
+// tapping a piece opens one row under it: put it on a slide (the one shown in the preview, or another), and for the ready-made set, keep it in or out of the layouts' own picks
+let actFor=null;
+function pieceAction(tile,it,opts){const was=actFor===it.id&&tile.nextElementSibling&&tile.nextElementSibling.classList.contains('piece-act');
+  document.querySelectorAll('.piece-act').forEach(e=>e.remove());document.querySelectorAll('.kit-item[aria-expanded="true"],.kit-item.open').forEach(e=>{e.setAttribute('aria-expanded','false');e.classList.remove('open')});
+  if(was){actFor=null;return}actFor=it.id;if(tile.classList.contains('bi'))tile.setAttribute('aria-expanded','true');else tile.classList.add('open');
+  const n=Math.max(1,urls.length),row=document.createElement('div');row.className='piece-act';row.setAttribute('role','group');row.setAttribute('aria-label',pieceName(it));
+  const nm=document.createElement('p');nm.className='pa-name';nm.textContent=pieceName(it);
+  const sel=document.createElement('select');sel.setAttribute('aria-label','Slide');for(let i=0;i<n;i++){const o=document.createElement('option');o.value=i;o.textContent=`Slide ${pad2(i+1)}${i===0?' · cover':i===n-1&&n>1?' · end':''}`;sel.append(o)}
+  sel.value=Math.min(curIndex(),n-1);const add=document.createElement('button');add.type='button';add.className='btn primary small';const lab=()=>{add.textContent=`Add to slide ${pad2(+sel.value+1)}`};lab();sel.onchange=lab;
+  add.onclick=()=>{actFor=null;addSticker(it.id,+sel.value)};row.append(nm,add,sel);
+  if(opts){const b=document.createElement('button');b.type='button';b.className='btn small';b.textContent=opts.off?'Use in auto picks':'Leave out of auto picks';b.onclick=opts.toggle;row.append(b)}
+  const x=document.createElement('button');x.type='button';x.className='btn small';x.textContent='Close';x.onclick=()=>{actFor=null;row.remove();tile.setAttribute('aria-expanded','false');tile.classList.remove('open');tile.focus()};row.append(x);
+  tile.after(row)}
 /* ---------- Hand-made, slide by slide: see the piece each slide uses, swap it, move, size and turn it ---------- */
-let handEl='',handGen=0,handMemo='',handMove=false,handPend=null,handSliding=false;
+let handEl='',handGen=0,handMemo='',handMove=false,handPend=null,handSliding=false,moveT='hand';
 const EL_NAMES={window:'Window',mark:'Mark',bar:'Bar',dots:'Dots'};
 const isHand=()=>HAND.includes(rendererOf(state.mode));
 const thumbURL=new Map();
 function pieceThumb(c){const k=c.__pid||'';if(k&&thumbURL.has(k))return thumbURL.get(k);const t=canvas(120,120),x=t.getContext('2d');x.fillStyle='#f2f0ea';x.fillRect(0,0,120,120);
   const s=Math.min(104/c.width,104/c.height);x.drawImage(c,60-c.width*s/2,60-c.height*s/2,c.width*s,c.height*s);const u=t.toDataURL('image/png');if(k)thumbURL.set(k,u);return u}
 // slides that currently use a piece, for the Atelier grid
-function slidesUsing(id){if(!isHand())return '';const ks=[];handUsed.forEach((es,k)=>{if(es&&es.some(e=>e.id===id))ks.push(k+1)});return ks.length?`On slide${ks.length>1?'s':''} ${ks.join(', ')}`:''}
+function slidesUsing(id){if(!isHand())return '';const ks=[];handUsed.forEach((es,k)=>{if(es&&es.some(e=>e.id===id))ks.push(k+1)});return ks.length?`Layout picks it: slide${ks.length>1?'s':''} ${ks.join(', ')}`:''}
 function updateHand(){const box=$('handBox');if(!box)return;const rid=rendererOf(state.mode);
-  if(!isHand()||!urls.length){box.hidden=true;if(handMove)setMove(false);handMemo='';return}
+  if(!isHand()||!urls.length){box.hidden=true;if(handMove&&moveT==='hand')setMove(false);handMemo='';return}
   box.hidden=false;const k=curIndex(),ents=handUsed[k]||[];
   if(!ents.some(e=>e.el===handEl))handEl=(ents[0]||{}).el||'';
-  const memo=[handGen,k,handEl,rid].join('|');if(memo===handMemo){positionOutline();return}handMemo=memo;handPend=null;
+  const memo=[handGen,k,handEl,rid].join('|');if(memo===handMemo){positionOutline();return}handMemo=memo;if(moveT==='hand')handPend=null;
   const n=urls.length;$('handSlide').textContent=pad2(k+1)+(k===0?' · cover':k===n-1&&n>1?' · end':'');
   const els=$('handEls');els.innerHTML='';els.hidden=ents.length<2;
   ents.forEach(e=>{const b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',e.el===handEl);const s=document.createElement('span');s.textContent=EL_NAMES[e.el]||e.el;b.append(s);
@@ -2891,7 +2946,7 @@ function updateHand(){const box=$('handBox');if(!box)return;const rid=rendererOf
     tile('Auto · the layout picks',null,!o.id,false,()=>{if(!o.id)return;handEdit(x=>{delete x.id},true)});
     const cands=piecesFor(rid,handEl);if(!cands.some(i=>i.id===ent.id)&&ent.id.startsWith('proc:'))cands.unshift(pieceItem(ent.id));
     cands.forEach(it=>{const c=it.canvas;if(!c.__pid)c.__pid=it.id;tile(c.__pname||it.name||'Piece',pieceThumb(c),o.id===it.id,it.id===ent.id,()=>{if(o.id===it.id)return;handEdit(x=>{x.id=it.id},true)})})}
-  const free=!!(ent&&ent.box);$('handPlace').hidden=!free;if(!free&&handMove)setMove(false);
+  const free=!!(ent&&ent.box);$('handPlace').hidden=!free;if(!free&&handMove&&moveT==='hand')setMove(false);
   $('handSize').value=Math.round((o.s||1)*100);$('handSizeV').textContent=`${Math.round((o.s||1)*100)}%`;
   const deg=Math.round((o.r||0)*180/Math.PI);$('handTurn').value=deg;$('handTurnV').textContent=`${deg}°`;
   $('handReset').disabled=!ents.some(e=>handGet(rid,k,e.el));positionOutline()}
@@ -2905,22 +2960,79 @@ $('handTurn').addEventListener('input',()=>{sliderStart();const v=+$('handTurn')
 document.querySelectorAll('[data-nudge]').forEach(b=>b.onclick=()=>{const [x,y]=b.dataset.nudge.split(',').map(Number);handEdit(o=>{o.dx=(o.dx||0)+x*.02;o.dy=(o.dy||0)+y*.02},true)});
 $('handReset').onclick=()=>{const rid=rendererOf(state.mode),k=curIndex();remember();(handUsed[k]||[]).forEach(e=>handSet(rid,k,e.el,null));handMemo='';schedule()};
 // moving on the preview: the carousel stops swiping, a dashed outline follows the finger, the slide is redrawn on release
-function setMove(on){handMove=!!on&&isHand();document.querySelector('.car-wrap').classList.toggle('placing',handMove);$('handOverlay').hidden=!handMove;
-  const b=$('handMoveBtn');b.setAttribute('aria-pressed',handMove);b.textContent=handMove?'Done moving':'Move on the preview';positionOutline()}
-$('handMoveBtn').onclick=()=>setMove(!handMove);
+// shared by the Hand-made editor (moveT 'hand') and the free pieces (moveT 'stk')
+function setMove(on,t){if(t)moveT=t;handMove=!!on&&(moveT==='stk'||isHand());handPend=null;document.querySelector('.car-wrap').classList.toggle('placing',handMove);$('handOverlay').hidden=!handMove;
+  [['handMoveBtn','hand'],['stkMoveBtn','stk']].forEach(([id,w])=>{const b=$(id),on2=handMove&&moveT===w;b.setAttribute('aria-pressed',on2);b.textContent=on2?'Done moving':'Move on the preview'});positionOutline()}
+$('handMoveBtn').onclick=()=>setMove(!(handMove&&moveT==='hand'),'hand');
+// the box being moved on the visible slide, in slide pixels
+function moveBox(){const k=curIndex();if(moveT==='stk')return (stkBoxes[k]||[])[stkSel]||null;const ent=(handUsed[k]||[]).find(e=>e.el===handEl);return ent&&ent.box}
 // displayed pixels per slide pixel
 const handScale=()=>car.getBoundingClientRect().width/FORMATS.find(f=>f.id===state.format).W;
-function positionOutline(){if(!handMove)return;const ov=$('handOverlay'),ol=$('handOutline'),k=curIndex(),ent=(handUsed[k]||[]).find(e=>e.el===handEl);
+function positionOutline(){if(!handMove)return;const ov=$('handOverlay'),ol=$('handOutline'),bx=moveBox();
   const cr=car.getBoundingClientRect(),wr=ov.parentNode.getBoundingClientRect();ov.style.left=(cr.left-wr.left)+'px';ov.style.top=(cr.top-wr.top)+'px';ov.style.width=cr.width+'px';ov.style.height=cr.height+'px';
-  if(!ent||!ent.box){ol.hidden=true;return}ol.hidden=false;const sc=handScale(),b=ent.box,d=handPend||{dx:0,dy:0};
+  if(!bx){ol.hidden=true;return}ol.hidden=false;const sc=handScale(),b=bx,d=handPend||{dx:0,dy:0};
   ol.style.left=(b.cx-b.w/2)*sc+'px';ol.style.top=(b.cy-b.h/2)*sc+'px';ol.style.width=b.w*sc+'px';ol.style.height=b.h*sc+'px';ol.style.transform=`translate(${d.dx}px,${d.dy}px) rotate(${b.a||0}rad)`}
 {const ov=$('handOverlay');let hd=null;
   ov.addEventListener('pointerdown',e=>{if(e.button>0)return;hd={x:e.clientX,y:e.clientY};handPend={dx:0,dy:0};try{ov.setPointerCapture(e.pointerId)}catch(err){}e.preventDefault()});
   ov.addEventListener('pointermove',e=>{if(!hd)return;handPend={dx:e.clientX-hd.x,dy:e.clientY-hd.y};positionOutline()});
   const end=()=>{if(!hd)return;hd=null;const d=handPend;if(!d||Math.hypot(d.dx,d.dy)<3){handPend=null;positionOutline();return}
-    const F=FORMATS.find(f=>f.id===state.format),sc=handScale();handEdit(o=>{o.dx=(o.dx||0)+d.dx/sc/F.W;o.dy=(o.dy||0)+d.dy/sc/F.H},true)};
+    const F=FORMATS.find(f=>f.id===state.format),sc=handScale();if(moveT==='stk')stkEdit(o=>{o.cx+=d.dx/sc/F.W;o.cy+=d.dy/sc/F.H},true);else handEdit(o=>{o.dx=(o.dx||0)+d.dx/sc/F.W;o.dy=(o.dy||0)+d.dy/sc/F.H},true)};
   ov.addEventListener('pointerup',end);ov.addEventListener('pointercancel',()=>{hd=null;handPend=null;positionOutline()})}
 window.addEventListener('resize',()=>positionOutline());
+/* ---------- Free pieces: any drawing, brush stroke or mark put on any slide of any layout, then moved, sized and turned by hand ---------- */
+// state.stickers = {"<layout>":{"<slide>":[{id,cx,cy,s,r,look}]}}: centre in fractions of W and H, width in fractions of W
+let stkBoxes=[],stkSel=-1,stkSlideK=-1,stkPicking=false,stkAfterAdd=false,stkSliding=false,stkMemo='';
+const stkAll=()=>{try{return JSON.parse(state.stickers||'{}')||{}}catch(e){return {}}};
+const stkOf=k=>((stkAll()[state.mode]||{})[k]||[]);
+function stkWrite(k,list){const A=stkAll(),M=A[state.mode]||{};if(list.length)M[k]=list;else delete M[k];if(Object.keys(M).length)A[state.mode]=M;else delete A[state.mode];
+  state.stickers=Object.keys(A).length?JSON.stringify(A):'';persist()}
+// every piece can be put on a slide, ready-made ones too even when they are left out of the layouts' own picks
+const stkPool=()=>[...kitOf('drawing'),...kitOf('brush'),...kitOf('mark'),...builtin.items.filter(i=>i.type==='drawing'),...builtin.items.filter(i=>i.type==='brush')].map(tagPiece);
+const stkItem=id=>stkPool().find(i=>i.id===id)||null;
+function stkSlidesOf(id){const M=stkAll()[state.mode]||{},ks=Object.keys(M).filter(k=>M[k].some(s=>s.id===id)).map(k=>+k+1).sort((a,b)=>a-b);return ks.length?`On slide${ks.length>1?'s':''} ${ks.join(', ')}`:''}
+function stkDefault(it){const F=FORMATS.find(f=>f.id===state.format),m=it.canvas,asp=m.height/m.width;let s=it.type==='brush'?.5:it.type==='mark'?.22:.42;if(s*F.W*asp>F.H*.45)s=F.H*.45/(F.W*asp);
+  return {id:it.id,cx:.5,cy:.66,s:Math.round(s*1000)/1000,r:0,look:it.type==='drawing'?(it.look||'ink'):'ink'}}
+function addSticker(id,k){const it=stkItem(id);if(!it)return;remember();const list=[...stkOf(k),stkDefault(it)];stkWrite(k,list);stkSel=list.length-1;stkSlideK=k;stkPicking=false;stkAfterAdd=true;stkMemo='';
+  showStep('finish');car.scrollLeft=k*car.clientWidth;dots();schedule();status(`${pieceName(it)} is on slide ${pad2(k+1)}. Drag it on the preview to place it.`)}
+// mean lightness under a box, to choose the ink and the blend: dark ink multiplied on light paper, light ink on dark grounds
+function lumAt(c,cx,cy,w,h){const t=canvas(12,12),x=t.getContext('2d');try{x.drawImage(c,cx-w/2,cy-h/2,w,h,0,0,12,12)}catch(e){return 1}const d=x.getImageData(0,0,12,12).data;let s=0,n=0;
+  for(let i=0;i<d.length;i+=4)if(d[i+3]>0){s+=(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;n++}return n?s/n:1}
+function drawStickers(cs,W,H){stkBoxes=[];const M=stkAll()[state.mode]||{};
+  cs.forEach((c,k)=>{const list=M[k]||[];stkBoxes[k]=[];if(!list.length)return;const ctx=c.getContext('2d');
+    list.forEach(s=>{const it=stkItem(s.id);if(!it){stkBoxes[k].push(null);return}const m=it.canvas,w=(s.s||.4)*W,h=w*m.height/m.width,cx=s.cx*W,cy=s.cy*H,a=s.r||0;
+      const dark=lumAt(c,cx,cy,w,h)<.42,paint=s.look==='paint'&&it.type==='drawing',img=paint?m:tinted(m,dark?'#EDEAE0':'#1d1b18');
+      ctx.save();if(!dark)ctx.globalCompositeOperation='multiply';rotated(ctx,cx,cy,a,()=>ctx.drawImage(img,-w/2,-h/2,w,h));ctx.restore();stkBoxes[k].push({cx,cy,w,h,a})})})}
+function updateStk(){const box=$('stkBox');if(!box)return;if(!urls.length){box.hidden=true;return}box.hidden=false;
+  const k=curIndex(),list=stkOf(k);if(k!==stkSlideK){stkSlideK=k;stkSel=list.length?0:-1;stkPicking=false}if(stkSel>=list.length||(stkSel<0&&list.length))stkSel=list.length-1;
+  if(stkAfterAdd){stkAfterAdd=false;setMove(true,'stk');requestAnimationFrame(()=>{const m=window.innerWidth<900;(m?$('stage'):$('stkBox')).scrollIntoView({block:m?'start':'nearest',behavior:'smooth'})})}
+  const memo=[handGen,k,stkSel,stkPicking,state.stickers,state.mode,builtin.ready,kit.ver].join('|');if(memo===stkMemo){if(moveT==='stk')positionOutline();return}stkMemo=memo;
+  const n=urls.length;$('stkSlide').textContent=pad2(k+1)+(k===0?' · cover':k===n-1&&n>1?' · end':'');$('stkEmpty').hidden=!!list.length;
+  const tile=(g,label,img,pressed,fn,txt)=>{const b=document.createElement('button');b.type='button';b.className='hand-piece';b.setAttribute('aria-pressed',pressed);b.setAttribute('aria-label',label);
+    if(img){const im=new Image();im.src=img;im.alt='';b.append(im)}else{const a=document.createElement('div');a.className='auto plus';a.textContent=txt||'+';b.append(a)}
+    const s=document.createElement('span');s.className='n';s.textContent=label;b.append(s);b.onclick=fn;g.append(b);return b};
+  const L=$('stkList');L.innerHTML='';
+  list.forEach((s,i)=>{const it=stkItem(s.id);if(!it)return;const b=tile(L,pieceName(it),pieceThumb(it.canvas),i===stkSel,()=>{stkSel=i;stkPicking=false;stkMemo='';updateStk()});
+    if(i===stkSel){const u=document.createElement('span');u.className='tag-use';u.textContent='Selected';b.append(u)}});
+  tile(L,stkPicking?'Close the list':'Add a piece',null,stkPicking,()=>{stkPicking=!stkPicking;stkMemo='';if(stkPicking)ensureAtelier().then(()=>{stkMemo='';updateStk()});updateStk()},stkPicking?'×':'+ Add');
+  const P=$('stkPick');P.hidden=!stkPicking;P.innerHTML='';
+  if(stkPicking){const pool=stkPool();if(!pool.length){const q=document.createElement('p');q.className='sub';q.textContent='Loading the pieces…';P.append(q)}
+    pool.forEach(it=>tile(P,pieceName(it),pieceThumb(it.canvas),false,()=>addSticker(it.id,k)))}
+  const s=list[stkSel],it=s&&stkItem(s.id);$('stkPlace').hidden=!it;if(!it&&handMove&&moveT==='stk')setMove(false);
+  if(it){const v=Math.round((s.s||.4)*100);$('stkSize').value=v;$('stkSizeV').textContent=`${v}%`;const deg=Math.round((s.r||0)*180/Math.PI);$('stkTurn').value=deg;$('stkTurnV').textContent=`${deg}°`;
+    const lk=$('stkLook');lk.innerHTML='';lk.hidden=it.type!=='drawing';
+    [['ink','Ink'],['paint','As painted']].forEach(([v2,nm])=>{const b=document.createElement('button');b.type='button';b.className='chip';b.setAttribute('aria-pressed',(s.look||'ink')===v2);const sp=document.createElement('span');sp.textContent=nm;b.append(sp);
+      b.onclick=()=>{if((s.look||'ink')!==v2)stkEdit(o=>{o.look=v2},true)};lk.append(b)})}
+  if(moveT==='stk')positionOutline()}
+// one change to the selected piece of the visible slide
+function stkEdit(fn,mem){const k=curIndex(),list=stkOf(k).map(o=>({...o}));if(!list[stkSel])return;if(mem)remember();fn(list[stkSel]);
+  const o=list[stkSel];o.cx=clamp(o.cx,-.2,1.2);o.cy=clamp(o.cy,-.2,1.2);stkWrite(k,list);stkMemo='';schedule()}
+const stkSlider=()=>{if(!stkSliding){remember();stkSliding=true}};
+$('stkSize').addEventListener('input',()=>{stkSlider();const v=+$('stkSize').value;$('stkSizeV').textContent=`${v}%`;stkEdit(o=>{o.s=v/100})});
+$('stkTurn').addEventListener('input',()=>{stkSlider();const v=+$('stkTurn').value;$('stkTurnV').textContent=`${v}°`;stkEdit(o=>{o.r=v*Math.PI/180})});
+['stkSize','stkTurn'].forEach(id=>$(id).addEventListener('change',()=>{stkSliding=false}));
+document.querySelectorAll('[data-snudge]').forEach(b=>b.onclick=()=>{const [x,y]=b.dataset.snudge.split(',').map(Number);stkEdit(o=>{o.cx+=x*.02;o.cy+=y*.02},true)});
+$('stkMoveBtn').onclick=()=>setMove(!(handMove&&moveT==='stk'),'stk');
+$('stkRemove').onclick=()=>{const k=curIndex(),list=stkOf(k).slice();if(!list[stkSel])return;remember();list.splice(stkSel,1);stkWrite(k,list);stkSel=Math.min(stkSel,list.length-1);stkMemo='';if(!list.length&&handMove&&moveT==='stk')setMove(false);updateStk();schedule();status('Piece removed. Undo brings it back.')};
 chips($('kitBuiltinChips'),[{id:'on',name:'Use ready-made pieces'},{id:'off',name:'Only my own'}],'kitBuiltin',()=>null);
 $('kitBuiltinChips').addEventListener('click',()=>setTimeout(renderBuiltin,0));
 chips($('kitMarksChips'),[{id:'on',name:'My marks'},{id:'off',name:'Generated marks'}],'kitMarks',()=>null);chips($('kitStampChips'),[{id:'on',name:'Stamp on cover and end'},{id:'off',name:'No stamp'}],'kitStamp',()=>null);
@@ -2931,7 +3043,7 @@ $('resetBtn').onclick=()=>resetAsk($('resetConfirm').hidden);
 $('resetKeep').onclick=()=>{resetAsk(false);$('resetBtn').focus()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('resetConfirm').hidden)resetAsk(false)});
 $('resetGo').onclick=async()=>{resetAsk(false);fieldBase=null;hist.length=0;$('undoBtn').disabled=true;$('photoMsg').textContent='';
-  Object.assign(state,{mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',terrain:'inv'});
+  Object.assign(state,{mode:'gallery',intent:'',tirage:'original',fond:'auto',texte:'oui',gps:'non',format:'34',seed:11,title:'',artist:'',year:'',caption:'',kicker:'',duo:'ochre',inset:'zoom',terrain:'inv',stickers:''});
   ['title','artist','year','caption','kicker'].forEach(k=>$(k).value='');state.photos=makeSamples();state.photos.forEach(p=>allPhotos.set(p.id,p));
   persist();try{await DB.set('photos',[])}catch(e){}refreshControls();renderSlots();schedule();swatches();showStep('photos');status('Started a new series.')};
 
